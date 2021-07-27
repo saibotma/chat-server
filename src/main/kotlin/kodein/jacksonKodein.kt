@@ -1,10 +1,10 @@
-package app.storyways.kodein
+package kodein
 
-import app.storyways.jackson.DoNotIgnoreIs
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import jackson.DoNotIgnoreIs
 import org.kodein.di.Kodein.Module
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.instance
