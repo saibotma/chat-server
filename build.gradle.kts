@@ -37,9 +37,9 @@ group = "dev.saibotma"
 version = "1.0-SNAPSHOT"
 
 repositories {
-    maven { url = uri("https://dl.bintray.com/kodein-framework/Kodein-DI/") }
-    jcenter()
     mavenCentral()
+    jcenter()
+    maven { url = uri("https://dl.bintray.com/kodein-framework/Kodein-DI/") }
 }
 
 dependencies {
