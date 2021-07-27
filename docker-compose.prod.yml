@@ -1,0 +1,22 @@
+version: '3'
+services:
+  api:
+    image: "${API_IMAGE_TAG}"
+    # The env file is just used for running the production environment on on a local development system
+    env_file:
+      - .env
+    environment:
+      - KTOR_DEPLOYMENT_PORT
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_SERVERNAME
+      - POSTGRES_PORT
+      - POSTGRES_DB
+    restart: "always"
+    ports:
+      - "127.0.0.1:${KTOR_DEPLOYMENT_PORT}:${KTOR_DEPLOYMENT_PORT}"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "50m"

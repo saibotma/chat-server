@@ -1,0 +1,31 @@
+version: '3'
+services:
+  postgres:
+    image: "$POSTGRES_IMAGE_NAME"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_SERVERNAME
+      - POSTGRES_PORT
+      - POSTGRES_DB
+    restart: "always"
+    volumes:
+      - "postgres:/var/lib/postgresql/data"
+    # Change the internal port of Postgres https://stackoverflow.com/a/59572350/6172447
+    command: -p $POSTGRES_PORT
+    # Need expose else an error occurs when deploying
+    expose:
+      - $POSTGRES_PORT
+    ports:
+      # Required for ssh tunnel to the live database & local development
+      - "127.0.0.1:${POSTGRES_PORT}:${POSTGRES_PORT}"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "50m"
+
+volumes:
+  postgres:

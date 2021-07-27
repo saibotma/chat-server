@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<Configuration status="warn" monitorInterval="5" packages="dev.saibotma.logging">
+    <Properties>
+        <Property name="pattern" value="%d{dd MMM yyyy HH:mm:ss,SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </Properties>
+    <Appenders>
+        <CONSOLE name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${pattern}"/>
+        </CONSOLE>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+</Configuration>
