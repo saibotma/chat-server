@@ -5,15 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import jackson.DoNotIgnoreIs
-import org.kodein.di.Kodein.Module
-import org.kodein.di.generic.bind
-import org.kodein.di.generic.instance
-import org.kodein.di.generic.singleton
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.singleton
 
-val jacksonKodein = Module("jackson") {
-
+val jacksonKodein = DI.Module("jackson") {
     bind<ObjectMapper>() with singleton {
-        val config = instance<ObjectMapper.() -> Unit>()
+        val config: ObjectMapper.() -> Unit = instance()
         jacksonObjectMapper().apply(config)
     }
 

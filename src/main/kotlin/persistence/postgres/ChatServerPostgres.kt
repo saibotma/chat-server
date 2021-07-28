@@ -1,14 +1,14 @@
-package app.appella.persistence.postgres
+package persistence.postgres
 
 import app.appella.persistence.jooq.JacksonKotlinConverterProvider
 import persistence.jooq.KotlinDslContext
-import app.appella.util.PostgresConfig
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.output.MigrateResult
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.postgresql.ds.PGSimpleDataSource
 
-class AppellaPostgres(private val config: PostgresConfig, converterProvider: JacksonKotlinConverterProvider) {
+class ChatServerPostgres(private val config: PostgresConfig, converterProvider: JacksonKotlinConverterProvider) {
     private val dataSource = PGSimpleDataSource().apply {
         databaseName = config.db
         user = config.user
@@ -34,7 +34,7 @@ class AppellaPostgres(private val config: PostgresConfig, converterProvider: Jac
 
     val kotlinDslContext = KotlinDslContext(dslContext)
 
-    fun runMigration() = flyway.migrate()
+    fun runMigration(): MigrateResult = flyway.migrate()
 
     /**
      * ⚠️️⚠️️⚠️️⚠️️

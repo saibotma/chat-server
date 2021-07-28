@@ -10,7 +10,7 @@ services:
       - POSTGRES_SERVERNAME
       - POSTGRES_PORT
       - POSTGRES_DB
-    restart: "always"
+    restart: "unless-stopped"
     volumes:
       - "postgres:/var/lib/postgresql/data"
     # Change the internal port of Postgres https://stackoverflow.com/a/59572350/6172447

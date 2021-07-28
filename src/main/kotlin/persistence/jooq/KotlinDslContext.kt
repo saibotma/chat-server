@@ -1,8 +1,7 @@
 package persistence.jooq
 
-import app.appella.error.*
-import app.appella.extensions.*
 import app.appella.persistence.jooq.KotlinTransactionContext
+import error.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -10,8 +9,9 @@ import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.postgresql.util.PSQLException
+import persistence.postgres.*
+import util.snakeToCamelCase
 
-// TODO adjust naming
 class KotlinDslContext(private val dslContext: DSLContext) {
     /**
      * Starts a transaction that gets executed using the IO dispatcher.
@@ -59,15 +59,6 @@ private fun handleGenericPostgresError(e: PSQLException): Nothing {
                 serverErrorMessage?.detail?.extractKeyColumnNames()!!.first().snakeToCamelCase(),
                 serverErrorMessage?.detail?.extractKeyColumnValues()!!.first()
             )
-            isCheckViolation("temporal_updated_at_not_before_created_at_check") -> {
-                throw ApiException.updatedAtBeforeCreatedAt()
-            }
-            isCheckViolation("lesson_invalid_lock_integrity") -> {
-                throw ApiException.lessonIsLockedByAccountButNotByTeacher()
-            }
-            isPlException("lesson_student_attendance_not_set_but_lesson_locked") -> {
-                throw ApiException.lessonIsLocked()
-            }
             else -> throw e
         }
     }
