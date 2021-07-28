@@ -17,7 +17,9 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.ktor.DIFeature
 import org.kodein.di.ktor.closestDI
+import platformapi.PlatformApiConfig
 import platformapi.installPlatformApi
+import platformapi.installPlatformApiAccessTokenAuthentication
 import util.GenericTypeConversionService
 import java.time.Instant
 import java.time.LocalDate
@@ -65,7 +67,8 @@ private fun Application.installFeatures() {
     }
     install(Locations) {}
     install(Authentication) {
-        // TODO(saibotma): Add authentication
+        val platformApiConfig: PlatformApiConfig by closestDI().instance()
+        installPlatformApiAccessTokenAuthentication(expectedAccessToken = platformApiConfig.accessToken)
     }
     install(ContentNegotiation) {
         jackson { closestDI().direct.instance<ObjectMapper.() -> Unit>()() }
