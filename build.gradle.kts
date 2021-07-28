@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType.Companion.attribute
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val postgresUser = System.getenv("POSTGRES_USER") ?: "postgres"
@@ -8,25 +7,25 @@ val postgresPort = System.getenv("POSTGRES_PORT") ?: "54324"
 val postgresDb = System.getenv("POSTGRES_DB") ?: "chat-server"
 val postgresUrl = "jdbc:postgresql://$postgresServerName:$postgresPort/$postgresDb"
 
-val ktorVersion = "1.4.1"
-val kotlinVersion = "1.5.30-M1"
-val postgreSqlJdbcVersion = "42.2.20"
+val ktorVersion = "1.6.1"
+val kotlinVersion = "1.5.21"
+val postgreSqlJdbcVersion = "42.2.23"
 val postgreSqlR2dbcVersion = "0.8.8.RELEASE"
-val log4jVersion = "2.12.1"
+val log4jVersion = "2.14.1"
 val log4jApiKotlinVersion = "1.0.0"
 val jooqVersion = "3.15.1"
-val flywayCoreVersion = "6.5.5"
-val kodeinVersion = "6.3.3"
-val jacksonDataTypeJsr310Version = "2.11.3"
-val kotestVersion = "4.3.1"
-val junitJupiterVersion = "5.7.0"
+val flywayCoreVersion = "7.11.4"
+val kodeinVersion = "7.6.0"
+val jacksonDataTypeJsr310Version = "2.12.4"
+val kotestVersion = "4.6.1"
+val junitJupiterVersion = "5.7.2"
 
 plugins {
     application
     kotlin("jvm") version "1.5.21"
-    id("com.github.johnrengelman.shadow") version "5.0.0"
-    id("org.flywaydb.flyway") version "6.5.5"
-    id("nu.studer.jooq") version "5.2"
+    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("org.flywaydb.flyway") version "7.11.4"
+    id("nu.studer.jooq") version "6.0"
 }
 
 application {
@@ -62,8 +61,8 @@ dependencies {
     jooqGenerator("org.postgresql", "postgresql", postgreSqlJdbcVersion)
     implementation("org.jooq", "jooq", jooqVersion)
 
-    implementation("org.kodein.di", "kodein-di-generic-jvm", kodeinVersion)
-    //implementation("org.kodein.di", "kodein-di-framework-ktor-server-jvm", kodeinVersion)
+    runtimeOnly("org.kodein.di", "kodein-di-jvm", kodeinVersion)
+    implementation("org.kodein.di", "kodein-di-framework-ktor-server-jvm", kodeinVersion)
     implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", jacksonDataTypeJsr310Version)
 
     testImplementation(kotlin("test-junit5"))
