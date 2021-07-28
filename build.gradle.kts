@@ -49,6 +49,7 @@ dependencies {
     implementation("io.ktor", "ktor-jackson", ktorVersion)
     implementation("io.ktor", "ktor-locations", ktorVersion)
     implementation("io.ktor", "ktor-server-test-host", ktorVersion)
+    implementation("io.ktor", "ktor-auth-jwt", ktorVersion)
 
     implementation("org.apache.logging.log4j", "log4j-api", log4jVersion)
     implementation("org.apache.logging.log4j", "log4j-core", log4jVersion)

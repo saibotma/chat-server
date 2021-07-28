@@ -19,3 +19,6 @@ val HoconApplicationConfig.postgresDb: String
 
 val HoconApplicationConfig.platformApiAccessToken: String
     get() = property("platformApi.accessToken").getString()
+
+val HoconApplicationConfig.clientApiJwtSecret: String
+    get() = property("clientApi.jwtSecret").getString()
