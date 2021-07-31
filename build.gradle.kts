@@ -9,8 +9,10 @@ val postgresUrl = "jdbc:postgresql://$postgresServerName:$postgresPort/$postgres
 
 val ktorVersion = "1.6.1"
 val kotlinVersion = "1.5.21"
+val kotlinxCoroutinesVersion = "1.5.1"
 val postgreSqlJdbcVersion = "42.2.23"
 val postgreSqlR2dbcVersion = "0.8.8.RELEASE"
+val r2dbcPoolVersion = "0.8.7.RELEASE"
 val log4jVersion = "2.14.1"
 val log4jApiKotlinVersion = "1.0.0"
 val jooqVersion = "3.15.1"
@@ -43,6 +45,8 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", kotlinxCoroutinesVersion)
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-reactive", kotlinxCoroutinesVersion)
 
     implementation("io.ktor", "ktor-server-netty", ktorVersion)
     implementation("io.ktor:ktor-server-core:$ktorVersion")
@@ -61,6 +65,7 @@ dependencies {
     implementation("org.postgresql", "postgresql", postgreSqlJdbcVersion)
     jooqGenerator("org.postgresql", "postgresql", postgreSqlJdbcVersion)
     implementation("org.jooq", "jooq", jooqVersion)
+    implementation("io.r2dbc", "r2dbc-pool", r2dbcPoolVersion)
 
     runtimeOnly("org.kodein.di", "kodein-di-jvm", kodeinVersion)
     implementation("org.kodein.di", "kodein-di-framework-ktor-server-jvm", kodeinVersion)

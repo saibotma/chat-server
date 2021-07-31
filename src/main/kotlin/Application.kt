@@ -45,6 +45,8 @@ fun Application.module() {
     routing {
         route("/platform") {
             installPlatformApi()
+        }
+        route("/client") {
             installClientApi()
         }
     }

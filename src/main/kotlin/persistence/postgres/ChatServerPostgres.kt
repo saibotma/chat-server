@@ -1,6 +1,12 @@
 package persistence.postgres
 
 import app.appella.persistence.jooq.JacksonKotlinConverterProvider
+import io.r2dbc.pool.ConnectionPool
+import io.r2dbc.pool.ConnectionPoolConfiguration
+import io.r2dbc.spi.ConnectionFactories
+import io.r2dbc.spi.ConnectionFactory
+import io.r2dbc.spi.ConnectionFactoryOptions
+import io.r2dbc.spi.ConnectionFactoryOptions.*
 import persistence.jooq.KotlinDslContext
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
@@ -21,6 +27,23 @@ class ChatServerPostgres(private val config: PostgresConfig, converterProvider: 
         reWriteBatchedInserts = true
     }
 
+    private val connectionFactory = ConnectionFactories.get(
+        builder()
+            .option(DRIVER, "postgresql")
+            .option(HOST, config.serverName)
+            .option(PORT, config.port)
+            .option(USER, config.user)
+            .option(PASSWORD, config.password)
+            .option(DATABASE, config.db)
+            .build()
+    )
+
+    private val poolConfiguration = ConnectionPoolConfiguration.builder(connectionFactory)
+        .maxSize(2)
+        .build()
+
+    private val pool = ConnectionPool(poolConfiguration)
+
     // ⚠️ Configuration here must be the same as in build.gradle.kts
     private val flyway = Flyway.configure()
         .baselineVersion("1")
@@ -28,7 +51,7 @@ class ChatServerPostgres(private val config: PostgresConfig, converterProvider: 
         .dataSource(dataSource)
         .load()
 
-    val dslContext = DSL.using(dataSource, SQLDialect.POSTGRES).apply {
+    private val dslContext = DSL.using(pool, SQLDialect.POSTGRES).apply {
         configuration().set(converterProvider)
     }
 
