@@ -41,8 +41,8 @@ fun Route.installPlatformApi() {
         put<ChannelList.ChannelDetails.ChannelMetaDetails> { updateChannelMeta(it, database) }
         put<ChannelList.ChannelDetails.ChannelMemberList> { updateMembers(it, database) }
 
-        put<UserList.UserDetails> { TODO() }
-        delete<UserList.UserDetails> { TODO() }
+        put<UserList.UserDetails> { insertUser(it, database) }
+        delete<UserList.UserDetails> { deleteUser(it, database) }
 
         post<UserList.UserDetails.UserTokenList> { TODO() }
     }

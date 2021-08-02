@@ -1,16 +1,21 @@
 package persistence.postgres.queries
 
-import persistence.jooq.KotlinTransactionContext
 import dev.saibotma.persistence.postgres.jooq.tables.User.Companion.USER
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.User
-import kotlinx.coroutines.flow.singleOrNull
-import kotlinx.coroutines.reactive.asFlow
+import dev.saibotma.persistence.postgres.jooq.tables.records.UserRecord
+import persistence.jooq.KotlinTransactionContext
 
-suspend fun KotlinTransactionContext.getUser(userId: String): User? {
+fun KotlinTransactionContext.insertUser(user: User) {
+    db.insertInto(USER).set(UserRecord().apply { from(user) }).execute()
+}
+
+fun KotlinTransactionContext.deleteUser(userId: String) {
+    db.deleteFrom(USER).where(USER.ID.eq(userId)).execute()
+}
+
+fun KotlinTransactionContext.getUser(userId: String): User? {
     return db.select()
         .from(USER)
         .where(USER.ID.eq(userId))
-        .asFlow()
-        .singleOrNull()
-        ?.into(User::class.java)
+        .fetchOneInto(User::class.java)
 }
