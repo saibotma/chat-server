@@ -1,5 +1,6 @@
 package platformapi
 
+import clientapi.ClientApiConfig
 import io.ktor.locations.*
 import io.ktor.locations.put
 import io.ktor.locations.post
@@ -35,6 +36,8 @@ object UserList {
 fun Route.installPlatformApi() {
     platformApiAccessTokenAuthenticate {
         val database: KotlinDslContext by closestDI().instance()
+        val clientApiConfig: ClientApiConfig by closestDI().instance()
+
         put<ChannelList.ChannelDetails> { upsertChannel(it, database) }
         delete<ChannelList.ChannelDetails> { deleteChannel(it, database) }
 
@@ -44,6 +47,6 @@ fun Route.installPlatformApi() {
         put<UserList.UserDetails> { insertUser(it, database) }
         delete<UserList.UserDetails> { deleteUser(it, database) }
 
-        post<UserList.UserDetails.UserTokenList> { TODO() }
+        post<UserList.UserDetails.UserTokenList> { createUserToken(it, database, clientApiConfig.jwtSecret) }
     }
 }
