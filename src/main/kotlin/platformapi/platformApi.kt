@@ -15,11 +15,11 @@ import java.util.*
 object ChannelList {
     @Location("/{channelId}")
     data class ChannelDetails(val channelId: UUID, val channelList: ChannelList) {
+        @Location("/meta")
+        data class ChannelMetaDetails(val channelDetails: ChannelDetails)
+
         @Location("/members")
-        data class ChannelMemberList(val channelDetails: ChannelDetails) {
-            @Location("/{userId}")
-            data class ChannelMemberDetails(val userId: String, val channelMembers: ChannelMemberList)
-        }
+        data class ChannelMemberList(val channelDetails: ChannelDetails)
     }
 }
 
@@ -36,10 +36,10 @@ fun Route.installPlatformApi() {
     platformApiAccessTokenAuthenticate {
         val database: KotlinDslContext by closestDI().instance()
         put<ChannelList.ChannelDetails> { upsertChannel(it, database) }
-        delete<ChannelList.ChannelDetails> { TODO() }
+        delete<ChannelList.ChannelDetails> { deleteChannel(it, database) }
 
-        put<ChannelList.ChannelDetails.ChannelMemberList> { TODO() }
-        delete<ChannelList.ChannelDetails.ChannelMemberList> { TODO() }
+        put<ChannelList.ChannelDetails.ChannelMetaDetails> { updateChannelMeta(it, database) }
+        put<ChannelList.ChannelDetails.ChannelMemberList> { updateMembers(it, database) }
 
         put<UserList.UserDetails> { TODO() }
         delete<UserList.UserDetails> { TODO() }
