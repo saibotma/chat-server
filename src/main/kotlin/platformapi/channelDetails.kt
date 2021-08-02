@@ -16,13 +16,13 @@ suspend fun PipelineContext<Unit, ApplicationCall>.upsertChannel(
     database: KotlinDslContext
 ) {
     val channel = call.receive<ChannelWrite>()
-    database.transaction {
-        when (insertChannel(channel)) {
-            is Fallible.Failure -> {
-                updateChannel(channel)
-                call.respond(HttpStatusCode.NoContent)
-            }
-            is Fallible.Success -> call.respond(HttpStatusCode.Created)
+    // Have two transactions as postgres does not like reusing a transaction that
+    // had errors. (https://stackoverflow.com/questions/10399727/psqlexception-current-transaction-is-aborted-commands-ignored-until-end-of-tra)
+    when (database.transaction { insertChannel(channel) }) {
+        is Fallible.Failure -> {
+            database.transaction { updateChannel(channel) }
+            call.respond(HttpStatusCode.NoContent)
         }
+        is Fallible.Success -> call.respond(HttpStatusCode.Created)
     }
 }

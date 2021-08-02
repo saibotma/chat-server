@@ -49,7 +49,15 @@ class ChannelDetailsTests : DatabaseTest() {
 
         @Test
         fun `updates a channel when it already exists`() {
+            serverTest {
+                val channel = upsertChannel(mockedChannelWrite())
+                val updatedChannel = upsertChannel(channel.copy(name = "updated name", isManaged = !channel.isManaged))
 
+                with(getChannels().map { it.toChannelWrite() }.toList()) {
+                    shouldHaveSize(1)
+                    first() shouldBe updatedChannel
+                }
+            }
         }
     }
 }
