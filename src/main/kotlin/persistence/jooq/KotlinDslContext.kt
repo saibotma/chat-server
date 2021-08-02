@@ -1,6 +1,5 @@
 package persistence.jooq
 
-import app.appella.persistence.jooq.KotlinTransactionContext
 import error.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -12,7 +11,7 @@ import org.postgresql.util.PSQLException
 import persistence.postgres.*
 import util.snakeToCamelCase
 
-class KotlinDslContext(private val dslContext: DSLContext) {
+class KotlinDslContext(val dslContext: DSLContext) {
     /**
      * Starts a transaction that gets executed using the IO dispatcher.
      */

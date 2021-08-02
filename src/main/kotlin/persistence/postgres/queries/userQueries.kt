@@ -1,9 +1,9 @@
 package persistence.postgres.queries
 
-import app.appella.persistence.jooq.KotlinTransactionContext
+import persistence.jooq.KotlinTransactionContext
 import dev.saibotma.persistence.postgres.jooq.tables.User.Companion.USER
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.User
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.reactive.asFlow
 
 suspend fun KotlinTransactionContext.getUser(userId: String): User? {
@@ -11,6 +11,6 @@ suspend fun KotlinTransactionContext.getUser(userId: String): User? {
         .from(USER)
         .where(USER.ID.eq(userId))
         .asFlow()
-        .firstOrNull()
+        .singleOrNull()
         ?.into(User::class.java)
 }

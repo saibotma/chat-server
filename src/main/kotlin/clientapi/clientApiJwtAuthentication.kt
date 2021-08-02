@@ -19,7 +19,7 @@ fun Authentication.Configuration.installClientApiJwtAuthentication(
     jwtSecret: String,
     kotlinDslContext: KotlinDslContext,
 ) {
-    jwt("clientApiJwtAuthentication") {
+    jwt(configurationName) {
         verifier(
             JWT
                 .require(Algorithm.HMAC256(jwtSecret))

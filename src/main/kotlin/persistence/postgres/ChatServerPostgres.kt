@@ -27,23 +27,6 @@ class ChatServerPostgres(private val config: PostgresConfig, converterProvider: 
         reWriteBatchedInserts = true
     }
 
-    private val connectionFactory = ConnectionFactories.get(
-        builder()
-            .option(DRIVER, "postgresql")
-            .option(HOST, config.serverName)
-            .option(PORT, config.port)
-            .option(USER, config.user)
-            .option(PASSWORD, config.password)
-            .option(DATABASE, config.db)
-            .build()
-    )
-
-    private val poolConfiguration = ConnectionPoolConfiguration.builder(connectionFactory)
-        .maxSize(2)
-        .build()
-
-    private val pool = ConnectionPool(poolConfiguration)
-
     // ⚠️ Configuration here must be the same as in build.gradle.kts
     private val flyway = Flyway.configure()
         .baselineVersion("1")
@@ -51,7 +34,7 @@ class ChatServerPostgres(private val config: PostgresConfig, converterProvider: 
         .dataSource(dataSource)
         .load()
 
-    private val dslContext = DSL.using(pool, SQLDialect.POSTGRES).apply {
+    private val dslContext = DSL.using(dataSource, SQLDialect.POSTGRES).apply {
         configuration().set(converterProvider)
     }
 

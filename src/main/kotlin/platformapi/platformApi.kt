@@ -5,6 +5,9 @@ import io.ktor.locations.put
 import io.ktor.locations.post
 import io.ktor.locations.delete
 import io.ktor.routing.*
+import org.kodein.di.instance
+import org.kodein.di.ktor.closestDI
+import persistence.jooq.KotlinDslContext
 import java.nio.channels.Channel
 import java.util.*
 
@@ -31,7 +34,8 @@ object UserList {
 
 fun Route.installPlatformApi() {
     platformApiAccessTokenAuthenticate {
-        put<ChannelList.ChannelDetails> { TODO() }
+        val database: KotlinDslContext by closestDI().instance()
+        put<ChannelList.ChannelDetails> { upsertChannel(it, database) }
         delete<ChannelList.ChannelDetails> { TODO() }
 
         put<ChannelList.ChannelDetails.ChannelMemberList> { TODO() }

@@ -21,6 +21,7 @@ val kodeinVersion = "7.6.0"
 val jacksonDataTypeJsr310Version = "2.12.4"
 val kotestVersion = "4.6.1"
 val junitJupiterVersion = "5.7.2"
+val testContainersVersion = "1.15.3"
 
 plugins {
     application
@@ -76,7 +77,12 @@ dependencies {
     testImplementation("io.kotest", "kotest-property", kotestVersion)
     testImplementation("io.ktor", "ktor-server-tests", ktorVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitJupiterVersion)
+    testImplementation("org.junit.jupiter", "junit-jupiter-params", junitJupiterVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitJupiterVersion)
+
+    testImplementation("org.testcontainers", "testcontainers", testContainersVersion)
+    testImplementation("org.testcontainers", "junit-jupiter", testContainersVersion)
+    testImplementation("org.testcontainers", "postgresql", testContainersVersion)
 }
 
 tasks.test {

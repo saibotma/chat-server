@@ -1,4 +1,4 @@
-package kodein
+package di
 
 import io.ktor.config.*
 import org.kodein.di.*
@@ -7,7 +7,7 @@ import persistence.postgres.ChatServerPostgres
 import persistence.postgres.PostgresConfig
 import util.*
 
-val postgresKodein = DI.Module("postgres") {
+val postgresDi = DI.Module("postgres") {
     bind<PostgresConfig>() with singleton {
         val hocon: HoconApplicationConfig = instance()
         PostgresConfig(
