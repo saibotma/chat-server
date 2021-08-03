@@ -2,14 +2,12 @@ package platformapi
 
 import clientapi.ClientApiConfig
 import io.ktor.locations.*
-import io.ktor.locations.put
 import io.ktor.locations.post
-import io.ktor.locations.delete
+import io.ktor.locations.put
 import io.ktor.routing.*
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import persistence.jooq.KotlinDslContext
-import java.nio.channels.Channel
 import java.util.*
 
 @Location("/channels")

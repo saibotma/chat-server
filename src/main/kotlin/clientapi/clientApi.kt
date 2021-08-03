@@ -13,8 +13,8 @@ object ChannelList {
     data class ChannelDetails(val channelId: UUID, val channelList: ChannelList) {
         @Location("/members")
         data class ChannelMemberList(val channelDetails: ChannelDetails) {
-            @Location("/{memberId}")
-            data class ChannelMemberDetails(val memberId: UUID, val channelMemberList: ChannelMemberList)
+            @Location("/{userId}")
+            data class ChannelMemberDetails(val userId: UUID, val channelMemberList: ChannelMemberList)
         }
 
         @Location("/messages")
@@ -31,7 +31,6 @@ fun Route.installClientApi() {
         put<ChannelList.ChannelDetails> { TODO() }
         delete<ChannelList.ChannelDetails> { TODO() }
 
-        get<ChannelList.ChannelDetails.ChannelMemberList> { TODO() }
         put<ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails> { TODO() }
         delete<ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails> { TODO() }
 
