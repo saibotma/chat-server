@@ -11,7 +11,7 @@ import org.postgresql.util.PSQLException
 import persistence.postgres.*
 import util.snakeToCamelCase
 
-class KotlinDslContext(val dslContext: DSLContext) {
+class KotlinDslContext(private val dslContext: DSLContext) {
     /**
      * Starts a transaction that gets executed using the IO dispatcher.
      */
