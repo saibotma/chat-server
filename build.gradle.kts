@@ -11,8 +11,6 @@ val ktorVersion = "1.6.1"
 val kotlinVersion = "1.5.21"
 val kotlinxCoroutinesVersion = "1.5.1"
 val postgreSqlJdbcVersion = "42.2.23"
-val postgreSqlR2dbcVersion = "0.8.8.RELEASE"
-val r2dbcPoolVersion = "0.8.7.RELEASE"
 val log4jVersion = "2.14.1"
 val log4jApiKotlinVersion = "1.0.0"
 val jooqVersion = "3.15.1"
@@ -62,11 +60,9 @@ dependencies {
     implementation("org.apache.logging.log4j", "log4j-api-kotlin", log4jApiKotlinVersion)
 
     implementation("org.flywaydb", "flyway-core", flywayCoreVersion)
-    implementation("io.r2dbc", "r2dbc-postgresql", postgreSqlR2dbcVersion)
     implementation("org.postgresql", "postgresql", postgreSqlJdbcVersion)
     jooqGenerator("org.postgresql", "postgresql", postgreSqlJdbcVersion)
     implementation("org.jooq", "jooq", jooqVersion)
-    implementation("io.r2dbc", "r2dbc-pool", r2dbcPoolVersion)
 
     runtimeOnly("org.kodein.di", "kodein-di-jvm", kodeinVersion)
     implementation("org.kodein.di", "kodein-di-framework-ktor-server-jvm", kodeinVersion)
