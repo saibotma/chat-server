@@ -1,18 +1,12 @@
 package persistence.postgres
 
 import app.appella.persistence.jooq.JacksonKotlinConverterProvider
-import io.r2dbc.pool.ConnectionPool
-import io.r2dbc.pool.ConnectionPoolConfiguration
-import io.r2dbc.spi.ConnectionFactories
-import io.r2dbc.spi.ConnectionFactory
-import io.r2dbc.spi.ConnectionFactoryOptions
-import io.r2dbc.spi.ConnectionFactoryOptions.*
-import persistence.jooq.KotlinDslContext
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.postgresql.ds.PGSimpleDataSource
+import persistence.jooq.KotlinDslContext
 
 class ChatServerPostgres(private val config: PostgresConfig, converterProvider: JacksonKotlinConverterProvider) {
     private val dataSource = PGSimpleDataSource().apply {
