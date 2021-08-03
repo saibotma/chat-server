@@ -5,10 +5,13 @@ import dev.saibotma.persistence.postgres.jooq.tables.records.ChannelMemberRecord
 import persistence.jooq.KotlinTransactionContext
 import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL
 import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL_MEMBER
+import org.jooq.impl.DSL.exists
+import org.jooq.impl.DSL.select
 import persistence.postgres.catchPostgresExceptions
 import persistence.postgres.isUniqueViolation
-import platformapi.models.ChannelMeta
-import platformapi.models.ChannelWrite
+import persistence.postgres.mappings.detailedChannelToJson
+import models.ChannelMeta
+import models.DetailedChannel
 import util.Fallible
 import java.util.*
 
@@ -58,4 +61,16 @@ fun KotlinTransactionContext.deleteChannelMember(channelId: UUID, userId: String
         .where(CHANNEL_MEMBER.CHANNEL_ID.eq(channelId))
         .and(CHANNEL_MEMBER.USER_ID.eq(userId))
         .execute()
+}
+
+fun KotlinTransactionContext.getChannelsOf(userId: String): List<DetailedChannel> {
+    return db.select(detailedChannelToJson(channel = CHANNEL))
+        .from(CHANNEL)
+        .where(exists(select().from(CHANNEL_MEMBER).where(CHANNEL_MEMBER.USER_ID.eq(userId))))
+        .fetchInto(DetailedChannel::class.java)
+}
+
+fun KotlinTransactionContext.getChannelsOf(accountMemberId: UUID): List<clientapi.models.DetailedChannel> {
+    return selectChannelsOf(accountMemberId)
+        .fetchInto(clientapi.models.DetailedChannel::class.java)
 }

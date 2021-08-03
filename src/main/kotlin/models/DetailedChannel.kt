@@ -1,9 +1,8 @@
-package platformapi.models
+package models
 
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
 
-// TODO(saibotma): Maybe rename
-data class ChannelWrite(
+data class DetailedChannel(
     val meta: ChannelMeta,
     val members: List<ChannelMember>,
 )

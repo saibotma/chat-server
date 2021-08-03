@@ -7,7 +7,7 @@ import io.ktor.response.*
 import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.updateChannel
-import platformapi.models.ChannelMeta
+import models.ChannelMeta
 
 // TODO(saibotma): Finalize API & test
 suspend fun PipelineContext<Unit, ApplicationCall>.updateChannelMeta(

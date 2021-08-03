@@ -13,6 +13,10 @@ object ChannelList {
     data class ChannelDetails(val channelId: UUID, val channelList: ChannelList) {
         @Location("/members")
         data class ChannelMemberList(val channelDetails: ChannelDetails) {
+            @Location("/detailed")
+            data class DetailedChannelMemberList(val channelMemberList: ChannelMemberList)
+
+            // TODO(saibotma): Don't allow a user id to be "detailed"
             @Location("/{userId}")
             data class ChannelMemberDetails(val userId: UUID, val channelMemberList: ChannelMemberList)
         }

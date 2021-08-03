@@ -1,4 +1,4 @@
-package platformapi.models
+package models
 
 import java.util.*
 

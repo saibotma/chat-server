@@ -27,8 +27,8 @@ import org.kodein.di.ktor.closestDI
 import org.testcontainers.containers.PostgreSQLContainer
 import persistence.postgres.ChatServerPostgres
 import persistence.postgres.PostgresConfig
-import platformapi.models.ChannelWrite
-import platformapi.models.toChannelWrite
+import models.DetailedChannel
+import models.toChannelWrite
 import testutil.DatabaseTest
 import testutil.mockedChannelWrite
 
@@ -97,8 +97,8 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
     val objectMapper: ObjectMapper by di.instance()
 
     fun upsertChannel(
-        channel: ChannelWrite, response: TestApplicationResponse.(ChannelWrite) -> Unit = { ensureSuccess() }
-    ): ChannelWrite {
+        channel: DetailedChannel, response: TestApplicationResponse.(DetailedChannel) -> Unit = { ensureSuccess() }
+    ): DetailedChannel {
         return put(channel, "/platform/channels/${channel.id}", response)
     }
 

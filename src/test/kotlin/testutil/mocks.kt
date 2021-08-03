@@ -1,12 +1,12 @@
 package testutil
 
-import platformapi.models.ChannelWrite
+import models.DetailedChannel
 import java.util.*
 import java.util.UUID.randomUUID
 
-fun mockedChannelWrite(): ChannelWrite {
+fun mockedChannelWrite(): DetailedChannel {
     val id = randomUUID()
-    return ChannelWrite(
+    return DetailedChannel(
         id = id,
         name = "name-$id",
         isManaged = false,
