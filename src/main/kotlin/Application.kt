@@ -1,3 +1,6 @@
+import clientapi.ClientApiConfig
+import clientapi.installClientApi
+import clientapi.installClientApiJwtAuthentication
 import error.ApiException
 import persistence.postgres.ChatServerPostgres
 import com.fasterxml.jackson.databind.JsonMappingException
@@ -10,14 +13,16 @@ import io.ktor.jackson.*
 import io.ktor.locations.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.util.*
-import kodein.setupKodein
+import di.setupKodein
 import logging.Logging
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.ktor.DIFeature
 import org.kodein.di.ktor.closestDI
+import persistence.jooq.KotlinDslContext
+import platformapi.PlatformApiConfig
 import platformapi.installPlatformApi
+import platformapi.installPlatformApiAccessTokenAuthentication
 import util.GenericTypeConversionService
 import java.time.Instant
 import java.time.LocalDate
@@ -34,6 +39,9 @@ fun Application.module() {
     routing {
         route("/platform") {
             installPlatformApi()
+        }
+        route("/client") {
+            installClientApi()
         }
     }
 }
@@ -65,7 +73,12 @@ private fun Application.installFeatures() {
     }
     install(Locations) {}
     install(Authentication) {
-        // TODO(saibotma): Add authentication
+        val platformApiConfig: PlatformApiConfig by closestDI().instance()
+        val clientApiConfig: ClientApiConfig by closestDI().instance()
+        val kotlinDslContext: KotlinDslContext by closestDI().instance()
+
+        installPlatformApiAccessTokenAuthentication(expectedAccessToken = platformApiConfig.accessToken)
+        installClientApiJwtAuthentication(jwtSecret = clientApiConfig.jwtSecret, kotlinDslContext = kotlinDslContext)
     }
     install(ContentNegotiation) {
         jackson { closestDI().direct.instance<ObjectMapper.() -> Unit>()() }

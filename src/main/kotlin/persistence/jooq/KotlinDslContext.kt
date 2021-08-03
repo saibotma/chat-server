@@ -1,6 +1,5 @@
 package persistence.jooq
 
-import app.appella.persistence.jooq.KotlinTransactionContext
 import error.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking

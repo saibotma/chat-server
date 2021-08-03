@@ -1,12 +1,12 @@
 package persistence.postgres
 
 import app.appella.persistence.jooq.JacksonKotlinConverterProvider
-import persistence.jooq.KotlinDslContext
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.postgresql.ds.PGSimpleDataSource
+import persistence.jooq.KotlinDslContext
 
 class ChatServerPostgres(private val config: PostgresConfig, converterProvider: JacksonKotlinConverterProvider) {
     private val dataSource = PGSimpleDataSource().apply {
@@ -28,7 +28,7 @@ class ChatServerPostgres(private val config: PostgresConfig, converterProvider: 
         .dataSource(dataSource)
         .load()
 
-    val dslContext = DSL.using(dataSource, SQLDialect.POSTGRES).apply {
+    private val dslContext = DSL.using(dataSource, SQLDialect.POSTGRES).apply {
         configuration().set(converterProvider)
     }
 

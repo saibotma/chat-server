@@ -9,8 +9,8 @@ val postgresUrl = "jdbc:postgresql://$postgresServerName:$postgresPort/$postgres
 
 val ktorVersion = "1.6.1"
 val kotlinVersion = "1.5.21"
+val kotlinxCoroutinesVersion = "1.5.1"
 val postgreSqlJdbcVersion = "42.2.23"
-val postgreSqlR2dbcVersion = "0.8.8.RELEASE"
 val log4jVersion = "2.14.1"
 val log4jApiKotlinVersion = "1.0.0"
 val jooqVersion = "3.15.1"
@@ -19,6 +19,7 @@ val kodeinVersion = "7.6.0"
 val jacksonDataTypeJsr310Version = "2.12.4"
 val kotestVersion = "4.6.1"
 val junitJupiterVersion = "5.7.2"
+val testContainersVersion = "1.15.3"
 
 plugins {
     application
@@ -43,12 +44,15 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", kotlinxCoroutinesVersion)
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-reactive", kotlinxCoroutinesVersion)
 
     implementation("io.ktor", "ktor-server-netty", ktorVersion)
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor", "ktor-jackson", ktorVersion)
     implementation("io.ktor", "ktor-locations", ktorVersion)
     implementation("io.ktor", "ktor-server-test-host", ktorVersion)
+    implementation("io.ktor", "ktor-auth-jwt", ktorVersion)
 
     implementation("org.apache.logging.log4j", "log4j-api", log4jVersion)
     implementation("org.apache.logging.log4j", "log4j-core", log4jVersion)
@@ -56,7 +60,6 @@ dependencies {
     implementation("org.apache.logging.log4j", "log4j-api-kotlin", log4jApiKotlinVersion)
 
     implementation("org.flywaydb", "flyway-core", flywayCoreVersion)
-    implementation("io.r2dbc", "r2dbc-postgresql", postgreSqlR2dbcVersion)
     implementation("org.postgresql", "postgresql", postgreSqlJdbcVersion)
     jooqGenerator("org.postgresql", "postgresql", postgreSqlJdbcVersion)
     implementation("org.jooq", "jooq", jooqVersion)
@@ -70,7 +73,12 @@ dependencies {
     testImplementation("io.kotest", "kotest-property", kotestVersion)
     testImplementation("io.ktor", "ktor-server-tests", ktorVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitJupiterVersion)
+    testImplementation("org.junit.jupiter", "junit-jupiter-params", junitJupiterVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitJupiterVersion)
+
+    testImplementation("org.testcontainers", "testcontainers", testContainersVersion)
+    testImplementation("org.testcontainers", "junit-jupiter", testContainersVersion)
+    testImplementation("org.testcontainers", "postgresql", testContainersVersion)
 }
 
 tasks.test {
