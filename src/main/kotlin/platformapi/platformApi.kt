@@ -20,7 +20,10 @@ object ChannelList {
         data class ChannelMetaDetails(val channelDetails: ChannelDetails)
 
         @Location("/members")
-        data class ChannelMemberList(val channelDetails: ChannelDetails)
+        data class ChannelMemberList(val channelDetails: ChannelDetails) {
+            @Location("/{userId}")
+            data class ChannelMemberDetails(val userId: String, val channelMemberList: ChannelMemberList)
+        }
     }
 }
 
@@ -43,6 +46,9 @@ fun Route.installPlatformApi() {
 
         put<ChannelList.ChannelDetails.ChannelMetaDetails> { updateChannelMeta(it, database) }
         put<ChannelList.ChannelDetails.ChannelMemberList> { updateMembers(it, database) }
+
+        put<ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails> { upsertChannelMember(it, database) }
+        delete<ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails> { deleteChannelMember(it, database) }
 
         put<UserList.UserDetails> { insertUser(it, database) }
         delete<UserList.UserDetails> { deleteUser(it, database) }

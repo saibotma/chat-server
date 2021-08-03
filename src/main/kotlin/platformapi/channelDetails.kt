@@ -39,5 +39,5 @@ suspend fun PipelineContext<Unit, ApplicationCall>.deleteChannel(
     database: KotlinDslContext
 ) {
     database.transaction { deleteChannel(location.channelId) }
-    call.respond(HttpStatusCode.OK)
+    call.respond(HttpStatusCode.NoContent)
 }

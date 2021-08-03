@@ -52,3 +52,10 @@ fun KotlinTransactionContext.insertMembers(members: List<ChannelMember>) {
 fun KotlinTransactionContext.deleteMembersOf(channelId: UUID) {
     db.deleteFrom(CHANNEL_MEMBER).where(CHANNEL_MEMBER.CHANNEL_ID.eq(channelId)).execute()
 }
+
+fun KotlinTransactionContext.deleteChannelMember(channelId: UUID, userId: String) {
+    db.deleteFrom(CHANNEL_MEMBER)
+        .where(CHANNEL_MEMBER.CHANNEL_ID.eq(channelId))
+        .and(CHANNEL_MEMBER.USER_ID.eq(userId))
+        .execute()
+}
