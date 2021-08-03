@@ -17,18 +17,22 @@ suspend fun PipelineContext<Unit, ApplicationCall>.upsertChannel(
     val channel = call.receive<ChannelWrite>()
     // Have two transactions as postgres does not like reusing a transaction that
     // had errors. (https://stackoverflow.com/questions/10399727/psqlexception-current-transaction-is-aborted-commands-ignored-until-end-of-tra)
-    when (database.transaction {
+    when (val insertResult = database.transaction {
         val insertResult = insertChannel(channel.meta)
         insertMembers(channel.members)
         insertResult
     }) {
         is Fallible.Failure -> {
-            database.transaction {
-                updateChannel(channel.meta)
-                deleteMembersOf(location.channelId)
-                insertMembers(channel.members)
+            when (insertResult.failure) {
+                InsertChannelError.Duplicate -> {
+                    database.transaction {
+                        updateChannel(channel.meta)
+                        deleteMembersOf(location.channelId)
+                        insertMembers(channel.members)
+                    }
+                    call.respond(HttpStatusCode.NoContent)
+                }
             }
-            call.respond(HttpStatusCode.NoContent)
         }
         is Fallible.Success -> call.respond(HttpStatusCode.Created)
     }
