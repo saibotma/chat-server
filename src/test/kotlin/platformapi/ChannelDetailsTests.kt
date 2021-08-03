@@ -86,10 +86,6 @@ fun serverTest(
             bindDependencies()
         }
     }) {
-        val kodein = application.closestDI()
-        val objectMapper: ObjectMapper by kodein.instance()
-        print(objectMapper.writeValueAsString("klajsldkjfasdf"))
-
         val environment = ServerTestEnvironment(this).apply { resetDatabase() }
         runBlocking { test(environment) }
     }
