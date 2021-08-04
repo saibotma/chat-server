@@ -14,9 +14,6 @@ import java.util.*
 object ChannelList {
     @Location("/{channelId}")
     data class ChannelDetails(val channelId: UUID, val channelList: ChannelList) {
-        @Location("/meta")
-        data class ChannelMetaDetails(val channelDetails: ChannelDetails)
-
         @Location("/members")
         data class ChannelMemberList(val channelDetails: ChannelDetails) {
             @Location("/{userId}")
@@ -26,7 +23,7 @@ object ChannelList {
 }
 
 @Location("/users")
-object UserList {
+object UserList{
     @Location("/{userId}")
     data class UserDetails(val userId: String, val userList: UserList) {
         @Location("/tokens")
@@ -39,10 +36,10 @@ fun Route.installPlatformApi() {
         val database: KotlinDslContext by closestDI().instance()
         val clientApiConfig: ClientApiConfig by closestDI().instance()
 
-        put<ChannelList.ChannelDetails> { upsertChannel(it, database) }
+        post<ChannelList> { createChannel(it, database) }
+        put<ChannelList.ChannelDetails> { updateChannel(it, database) }
         delete<ChannelList.ChannelDetails> { deleteChannel(it, database) }
 
-        put<ChannelList.ChannelDetails.ChannelMetaDetails> { updateChannelMeta(it, database) }
         put<ChannelList.ChannelDetails.ChannelMemberList> { updateMembers(it, database) }
 
         put<ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails> { upsertChannelMember(it, database) }

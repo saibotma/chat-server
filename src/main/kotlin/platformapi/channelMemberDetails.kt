@@ -9,13 +9,24 @@ import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.deleteChannelMember
 import persistence.postgres.queries.insertMembers
+import platformapi.models.ChannelMemberWritePayload
+import platformapi.models.toChannelMemberRecord
 
 suspend fun PipelineContext<Unit, ApplicationCall>.upsertChannelMember(
     location: ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails,
     database: KotlinDslContext
 ) {
-    val member = call.receive<ChannelMember>()
-    database.transaction { insertMembers(listOf(member)) }
+    val member = call.receive<ChannelMemberWritePayload>()
+    database.transaction {
+        insertMembers(
+            listOf(
+                member.toChannelMemberRecord(
+                    channelId = location.channelMemberList.channelDetails.channelId,
+                    userId = location.userId,
+                )
+            )
+        )
+    }
     // TODO(saibotma): Return created when created
     call.respond(HttpStatusCode.NoContent)
 }

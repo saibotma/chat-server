@@ -12,7 +12,7 @@ CREATE TABLE "channel"
     "id"         uuid,
     "name"       varchar(128) NULL,
     "is_managed" bool         NOT NULL,
-    "created_at" timestamptz  NOT NULL DEFAULT now(),
+    "created_at" timestamptz  NOT NULL,
     CONSTRAINT "channel_id_pkey" PRIMARY KEY ("id")
 );
 
@@ -21,6 +21,7 @@ CREATE TABLE "channel_member"
     "channel_id" uuid,
     "user_id"    varchar,
     "role"       channel_member_role NOT NULL,
+    "added_at"   timestamptz         NOT NULL,
     CONSTRAINT "channel_member_channel_id_user_id_pkey"
         PRIMARY KEY ("channel_id", "user_id"),
     CONSTRAINT "channel_member_channel_id_fkey"
