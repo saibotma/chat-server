@@ -58,6 +58,5 @@ val graphQlDi = DI.Module("graphql") {
     bind<GraphQLRequestHandler>() with singleton { GraphQLRequestHandler(instance()) }
     bind<GraphQLRequestParser<ApplicationRequest>>() with singleton { KtorGraphQLRequestParser(instance()) }
     bind<GraphQLContextFactory<AuthContext, ApplicationRequest>>() with singleton { KtorGraphQLContextFactory() }
-    bind<DataLoaderRegistryFactory>() with singleton { KtorDataLoaderRegistryFactory() }
     bind<GraphQLServer<ApplicationRequest>>() with singleton { KtorGraphQLServer(instance(), instance(), instance()) }
 }
