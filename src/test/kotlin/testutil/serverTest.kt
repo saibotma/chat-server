@@ -55,6 +55,11 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
         return put(channel, "/platform/channels/$id", response)
     }
 
+    fun deleteChannel(
+        id: UUID,
+        response: TestApplicationResponse.() -> Unit = { ensureNoContent() }
+    ) = delete(path = "/platform/channels/$id", response)
+
     inline fun <T, reified R> post(
         resource: T,
         path: String,

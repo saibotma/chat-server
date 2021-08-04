@@ -11,7 +11,7 @@ import testutil.serverTest
 
 class ChannelDetailsTests : PostgresTest() {
     @Nested
-    inner class UpsertChannelTests {
+    inner class UpdateChannelTests {
         @Test
         fun `updates an existing channel and returns it`() {
             serverTest {
@@ -26,6 +26,23 @@ class ChannelDetailsTests : PostgresTest() {
                 with(getChannels().map { it.toChannelRead() }) {
                     shouldHaveSize(1)
                     first() shouldBe updatedChannelRead
+                }
+            }
+        }
+    }
+
+    @Nested
+    inner class DeleteChannelTests {
+        @Test
+        fun `deletes a channel`() {
+            serverTest {
+                val (_, channel) = createChannel(mockedChannelWrite())
+                val (_, otherChannel) = createChannel(mockedChannelWrite())
+                deleteChannel(id = channel!!.id)
+
+                with(getChannels().map { it.toChannelRead() }) {
+                    shouldHaveSize(1)
+                    first().id shouldBe otherChannel!!.id
                 }
             }
         }
