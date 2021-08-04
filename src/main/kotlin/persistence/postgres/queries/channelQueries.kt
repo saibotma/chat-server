@@ -15,7 +15,22 @@ import persistence.jooq.KotlinTransactionContext
 import persistence.jooq.andIf
 import persistence.jooq.funAlias
 import persistence.postgres.mappings.detailedChannelToJson
+import platformapi.models.ChannelReadPayload
 import java.util.*
+
+fun KotlinTransactionContext.getChannelReadPayload(channelId: UUID): ChannelReadPayload? {
+    return db.select(CHANNEL.ID, CHANNEL.NAME, CHANNEL.IS_MANAGED, CHANNEL.CREATED_AT)
+        .from(CHANNEL)
+        .where(CHANNEL.ID.eq(channelId))
+        .fetchOne {
+            ChannelReadPayload(
+                id = it.value1()!!,
+                name = it.value2(),
+                isManaged = it.value3()!!,
+                createdAt = it.value4()!!
+            )
+        }
+}
 
 fun KotlinTransactionContext.insertChannel(channel: Channel) {
     db.executeInsert(ChannelRecord().apply { from(channel) })

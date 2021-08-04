@@ -15,11 +15,13 @@ suspend fun PipelineContext<Unit, ApplicationCall>.updateChannel(
     database: KotlinDslContext
 ) {
     val channel = call.receive<ChannelWritePayload>()
+    val channelId = location.channelId
 
-    database.transaction {
-        updateChannel(id = location.channelId, name = channel.name, isManaged = channel.isManaged)
+    val result = database.transaction {
+        updateChannel(id = channelId, name = channel.name, isManaged = channel.isManaged)
+        getChannelReadPayload(channelId)
     }
-    call.respond(HttpStatusCode.NoContent)
+    call.respond(HttpStatusCode.OK, result!!)
 }
 
 suspend fun PipelineContext<Unit, ApplicationCall>.deleteChannel(

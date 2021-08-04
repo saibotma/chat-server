@@ -2,10 +2,11 @@ package platformapi
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import platformapi.models.ChannelReadPayload
+import platformapi.models.ChannelWritePayload
+import platformapi.models.toChannelRead
 import testutil.mockedChannelWrite
 import testutil.serverTest
 
@@ -13,15 +14,20 @@ class ChannelListTests {
     @Nested
     inner class CreateChannelTests {
         @Test
-        fun `creates a channel`() {
+        fun `creates a channel and returns it`() {
             serverTest {
-                val channel = upsertChannel(mockedChannelWrite())
+                val (write, read) = createChannel(mockedChannelWrite())
+                read?.toWrite() shouldBe write
 
-                with(getChannels().map { it.toChannelWrite() }.toList()) {
+                with(getChannels().map { it.toChannelRead() }) {
                     shouldHaveSize(1)
-                    first() shouldBe channel
+                    first() shouldBe read
                 }
             }
         }
     }
+}
+
+fun ChannelReadPayload.toWrite(): ChannelWritePayload {
+    return ChannelWritePayload(name = name, isManaged = isManaged)
 }

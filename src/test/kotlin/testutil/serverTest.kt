@@ -16,9 +16,10 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.subDI
-import platformapi.DatabaseTestEnvironment
 import platformapi.PlatformApiConfig
-import platformapi.setupTestDependencies
+import platformapi.models.ChannelReadPayload
+import platformapi.models.ChannelWritePayload
+import java.util.*
 
 fun serverTest(
     bindDependencies: DI.MainBuilder.() -> Unit = {},
@@ -41,22 +42,51 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
     val di = testApplicationEngine.application.closestDI()
     val objectMapper: ObjectMapper by di.instance()
 
-    fun upsertChannel(
-        channel: DetailedChannel, response: TestApplicationResponse.(DetailedChannel) -> Unit = { ensureSuccess() }
-    ): DetailedChannel {
-        return put(channel, "/platform/channels/${channel.id}", response)
+    fun createChannel(
+        channel: ChannelWritePayload,
+        response: TestApplicationResponse.(ChannelWritePayload, ChannelReadPayload?) -> Unit = { _, _ -> ensureSuccess() }
+    ): Pair<ChannelWritePayload, ChannelReadPayload?> = post(channel, "/platform/channels", response)
+
+    fun updateChannel(
+        id: UUID,
+        channel: ChannelWritePayload,
+        response: TestApplicationResponse.(ChannelWritePayload, ChannelReadPayload?) -> Unit = { _, _ -> ensureSuccess() }
+    ): Pair<ChannelWritePayload, ChannelReadPayload?> {
+        return put(channel, "/platform/channels/$id", response)
     }
 
-    fun <T> put(
+    inline fun <T, reified R> post(
         resource: T,
         path: String,
-        response: TestApplicationResponse.(T) -> Unit
-    ): T {
+        response: TestApplicationResponse.(T, R?) -> Unit
+    ): Pair<T, R?> {
+        var result: R?
+        testApplicationEngine.handleRequest(HttpMethod.Post, path) {
+            addApiKeyAuthentication()
+            setJsonBody(resource, objectMapper)
+        }.response.apply {
+            result =
+                if (status()?.isSuccessWithContent() == true) content?.let { objectMapper.readValue<R>(it) } else null
+            response(resource, result)
+        }
+        return resource to result
+    }
+
+    inline fun <T, reified R> put(
+        resource: T,
+        path: String,
+        response: TestApplicationResponse.(T, R?) -> Unit
+    ): Pair<T, R?> {
+        var result: R?
         testApplicationEngine.handleRequest(HttpMethod.Put, path) {
             addApiKeyAuthentication()
             setJsonBody(resource, objectMapper)
-        }.response.apply { response(resource) }
-        return resource
+        }.response.apply {
+            result =
+                if (status()?.isSuccessWithContent() == true) content?.let { objectMapper.readValue<R>(it) } else null
+            response(resource, result)
+        }
+        return resource to result
     }
 
     inline fun <reified T> get(
@@ -84,7 +114,7 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
         addHeader("X-Chat-Server-Platform-Api-Access-Token", platformApiConfig.accessToken)
     }
 
-    private fun <T> TestApplicationRequest.setJsonBody(body: T, objectMapper: ObjectMapper) {
+    fun <T> TestApplicationRequest.setJsonBody(body: T, objectMapper: ObjectMapper) {
         addHeader("Content-Type", "application/json")
         setBody(body.asString(objectMapper))
     }
@@ -120,4 +150,6 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
     fun String.asApiError(objectMapper: ObjectMapper): ApiError {
         return objectMapper.readValue(this)
     }
+
+    fun HttpStatusCode.isSuccessWithContent() = this == HttpStatusCode.OK || this == HttpStatusCode.Created
 }
