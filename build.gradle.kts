@@ -13,6 +13,8 @@ val kotlinxCoroutinesVersion = "1.5.1"
 val postgreSqlJdbcVersion = "42.2.23"
 val log4jVersion = "2.14.1"
 val log4jApiKotlinVersion = "1.0.0"
+val graphQlJavaVersion = "16.2"
+val graphQlKotlinVersion = "4.1.1"
 val jooqVersion = "3.15.1"
 val flywayCoreVersion = "7.11.4"
 val kodeinVersion = "7.6.0"
@@ -58,6 +60,9 @@ dependencies {
     implementation("org.apache.logging.log4j", "log4j-core", log4jVersion)
     implementation("org.apache.logging.log4j", "log4j-slf4j-impl", log4jVersion)
     implementation("org.apache.logging.log4j", "log4j-api-kotlin", log4jApiKotlinVersion)
+
+    implementation("com.expediagroup", "graphql-kotlin-schema-generator", graphQlKotlinVersion)
+    implementation("com.expediagroup", "graphql-kotlin-server", graphQlKotlinVersion)
 
     implementation("org.flywaydb", "flyway-core", flywayCoreVersion)
     implementation("org.postgresql", "postgresql", postgreSqlJdbcVersion)

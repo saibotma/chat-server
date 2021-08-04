@@ -1,3 +1,3 @@
-package platformapi.models
+package models
 
 data class UserToken(val jwt: String)

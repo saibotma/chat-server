@@ -15,7 +15,6 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import di.setupKodein
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -27,8 +26,6 @@ import org.kodein.di.ktor.closestDI
 import org.testcontainers.containers.PostgreSQLContainer
 import persistence.postgres.ChatServerPostgres
 import persistence.postgres.PostgresConfig
-import platformapi.models.ChannelWrite
-import platformapi.models.toChannelWrite
 import testutil.DatabaseTest
 import testutil.mockedChannelWrite
 
@@ -97,8 +94,8 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
     val objectMapper: ObjectMapper by di.instance()
 
     fun upsertChannel(
-        channel: ChannelWrite, response: TestApplicationResponse.(ChannelWrite) -> Unit = { ensureSuccess() }
-    ): ChannelWrite {
+        channel: DetailedChannel, response: TestApplicationResponse.(DetailedChannel) -> Unit = { ensureSuccess() }
+    ): DetailedChannel {
         return put(channel, "/platform/channels/${channel.id}", response)
     }
 
