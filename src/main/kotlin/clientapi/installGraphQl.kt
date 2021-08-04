@@ -1,9 +1,13 @@
 package clientapi
 
+import com.expediagroup.graphql.server.execution.GraphQLServer
+import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.ExecutionInput
 import graphql.GraphQL
+import graphql.KtorGraphQLServer
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.request.*
 import io.ktor.response.*
@@ -11,14 +15,9 @@ import io.ktor.routing.*
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
-private data class GraphQLRequest(
-    val query: String? = null,
-    val operationName: String? = null,
-    val variables: Map<String, Any>? = null
-)
-
 fun Route.installClientApi() {
-    val graphQL: GraphQL by closestDI().instance()
+    val graphQLServer: GraphQLServer<ApplicationRequest> by closestDI().instance()
+    val objectMapper: ObjectMapper by closestDI().instance()
 
     // To get the GraphQL schema comment this back in and
     // remove the "appWriteAuthenticate" block
@@ -26,16 +25,16 @@ fun Route.installClientApi() {
 
     clientApiJwtAuthenticate {
         post("/graphql") {
-            val authContext = call.principal<AuthContext>()
-            val request = call.receive<GraphQLRequest>()
-            val executionInput = ExecutionInput.newExecutionInput()
-                .context(authContext)
-                .query(request.query)
-                .operationName(request.operationName)
-                .variables(request.variables ?: emptyMap())
-                .build()
+            // Execute the query against the schema
+            val result = graphQLServer.execute(call.request)
 
-            call.respond(graphQL.execute(executionInput))
+            if (result != null) {
+                // write response as json
+                val json = objectMapper.writeValueAsString(result)
+                call.respond(json)
+            } else {
+                call.respond(HttpStatusCode.BadRequest, "Invalid request")
+            }
         }
     }
 }
