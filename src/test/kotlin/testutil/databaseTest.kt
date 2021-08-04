@@ -1,7 +1,11 @@
 package testutil
 
 import dev.saibotma.persistence.postgres.jooq.tables.Channel.Companion.CHANNEL
+import dev.saibotma.persistence.postgres.jooq.tables.User.Companion.USER
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
+import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
+import dev.saibotma.persistence.postgres.jooq.tables.pojos.User
+import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL_MEMBER
 import di.setupKodein
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
@@ -32,6 +36,18 @@ open class DatabaseTestEnvironment(private val di: DI) {
     suspend fun getChannels(): List<Channel> {
         return database.transaction {
             db.selectFrom(CHANNEL).fetchInto(Channel::class.java)
+        }
+    }
+
+    suspend fun getUsers(): List<User> {
+        return database.transaction {
+            db.selectFrom(USER).fetchInto(User::class.java)
+        }
+    }
+
+    suspend fun getMembers(): List<ChannelMember> {
+        return database.transaction {
+            db.selectFrom(CHANNEL_MEMBER).fetchInto(ChannelMember::class.java)
         }
     }
 }

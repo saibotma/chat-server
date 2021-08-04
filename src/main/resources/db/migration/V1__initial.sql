@@ -2,8 +2,9 @@ CREATE TYPE channel_member_role AS ENUM ('admin', 'user');
 
 CREATE TABLE "user"
 (
-    "id"   varchar,
-    "name" varchar(500),
+    "id"        varchar,
+    "name"      varchar(500),
+    "created_at" timestamptz NOT NULL,
     CONSTRAINT "user_id_pkey" PRIMARY KEY ("id")
 );
 

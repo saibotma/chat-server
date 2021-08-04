@@ -48,10 +48,11 @@ fun KotlinTransactionContext.deleteChannel(channelId: UUID) {
     db.deleteFrom(CHANNEL).where(CHANNEL.ID.eq(channelId)).execute()
 }
 
-fun KotlinTransactionContext.getMembersOf(channelId: UUID): List<ChannelMember> {
+fun KotlinTransactionContext.getMembersOf(channelId: UUID, userIdFilter: String? = null): List<ChannelMember> {
     return db.select()
         .from(CHANNEL_MEMBER)
         .where(CHANNEL_MEMBER.CHANNEL_ID.eq(channelId))
+        .andIf(userIdFilter != null) { CHANNEL_MEMBER.USER_ID.eq(userIdFilter) }
         .fetchInto(ChannelMember::class.java)
 }
 

@@ -17,8 +17,7 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.subDI
 import platformapi.PlatformApiConfig
-import platformapi.models.ChannelReadPayload
-import platformapi.models.ChannelWritePayload
+import platformapi.models.*
 import java.util.*
 
 fun serverTest(
@@ -43,7 +42,7 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
     val objectMapper: ObjectMapper by di.instance()
 
     fun createChannel(
-        channel: ChannelWritePayload,
+        channel: ChannelWritePayload = mockedChannelWrite(),
         response: TestApplicationResponse.(ChannelWritePayload, ChannelReadPayload?) -> Unit = { _, _ -> ensureSuccess() }
     ): Pair<ChannelWritePayload, ChannelReadPayload?> = post(channel, "/platform/channels", response)
 
@@ -59,6 +58,26 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
         id: UUID,
         response: TestApplicationResponse.() -> Unit = { ensureNoContent() }
     ) = delete(path = "/platform/channels/$id", response)
+
+    fun addMember(
+        channelId: UUID,
+        member: ChannelMemberWritePayload,
+        response: TestApplicationResponse.(ChannelMemberWritePayload, ChannelMemberReadPayload?) -> Unit = { _, _ -> ensureSuccess() }
+    ): Pair<ChannelMemberWritePayload, ChannelMemberReadPayload?> {
+        return post(member, "/platform/channels/$channelId/members", response)
+    }
+
+    fun createUser(
+        user: UserWritePayload = mockedUser(),
+        response: TestApplicationResponse.(UserWritePayload, UserReadPayload?) -> Unit = { _, _ -> ensureSuccess() }
+    ): Pair<UserWritePayload, UserReadPayload?> {
+        return put(user, "/platform/users/${user.id}", response)
+    }
+
+    fun deleteUser(
+        id: String,
+        response: TestApplicationResponse.() -> Unit = { ensureNoContent() }
+    ) = delete(path = "/platform/users/$id", response)
 
     inline fun <T, reified R> post(
         resource: T,

@@ -40,13 +40,13 @@ fun Route.installPlatformApi() {
         put<ChannelList.ChannelDetails> { updateChannel(it, database) }
         delete<ChannelList.ChannelDetails> { deleteChannel(it, database) }
 
-        post<ChannelList.ChannelDetails.ChannelMemberList> { createMember(it, database) }
+        post<ChannelList.ChannelDetails.ChannelMemberList> { addMember(it, database) }
         put<ChannelList.ChannelDetails.ChannelMemberList> { updateMembers(it, database) }
 
         put<ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails> { updateMember(it, database) }
         delete<ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails> { deleteChannelMember(it, database) }
 
-        put<UserList.UserDetails> { insertUser(it, database) }
+        put<UserList.UserDetails> { createUser(it, database) }
         delete<UserList.UserDetails> { deleteUser(it, database) }
 
         post<UserList.UserDetails.UserTokenList> { createUserToken(it, database, clientApiConfig.jwtSecret) }

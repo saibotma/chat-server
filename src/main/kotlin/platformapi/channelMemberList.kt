@@ -14,20 +14,22 @@ import platformapi.models.ChannelMemberWritePayload
 import platformapi.models.toChannelMember
 import java.time.Instant.now
 
-suspend fun PipelineContext<Unit, ApplicationCall>.createMember(
+suspend fun PipelineContext<Unit, ApplicationCall>.addMember(
     location: ChannelList.ChannelDetails.ChannelMemberList,
     database: KotlinDslContext
 ) {
     val member = call.receive<ChannelMemberWritePayload>()
-    database.transaction {
+    val channelId = location.channelDetails.channelId
+    val result = database.transaction {
         insertMember(
             member.toChannelMember(
-                channelId = location.channelDetails.channelId,
+                channelId = channelId,
                 addedAt = now()
             )
         )
+        getMembersOf(channelId = channelId, userIdFilter = member.userId).first()
     }
-    call.respond(HttpStatusCode.Created)
+    call.respond(HttpStatusCode.Created, result)
 }
 
 

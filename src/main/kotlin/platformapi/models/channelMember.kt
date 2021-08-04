@@ -14,6 +14,13 @@ interface ChannelMemberPayload {
 data class ChannelMemberWritePayload(override val userId: String, override val role: ChannelMemberRole) :
     ChannelMemberPayload
 
+data class ChannelMemberReadPayload(
+    val channelId: UUID,
+    override val userId: String,
+    override val role: ChannelMemberRole,
+    val addedAt: Instant
+) : ChannelMemberPayload
+
 fun ChannelMemberWritePayload.toChannelMember(channelId: UUID, addedAt: Instant): ChannelMember {
     return ChannelMember(channelId = channelId, userId = userId, role = role, addedAt = addedAt)
 }
