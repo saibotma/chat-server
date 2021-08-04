@@ -17,7 +17,7 @@ private data class GraphQLRequest(
     val variables: Map<String, Any>? = null
 )
 
-fun Routing.installClientApi() {
+fun Route.installClientApi() {
     val graphQL: GraphQL by closestDI().instance()
 
     // To get the GraphQL schema comment this back in and

@@ -7,8 +7,8 @@ import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
-import persistence.postgres.queries.getUser
 import models.UserToken
+import persistence.postgres.queries.getUser
 import java.time.Instant.now
 import java.util.*
 

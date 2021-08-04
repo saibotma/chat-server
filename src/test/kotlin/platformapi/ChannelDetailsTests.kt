@@ -15,7 +15,6 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import di.setupKodein
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -27,8 +26,6 @@ import org.kodein.di.ktor.closestDI
 import org.testcontainers.containers.PostgreSQLContainer
 import persistence.postgres.ChatServerPostgres
 import persistence.postgres.PostgresConfig
-import models.DetailedChannel
-import models.toChannelWrite
 import testutil.DatabaseTest
 import testutil.mockedChannelWrite
 

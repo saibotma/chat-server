@@ -8,11 +8,7 @@ import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
 import platformapi.models.ChannelWritePayload
-import platformapi.models.toChannelRecord
-import util.Fallible
-import java.time.Instant.now
 import java.util.*
-import java.util.UUID.randomUUID
 
 suspend fun PipelineContext<Unit, ApplicationCall>.updateChannel(
     location: ChannelList.ChannelDetails,

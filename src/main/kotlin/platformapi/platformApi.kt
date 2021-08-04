@@ -23,7 +23,7 @@ object ChannelList {
 }
 
 @Location("/users")
-object UserList{
+object UserList {
     @Location("/{userId}")
     data class UserDetails(val userId: String, val userList: UserList) {
         @Location("/tokens")
@@ -40,9 +40,10 @@ fun Route.installPlatformApi() {
         put<ChannelList.ChannelDetails> { updateChannel(it, database) }
         delete<ChannelList.ChannelDetails> { deleteChannel(it, database) }
 
+        post<ChannelList.ChannelDetails.ChannelMemberList> { createMember(it, database) }
         put<ChannelList.ChannelDetails.ChannelMemberList> { updateMembers(it, database) }
 
-        put<ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails> { upsertChannelMember(it, database) }
+        put<ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails> { updateMember(it, database) }
         delete<ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails> { deleteChannelMember(it, database) }
 
         put<UserList.UserDetails> { insertUser(it, database) }

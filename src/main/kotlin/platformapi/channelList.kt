@@ -8,7 +8,7 @@ import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
 import platformapi.models.ChannelWritePayload
-import platformapi.models.toChannelRecord
+import platformapi.models.toChannel
 import java.time.Instant
 import java.util.*
 
@@ -18,7 +18,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.createChannel(
 ) {
     val channel = call.receive<ChannelWritePayload>()
     database.transaction {
-        insertChannel(channel.toChannelRecord(id = UUID.randomUUID(), createdAt = Instant.now()))
+        insertChannel(channel.toChannel(id = UUID.randomUUID(), createdAt = Instant.now()))
     }
     call.respond(HttpStatusCode.Created)
 }
