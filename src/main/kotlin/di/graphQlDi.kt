@@ -32,12 +32,9 @@ val graphQlDi = DI.Module("graphql") {
             registerModule(JavaTimeModule())
         }
         val config = SchemaGeneratorConfig(
-            // TODO(saibotma): Adjust schema models
             supportedPackages = listOf(
-                "app.appella.rrule.LocalRRule",
-                "app.appella.models",
-                "app.appella.persistence.postgres.jooq.tables.pojos",
-                "app.appella.graphql.models",
+                "dev.saibotma.persistence.postgres.jooq.tables.pojos",
+                "dev.saibotma.clientapi.models",
             ),
             hooks = ChatServerSchemaGeneratorHooks(),
             dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(objectMapper = objectMapper)
@@ -55,6 +52,7 @@ val graphQlDi = DI.Module("graphql") {
 
         toSchema(config, queries, mutations)
     }
+    // Got most of the stuff from https://github.com/ExpediaGroup/graphql-kotlin/tree/master/examples/server/ktor-server/src/main/kotlin/com/expediagroup/graphql/examples/server/ktor.
     bind<DataFetcherExceptionHandler>() with singleton { DefaultDataFetcherExceptionHandler(instance()) }
     bind<GraphQL>() with singleton { newGraphQL(instance()).defaultDataFetcherExceptionHandler(instance()).build() }
     bind<GraphQLRequestHandler>() with singleton { GraphQLRequestHandler(instance()) }
