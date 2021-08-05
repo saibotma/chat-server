@@ -13,7 +13,9 @@ fun detailedChannelMemberReadToJson(channelMember: ChannelMemberTable): JSONObje
     return jsonObject(
         DetailedChannelMemberReadPayload::channelId.value(channelMember.CHANNEL_ID),
         DetailedChannelMemberReadPayload::userId.value(channelMember.USER_ID),
-        DetailedChannelMemberReadPayload::user.value(select(userToJson(USER)).from(USER).where(USER.ID.eq(channelMember.USER_ID))),
+        DetailedChannelMemberReadPayload::user.value(
+            select(detailedUserReadToJson(USER)).from(USER).where(USER.ID.eq(channelMember.USER_ID))
+        ),
         DetailedChannelMemberReadPayload::role.value(channelMember.ROLE),
         DetailedChannelMemberReadPayload::addedAt.value(channelMember.ADDED_AT)
     )

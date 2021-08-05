@@ -16,7 +16,7 @@ fun detailedMessageToJson(message: MessageTable): JSONObjectNullStep<JSON> {
         DetailedMessage::respondedMessageId.value(message.RESPONDED_MESSAGE_ID),
         DetailedMessage::extendedMessageId.value(message.EXTENDED_MESSAGE_ID),
         DetailedMessage::creator.value(
-            select(userToJson(user = USER))
+            select(detailedUserReadToJson(user = USER))
                 .from(USER)
                 .where(message.CREATOR_USER_ID.eq(USER.ID))
         )

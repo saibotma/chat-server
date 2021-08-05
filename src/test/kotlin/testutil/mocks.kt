@@ -4,7 +4,7 @@ import clientapi.AuthContext
 import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import platformapi.models.ChannelMemberWritePayload
 import models.ChannelWritePayload
-import platformapi.models.UserWritePayload
+import models.UserWritePayload
 import java.util.UUID.randomUUID
 
 fun mockedChannelWrite(name: String? = null, isManaged: Boolean = false): ChannelWritePayload {

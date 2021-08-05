@@ -2,8 +2,8 @@ package platformapi.models
 
 import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.User
-import dev.saibotma.persistence.postgres.jooq.tables.records.ChannelMemberRecord
+import models.DetailedUserReadPayload
+import models.UserReadPayload
 import java.time.Instant
 import java.util.*
 
@@ -25,7 +25,7 @@ data class ChannelMemberReadPayload(
 data class DetailedChannelMemberReadPayload(
     val channelId: UUID,
     override val userId: String,
-    val user: User,
+    val user: DetailedUserReadPayload,
     override val role: ChannelMemberRole,
     val addedAt: Instant,
 ) : ChannelMemberPayload
