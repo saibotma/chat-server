@@ -11,9 +11,9 @@ import io.ktor.response.*
 import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
-import platformapi.models.ChannelMemberWritePayload
-import platformapi.models.toChannelMember
-import platformapi.models.toChannelMemberWrite
+import models.ChannelMemberWritePayload
+import models.toChannelMember
+import models.toChannelMemberWrite
 import java.time.Instant.now
 
 suspend fun PipelineContext<Unit, ApplicationCall>.addMember(

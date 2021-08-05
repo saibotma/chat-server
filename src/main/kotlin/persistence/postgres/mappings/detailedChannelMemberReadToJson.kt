@@ -6,7 +6,7 @@ import org.jooq.JSONObjectNullStep
 import org.jooq.impl.DSL.jsonObject
 import org.jooq.impl.DSL.select
 import persistence.jooq.value
-import platformapi.models.DetailedChannelMemberReadPayload
+import models.DetailedChannelMemberReadPayload
 import dev.saibotma.persistence.postgres.jooq.tables.ChannelMember as ChannelMemberTable
 
 fun detailedChannelMemberReadToJson(channelMember: ChannelMemberTable): JSONObjectNullStep<JSON> {

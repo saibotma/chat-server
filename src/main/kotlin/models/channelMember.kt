@@ -1,9 +1,7 @@
-package platformapi.models
+package models
 
 import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
-import models.DetailedUserReadPayload
-import models.UserReadPayload
 import java.time.Instant
 import java.util.*
 

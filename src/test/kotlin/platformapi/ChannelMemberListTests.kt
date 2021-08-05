@@ -9,9 +9,9 @@ import io.kotest.matchers.shouldBe
 import io.ktor.http.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import platformapi.models.ChannelMemberReadPayload
-import platformapi.models.ChannelMemberWritePayload
-import platformapi.models.toChannelMemberRead
+import models.ChannelMemberReadPayload
+import models.ChannelMemberWritePayload
+import models.toChannelMemberRead
 import testutil.mockedChannelMember
 import testutil.mockedChannelWrite
 import testutil.serverTest

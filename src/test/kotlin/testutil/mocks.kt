@@ -2,7 +2,7 @@ package testutil
 
 import clientapi.AuthContext
 import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
-import platformapi.models.ChannelMemberWritePayload
+import models.ChannelMemberWritePayload
 import models.ChannelWritePayload
 import models.UserWritePayload
 import java.util.UUID.randomUUID

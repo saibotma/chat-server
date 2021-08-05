@@ -6,7 +6,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import platformapi.models.toChannelMemberWrite
+import models.toChannelMemberWrite
 import testutil.mockedChannelMember
 import testutil.serverTest
 

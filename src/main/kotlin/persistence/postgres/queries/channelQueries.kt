@@ -16,9 +16,8 @@ import persistence.jooq.andIf
 import persistence.jooq.funAlias
 import persistence.postgres.mappings.detailedChannelMemberReadToJson
 import persistence.postgres.mappings.detailedChannelReadToJson
-import platformapi.models.ChannelMemberWritePayload
-import platformapi.models.DetailedChannelMemberReadPayload
-import java.time.Instant
+import models.ChannelMemberWritePayload
+import models.DetailedChannelMemberReadPayload
 import java.time.Instant.now
 import java.util.*
 

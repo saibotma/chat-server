@@ -8,8 +8,8 @@ import io.kotest.matchers.shouldBe
 import models.toChannelRead
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import platformapi.models.toChannelMemberRead
-import platformapi.models.toChannelMemberWrite
+import models.toChannelMemberRead
+import models.toChannelMemberWrite
 import testutil.mockedAuthContext
 import testutil.mockedChannelMember
 import testutil.mockedChannelWrite

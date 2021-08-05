@@ -3,14 +3,13 @@ package clientapi.mutations
 import clientapi.AuthContext
 import clientapi.ClientApiException
 import clientapi.resourceNotFound
-import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
 import models.DetailedChannelReadPayload
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
-import platformapi.models.ChannelMemberWritePayload
-import platformapi.models.DetailedChannelMemberReadPayload
-import platformapi.models.toChannelMember
+import models.ChannelMemberWritePayload
+import models.DetailedChannelMemberReadPayload
+import models.toChannelMember
 import java.time.Instant.now
 import java.util.*
 import java.util.UUID.randomUUID

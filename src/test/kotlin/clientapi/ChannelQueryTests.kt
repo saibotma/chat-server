@@ -6,8 +6,8 @@ import models.DetailedChannelReadPayload
 import models.DetailedUserReadPayload
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import platformapi.models.ChannelMemberReadPayload
-import platformapi.models.DetailedChannelMemberReadPayload
+import models.ChannelMemberReadPayload
+import models.DetailedChannelMemberReadPayload
 import models.UserReadPayload
 import testutil.mockedAuthContext
 import testutil.mockedChannelMember

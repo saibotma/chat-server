@@ -1,7 +1,6 @@
 package models
 
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
-import platformapi.models.DetailedChannelMemberReadPayload
 import java.time.Instant
 import java.util.*
 
