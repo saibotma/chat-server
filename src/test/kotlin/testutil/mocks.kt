@@ -15,8 +15,11 @@ fun mockedChannelWrite(): ChannelWritePayload {
     )
 }
 
-fun mockedChannelMemberWrite(userId: String): ChannelMemberWritePayload {
-    return ChannelMemberWritePayload(userId = userId, role = ChannelMemberRole.user)
+fun mockedChannelMemberWrite(
+    userId: String,
+    role: ChannelMemberRole = ChannelMemberRole.user
+): ChannelMemberWritePayload {
+    return ChannelMemberWritePayload(userId = userId, role = role)
 }
 
 fun mockedUser(): UserWritePayload {

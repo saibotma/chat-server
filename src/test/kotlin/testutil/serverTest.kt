@@ -67,6 +67,14 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
         return post(member, "/platform/channels/$channelId/members", response)
     }
 
+    fun setMembers(
+        channelId: UUID,
+        members: List<ChannelMemberWritePayload>,
+        response: TestApplicationResponse.(List<ChannelMemberWritePayload>, List<ChannelMemberReadPayload>?) -> Unit = { _, _ -> ensureSuccess() }
+    ): Pair<List<ChannelMemberWritePayload>, List<ChannelMemberReadPayload>?> {
+        return put(members, "/platform/channels/$channelId/members", response)
+    }
+
     fun createUser(
         user: UserWritePayload = mockedUser(),
         response: TestApplicationResponse.(UserWritePayload, UserReadPayload?) -> Unit = { _, _ -> ensureSuccess() }

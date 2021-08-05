@@ -1,6 +1,8 @@
 package platformapi
 
+import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
@@ -29,6 +31,35 @@ class ChannelMemberListTests {
                     shouldHaveSize(1)
                     first() shouldBe read
                 }
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateMembersTests {
+        @Test
+        fun `replaces all members of a channel`() {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, user1) = createUser()
+                val (_, user2) = createUser()
+                val (_, user3) = createUser()
+                addMember(channelId = channel!!.id, member = mockedChannelMemberWrite(userId = user1!!.id))
+                addMember(
+                    channelId = channel.id,
+                    member = mockedChannelMemberWrite(userId = user2!!.id, role = ChannelMemberRole.user)
+                )
+                // Delete 1, edit 2 and add 3
+                val (write, read) = setMembers(
+                    channelId = channel.id,
+                    members = listOf(
+                        mockedChannelMemberWrite(userId = user2.id, role = ChannelMemberRole.admin),
+                        mockedChannelMemberWrite(userId = user3!!.id),
+                    )
+                )
+
+                read!!.map { it.toWrite() } shouldContainExactlyInAnyOrder write
+                getMembers().map { it.toChannelMemberRead() } shouldContainExactlyInAnyOrder read
             }
         }
     }

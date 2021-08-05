@@ -6,12 +6,10 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
-import persistence.postgres.queries.deleteMembersOf
-import persistence.postgres.queries.getMembersOf
-import persistence.postgres.queries.insertMember
-import persistence.postgres.queries.insertMembers
+import persistence.postgres.queries.*
 import platformapi.models.ChannelMemberWritePayload
 import platformapi.models.toChannelMember
+import platformapi.models.toChannelMemberWrite
 import java.time.Instant.now
 
 suspend fun PipelineContext<Unit, ApplicationCall>.addMember(
@@ -32,20 +30,25 @@ suspend fun PipelineContext<Unit, ApplicationCall>.addMember(
     call.respond(HttpStatusCode.Created, result)
 }
 
-
+// TODO(saibotma): Check that ther must be at least one admin when not managed
+// and that there must not be an admin when managed
 suspend fun PipelineContext<Unit, ApplicationCall>.updateMembers(
     location: ChannelList.ChannelDetails.ChannelMemberList,
     database: KotlinDslContext
 ) {
-    val members = call.receive<List<ChannelMemberWritePayload>>()
-    val memberIds = members.map { it.userId }
     val channelId = location.channelDetails.channelId
-    database.transaction {
-        val currentMembers = getMembersOf(channelId)
-        val currentMemberIds = currentMembers.map { it.userId!! }
-        deleteMembersOf(channelId, currentMemberIds - memberIds)
-        insertMembers(members.filter { !currentMemberIds.contains(it.userId) }
-            .map { it.toChannelMember(channelId = channelId, addedAt = now()) })
+    val members = call.receive<Array<ChannelMemberWritePayload>>()
+    val result = database.transaction {
+        val currentMembers = getMembersOf(channelId).map { it.toChannelMemberWrite() }
+        val union = members.map { it.userId }.intersect(currentMembers.map { it.userId }).toList()
+        val deleted = currentMembers.filter { !union.contains(it.userId) }.map { it.userId }
+        val inserted = members.filter { member -> !currentMembers.map { it.userId }.contains(member.userId) }
+            .map { it.toChannelMember(channelId, addedAt = now()) }
+        val updated = members.filter { union.contains(it.userId) }
+        deleteMembersOf(channelId, deleted)
+        insertMembers(inserted)
+        updateMembers(channelId = channelId, members = updated)
+        getMembersOf(channelId = channelId)
     }
-    call.respond(HttpStatusCode.NoContent)
+    call.respond(HttpStatusCode.OK, result)
 }
