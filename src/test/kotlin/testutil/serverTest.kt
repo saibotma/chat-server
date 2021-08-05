@@ -5,12 +5,14 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import error.ApiError
 import error.ApiException
 import error.duplicate
+import error.resourceNotFound
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import models.UserToken
 import module
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -94,6 +96,13 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
         response: TestApplicationResponse.(UserWritePayload, UserReadPayload?) -> Unit = { _, _ -> ensureSuccess() }
     ): Pair<UserWritePayload, UserReadPayload?> {
         return put(user, "/platform/users/${user.id}", response)
+    }
+
+    fun createUserToken(
+        userId: String,
+        response: TestApplicationResponse.(Unit, UserToken?) -> Unit = { _, _ -> ensureSuccess() }
+    ): Pair<Unit, UserToken?> {
+        return post(Unit, "/platform/users/$userId/tokens", response)
     }
 
     fun deleteUser(
@@ -191,6 +200,11 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
     fun TestApplicationResponse.ensureHasContent() {
         content shouldNotBe null
         status() shouldBe HttpStatusCode.OK
+    }
+
+    fun TestApplicationResponse.ensureResourceNotFound() {
+        asApiError() shouldBe ApiException.resourceNotFound().error
+        status() shouldBe HttpStatusCode.NotFound
     }
 
     fun TestApplicationResponse.asApiError(): ApiError {

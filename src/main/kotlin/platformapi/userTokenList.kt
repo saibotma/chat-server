@@ -2,6 +2,8 @@ package platformapi
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import error.ApiException
+import error.resourceNotFound
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
@@ -18,8 +20,8 @@ suspend fun PipelineContext<Unit, ApplicationCall>.createUserToken(
     jwtSecret: String,
 ) {
     val userId = location.userDetails.userId
-    val userDoesNotExist = database.transaction { getUser(userId) != null }
-    if (userDoesNotExist) TODO("Throw resource not found")
+    val userDoesNotExist = database.transaction { getUser(userId) == null }
+    if (userDoesNotExist) throw ApiException.resourceNotFound()
     val jwt = JWT.create()
         .withSubject(userId)
         .withExpiresAt(Date.from(now().plusSeconds(60 * 15)))
