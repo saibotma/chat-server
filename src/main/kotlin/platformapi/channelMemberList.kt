@@ -34,7 +34,6 @@ suspend fun PipelineContext<Unit, ApplicationCall>.addMember(
     call.respond(HttpStatusCode.Created, result)
 }
 
-// and that there must not be an admin when managed
 suspend fun PipelineContext<Unit, ApplicationCall>.updateMembers(
     location: ChannelList.ChannelDetails.ChannelMemberList,
     database: KotlinDslContext
