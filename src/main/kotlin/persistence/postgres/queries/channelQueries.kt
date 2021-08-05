@@ -56,6 +56,16 @@ fun KotlinTransactionContext.getDetailedMember(channelId: UUID, userId: String):
         .fetchOneInto(DetailedChannelMember::class.java)
 }
 
+fun KotlinTransactionContext.isAdminOfChannel(channelId: UUID, userId: String): Boolean {
+    return db.fetchExists(
+        select()
+            .from(CHANNEL_MEMBER)
+            .where(CHANNEL_MEMBER.CHANNEL_ID.eq(channelId))
+            .and(CHANNEL_MEMBER.USER_ID.eq(userId))
+            .and(CHANNEL_MEMBER.ROLE.eq(ChannelMemberRole.admin))
+    )
+}
+
 fun KotlinTransactionContext.getMembersOf(channelId: UUID, userIdFilter: String? = null): List<ChannelMember> {
     return db.select()
         .from(CHANNEL_MEMBER)

@@ -1,10 +1,13 @@
 package clientapi.mutations
 
 import clientapi.AuthContext
+import clientapi.ClientApiException
 import clientapi.models.DetailedChannel
+import clientapi.resourceNotFound
 import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
+import error.ApiException
 import models.DetailedChannelMember
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
@@ -33,9 +36,11 @@ class ChannelMutation(
         id: UUID,
         name: String?
     ): DetailedChannel {
+        val userId = context.userId
         return database.transaction {
+            if (!isAdminOfChannel(channelId = id, userId = userId)) throw ClientApiException.resourceNotFound()
             updateChannel(id = id, name = name)
-            getChannelsOf(context.userId, channelIdFilter = id).first()
+            getChannelsOf(userId, channelIdFilter = id).first()
         }
     }
 
@@ -43,7 +48,9 @@ class ChannelMutation(
         context: AuthContext,
         id: UUID
     ) {
+        val userId = context.userId
         database.transaction {
+            if (!isAdminOfChannel(channelId = id, userId = userId)) throw ClientApiException.resourceNotFound()
             deleteChannel(id)
         }
     }
@@ -55,6 +62,7 @@ class ChannelMutation(
         role: ChannelMemberRole
     ): DetailedChannelMember {
         return database.transaction {
+            if (!isAdminOfChannel(channelId = channelId, userId = userId)) throw ClientApiException.resourceNotFound()
             upsertMember(channelId = channelId, userId = userId, role = role)
             getDetailedMember(channelId = channelId, userId = userId)!!
         }
@@ -66,6 +74,13 @@ class ChannelMutation(
         userId: String,
     ) {
         database.transaction {
+            val channel = getChannel(channelId = channelId) ?: throw ClientApiException.resourceNotFound()
+            if (!isAdminOfChannel(channelId = channelId, userId = userId)
+                || userId != context.userId
+                || channel.isManaged!!
+            ) {
+                throw ClientApiException.resourceNotFound()
+            }
             deleteMember(channelId = channelId, userId = userId)
         }
     }
