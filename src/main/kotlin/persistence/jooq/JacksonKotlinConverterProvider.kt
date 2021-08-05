@@ -1,4 +1,4 @@
-package app.appella.persistence.jooq
+package persistence.jooq
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper

@@ -4,7 +4,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import platformapi.models.toChannelRead
+import models.toChannelRead
 import testutil.PostgresTest
 import testutil.mockedChannelWrite
 import testutil.serverTest

@@ -1,5 +1,9 @@
 package testutil
 
+import clientapi.mutations.ChannelMutation
+import clientapi.mutations.MessageMutation
+import clientapi.queries.ChannelQuery
+import clientapi.queries.MessageQuery
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import error.ApiError
@@ -12,6 +16,8 @@ import io.kotest.matchers.shouldNotBe
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import models.ChannelReadPayload
+import models.ChannelWritePayload
 import models.UserToken
 import module
 import org.kodein.di.DI
@@ -42,6 +48,11 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
     DatabaseTestEnvironment(testApplicationEngine.application.closestDI()) {
     val di = testApplicationEngine.application.closestDI()
     val objectMapper: ObjectMapper by di.instance()
+
+    val channelQuery: ChannelQuery by di.instance()
+    val messageQuery: MessageQuery by di.instance()
+    val channelMutation: ChannelMutation by di.instance()
+    val messageMutation: MessageMutation by di.instance()
 
     fun createChannel(
         channel: ChannelWritePayload = mockedChannelWrite(),

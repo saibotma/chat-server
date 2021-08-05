@@ -1,6 +1,6 @@
 package persistence.postgres
 
-import app.appella.persistence.jooq.JacksonKotlinConverterProvider
+import persistence.jooq.JacksonKotlinConverterProvider
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 import org.jooq.SQLDialect

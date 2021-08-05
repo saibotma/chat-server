@@ -16,6 +16,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.updateMember(
     location: ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails,
     database: KotlinDslContext
 ) {
+    // TODO(saibotma): Don't allow admins in a managed channel
     val member = call.receive<ChannelMemberWritePayload>()
     val channelId = location.channelMemberList.channelDetails.channelId
     val userId = location.userId

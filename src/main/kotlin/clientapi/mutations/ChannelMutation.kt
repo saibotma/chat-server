@@ -2,15 +2,15 @@ package clientapi.mutations
 
 import clientapi.AuthContext
 import clientapi.ClientApiException
-import clientapi.models.DetailedChannel
 import clientapi.resourceNotFound
 import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
-import error.ApiException
-import models.DetailedChannelMember
+import models.DetailedChannelReadPayload
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
+import platformapi.models.ChannelMemberWritePayload
+import platformapi.models.DetailedChannelMemberReadPayload
+import platformapi.models.toChannelMember
 import java.time.Instant.now
 import java.util.*
 import java.util.UUID.randomUUID
@@ -18,15 +18,15 @@ import java.util.UUID.randomUUID
 class ChannelMutation(
     private val database: KotlinDslContext,
 ) {
-    suspend fun addChannel(
+    suspend fun createChannel(
         context: AuthContext,
         name: String?,
-        memberUserIds: List<String>
-    ): DetailedChannel {
+        members: List<ChannelMemberWritePayload>
+    ): DetailedChannelReadPayload {
         return database.transaction {
             val id = randomUUID()
             insertChannel(Channel(id = id, name = name, isManaged = false, createdAt = now()))
-            insertMembers(memberUserIds.map { ChannelMember(channelId = id, userId = it) })
+            insertMembers(members.map { it.toChannelMember(channelId = id, addedAt = now()) })
             getChannelsOf(userId = context.userId, channelIdFilter = id).first()
         }
     }
@@ -35,7 +35,7 @@ class ChannelMutation(
         context: AuthContext,
         id: UUID,
         name: String?
-    ): DetailedChannel {
+    ): DetailedChannelReadPayload {
         val userId = context.userId
         return database.transaction {
             if (!isAdminOfChannel(channelId = id, userId = userId)) throw ClientApiException.resourceNotFound()
@@ -58,25 +58,26 @@ class ChannelMutation(
     suspend fun upsertMember(
         context: AuthContext,
         channelId: UUID,
-        userId: String,
-        role: ChannelMemberRole
-    ): DetailedChannelMember {
+        member: ChannelMemberWritePayload,
+    ): DetailedChannelMemberReadPayload {
+        val userId = context.userId
         return database.transaction {
-            if (!isAdminOfChannel(channelId = channelId, userId = userId)) throw ClientApiException.resourceNotFound()
-            upsertMember(channelId = channelId, userId = userId, role = role)
-            getDetailedMember(channelId = channelId, userId = userId)!!
+            if (!isAdminOfChannel(channelId = channelId, userId = userId)) {
+                throw ClientApiException.resourceNotFound()
+            }
+            upsertMember(channelId = channelId, userId = member.userId, role = member.role)
+            getDetailedMember(channelId = channelId, userId = member.userId)!!
         }
     }
 
-    suspend fun deleteMember(
+    suspend fun removeMember(
         context: AuthContext,
         channelId: UUID,
         userId: String,
     ) {
         database.transaction {
             val channel = getChannel(channelId = channelId) ?: throw ClientApiException.resourceNotFound()
-            if (!isAdminOfChannel(channelId = channelId, userId = userId)
-                || userId != context.userId
+            if ((!isAdminOfChannel(channelId = channelId, userId = userId) && userId != context.userId)
                 || channel.isManaged!!
             ) {
                 throw ClientApiException.resourceNotFound()
