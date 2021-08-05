@@ -8,7 +8,6 @@ import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
 import platformapi.models.ChannelWritePayload
-import java.util.*
 
 suspend fun PipelineContext<Unit, ApplicationCall>.updateChannel(
     location: ChannelList.ChannelDetails,
@@ -19,7 +18,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.updateChannel(
 
     val result = database.transaction {
         updateChannel(id = channelId, name = channel.name, isManaged = channel.isManaged)
-        getChannelReadPayload(channelId)
+        getChannel(channelId)
     }
     call.respond(HttpStatusCode.OK, result!!)
 }

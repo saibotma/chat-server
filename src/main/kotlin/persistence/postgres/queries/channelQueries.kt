@@ -19,18 +19,11 @@ import platformapi.models.ChannelMemberWritePayload
 import platformapi.models.ChannelReadPayload
 import java.util.*
 
-fun KotlinTransactionContext.getChannelReadPayload(channelId: UUID): ChannelReadPayload? {
-    return db.select(CHANNEL.ID, CHANNEL.NAME, CHANNEL.IS_MANAGED, CHANNEL.CREATED_AT)
+fun KotlinTransactionContext.getChannel(channelId: UUID): Channel? {
+    return db.select()
         .from(CHANNEL)
         .where(CHANNEL.ID.eq(channelId))
-        .fetchOne {
-            ChannelReadPayload(
-                id = it.value1()!!,
-                name = it.value2(),
-                isManaged = it.value3()!!,
-                createdAt = it.value4()!!
-            )
-        }
+        .fetchOneInto(Channel::class.java)
 }
 
 fun KotlinTransactionContext.insertChannel(channel: Channel) {

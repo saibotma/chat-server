@@ -10,7 +10,6 @@ import persistence.postgres.queries.*
 import platformapi.models.ChannelWritePayload
 import platformapi.models.toChannel
 import java.time.Instant
-import java.util.*
 import java.util.UUID.randomUUID
 
 suspend fun PipelineContext<Unit, ApplicationCall>.createChannel(
@@ -21,7 +20,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.createChannel(
     val result = database.transaction {
         val channelId = randomUUID()
         insertChannel(channel.toChannel(id = channelId, createdAt = Instant.now()))
-        getChannelReadPayload(channelId)
+        getChannel(channelId)
     }
     call.respond(HttpStatusCode.Created, result!!)
 }

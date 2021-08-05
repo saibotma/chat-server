@@ -7,11 +7,11 @@ import platformapi.models.UserWritePayload
 import java.util.*
 import java.util.UUID.randomUUID
 
-fun mockedChannelWrite(): ChannelWritePayload {
+fun mockedChannelWrite(isManaged: Boolean = false): ChannelWritePayload {
     val id = randomUUID()
     return ChannelWritePayload(
         name = "name-$id",
-        isManaged = false,
+        isManaged = isManaged,
     )
 }
 

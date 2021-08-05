@@ -169,7 +169,7 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
         duplicatePropertyValue: String
     ) {
         val expectedError = ApiException.duplicate(duplicatePropertyName, duplicatePropertyValue).error
-        content?.asApiError(objectMapper) shouldBe expectedError
+        asApiError() shouldBe expectedError
 
         status() shouldBe HttpStatusCode.BadRequest
     }
@@ -179,8 +179,8 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
         status() shouldBe HttpStatusCode.OK
     }
 
-    fun String.asApiError(objectMapper: ObjectMapper): ApiError {
-        return objectMapper.readValue(this)
+    fun TestApplicationResponse.asApiError(): ApiError {
+        return objectMapper.readValue(content!!)
     }
 
     fun HttpStatusCode.isSuccessWithContent() = this == HttpStatusCode.OK || this == HttpStatusCode.Created

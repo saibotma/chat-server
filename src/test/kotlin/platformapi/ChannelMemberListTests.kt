@@ -2,14 +2,18 @@ package platformapi
 
 import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
+import error.ApiException
+import error.managedChannelHasAdmin
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.ktor.http.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import platformapi.models.ChannelMemberReadPayload
 import platformapi.models.ChannelMemberWritePayload
 import testutil.mockedChannelMemberWrite
+import testutil.mockedChannelWrite
 import testutil.serverTest
 
 class ChannelMemberListTests {
@@ -30,6 +34,21 @@ class ChannelMemberListTests {
                 with(getMembers().map { it.toChannelMemberRead() }) {
                     shouldHaveSize(1)
                     first() shouldBe read
+                }
+            }
+        }
+
+        @Test
+        fun `returns an error when a managed channel has an admin`() {
+            serverTest {
+                val (_, channel) = createChannel(mockedChannelWrite(isManaged = true))
+                val (_, user) = createUser()
+                addMember(
+                    channelId = channel!!.id,
+                    member = mockedChannelMemberWrite(userId = user!!.id, role = ChannelMemberRole.admin)
+                ) { _, _ ->
+                    status() shouldBe HttpStatusCode.BadRequest
+                    asApiError() shouldBe ApiException.managedChannelHasAdmin().error
                 }
             }
         }
@@ -60,6 +79,21 @@ class ChannelMemberListTests {
 
                 read!!.map { it.toWrite() } shouldContainExactlyInAnyOrder write
                 getMembers().map { it.toChannelMemberRead() } shouldContainExactlyInAnyOrder read
+            }
+        }
+
+        @Test
+        fun `returns an error when a managed channel has an admin`() {
+            serverTest {
+                val (_, channel) = createChannel(mockedChannelWrite(isManaged = true))
+                val (_, user) = createUser()
+                setMembers(
+                    channelId = channel!!.id,
+                    members = listOf(mockedChannelMemberWrite(userId = user!!.id, role = ChannelMemberRole.admin))
+                ) { _, _ ->
+                    status() shouldBe HttpStatusCode.BadRequest
+                    asApiError() shouldBe ApiException.managedChannelHasAdmin().error
+                }
             }
         }
     }
