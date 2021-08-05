@@ -28,12 +28,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.addMember(
             throw ApiException.managedChannelHasAdmin()
         }
 
-        insertMember(
-            member.toChannelMember(
-                channelId = channelId,
-                addedAt = now()
-            )
-        )
+        insertMember(member.toChannelMember(channelId = channelId, addedAt = now()))
         getMembersOf(channelId = channelId, userIdFilter = member.userId).first()
     }
     call.respond(HttpStatusCode.Created, result)
