@@ -33,3 +33,17 @@ fun ApiException.Companion.duplicate(duplicatePropertyName: String, duplicatePro
         ApiError(2, "Duplicate $duplicatePropertyName = \"$duplicatePropertyValue\"")
     )
 }
+
+fun ApiException.Companion.resourceNotFound(): ApiException {
+    return ApiException(
+        HttpStatusCode.NotFound,
+        ApiError(3, "The resource could not be found.")
+    )
+}
+
+fun ApiException.Companion.managedChannelHasAdmin(): ApiException {
+    return ApiException(
+        HttpStatusCode.BadRequest,
+        ApiError(4, "A managed channel may not have admin members.")
+    )
+}

@@ -8,18 +8,19 @@ import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
 import platformapi.models.ChannelWritePayload
-import java.util.*
 
 suspend fun PipelineContext<Unit, ApplicationCall>.updateChannel(
     location: ChannelList.ChannelDetails,
     database: KotlinDslContext
 ) {
     val channel = call.receive<ChannelWritePayload>()
+    val channelId = location.channelId
 
-    database.transaction {
-        updateChannel(id = location.channelId, name = channel.name, isManaged = channel.isManaged)
+    val result = database.transaction {
+        updateChannel(id = channelId, name = channel.name, isManaged = channel.isManaged)
+        getChannel(channelId)
     }
-    call.respond(HttpStatusCode.NoContent)
+    call.respond(HttpStatusCode.OK, result!!)
 }
 
 suspend fun PipelineContext<Unit, ApplicationCall>.deleteChannel(

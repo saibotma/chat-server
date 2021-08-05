@@ -2,6 +2,7 @@ package di
 
 import app.appella.persistence.jooq.JacksonKotlinConverterProvider
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -21,6 +22,14 @@ val jacksonDi = DI.Module("jackson") {
     bind<ObjectMapper.() -> Unit>() with singleton {
         {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+
+            registerModules(
+                JavaTimeModule(),
+            )
+
+            // Enables ISO-8601 serialization of dates and datetime
+            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             propertyNamingStrategy = DoNotIgnoreIs
             enable(SerializationFeature.INDENT_OUTPUT)
         }
