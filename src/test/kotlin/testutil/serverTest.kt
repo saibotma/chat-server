@@ -67,6 +67,20 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
         return post(member, "/platform/channels/$channelId/members", response)
     }
 
+    fun updateMember(
+        channelId: UUID,
+        member: ChannelMemberWritePayload,
+        response: TestApplicationResponse.(ChannelMemberWritePayload, ChannelMemberReadPayload?) -> Unit = { _, _ -> ensureSuccess() }
+    ): Pair<ChannelMemberWritePayload, ChannelMemberReadPayload?> {
+        return put(member, "/platform/channels/$channelId/members/${member.userId}", response)
+    }
+
+    fun deleteMember(
+        channelId: UUID,
+        userId: String,
+        response: TestApplicationResponse.() -> Unit = { ensureNoContent() }
+    ) = delete(path = "/platform/channels/$channelId/members/$userId", response)
+
     fun setMembers(
         channelId: UUID,
         members: List<ChannelMemberWritePayload>,

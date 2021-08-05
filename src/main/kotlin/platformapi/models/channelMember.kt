@@ -28,3 +28,8 @@ fun ChannelMemberWritePayload.toChannelMember(channelId: UUID, addedAt: Instant)
 fun ChannelMember.toChannelMemberWrite(): ChannelMemberWritePayload {
     return ChannelMemberWritePayload(userId = userId!!, role = role!!)
 }
+
+fun ChannelMember.toChannelMemberRead(): ChannelMemberReadPayload {
+    return ChannelMemberReadPayload(channelId = channelId!!, userId = userId!!, role = role!!, addedAt = addedAt!!)
+}
+

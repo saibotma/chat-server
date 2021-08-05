@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import platformapi.models.ChannelMemberReadPayload
 import platformapi.models.ChannelMemberWritePayload
+import platformapi.models.toChannelMemberRead
 import testutil.mockedChannelMemberWrite
 import testutil.mockedChannelWrite
 import testutil.serverTest
@@ -101,8 +102,4 @@ class ChannelMemberListTests {
 
 private fun ChannelMemberReadPayload.toWrite(): ChannelMemberWritePayload {
     return ChannelMemberWritePayload(userId = userId, role = role)
-}
-
-private fun ChannelMember.toChannelMemberRead(): ChannelMemberReadPayload {
-    return ChannelMemberReadPayload(channelId = channelId!!, userId = userId!!, role = role!!, addedAt = addedAt!!)
 }
