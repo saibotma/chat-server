@@ -8,12 +8,14 @@ import dev.saibotma.persistence.postgres.jooq.tables.records.ChannelMemberRecord
 import dev.saibotma.persistence.postgres.jooq.tables.records.ChannelRecord
 import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL
 import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL_MEMBER
+import models.DetailedChannelMember
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.impl.DSL.select
 import persistence.jooq.KotlinTransactionContext
 import persistence.jooq.andIf
 import persistence.jooq.funAlias
+import persistence.postgres.mappings.detailedChannelMemberToJson
 import persistence.postgres.mappings.detailedChannelToJson
 import platformapi.models.ChannelMemberWritePayload
 import platformapi.models.ChannelReadPayload
@@ -30,10 +32,14 @@ fun KotlinTransactionContext.insertChannel(channel: Channel) {
     db.executeInsert(ChannelRecord().apply { from(channel) })
 }
 
-fun KotlinTransactionContext.updateChannel(id: UUID, name: String?, isManaged: Boolean) {
+fun KotlinTransactionContext.updateChannel(id: UUID, name: String?, isManaged: Boolean? = null) {
     db.update(CHANNEL)
         .set(CHANNEL.NAME, name)
-        .set(CHANNEL.IS_MANAGED, isManaged)
+        .apply {
+            if (isManaged != null) {
+                set(CHANNEL.IS_MANAGED, isManaged)
+            }
+        }
         .where(CHANNEL.ID.eq(id))
         .execute()
 }
@@ -42,12 +48,30 @@ fun KotlinTransactionContext.deleteChannel(channelId: UUID) {
     db.deleteFrom(CHANNEL).where(CHANNEL.ID.eq(channelId)).execute()
 }
 
+fun KotlinTransactionContext.getDetailedMember(channelId: UUID, userId: String): DetailedChannelMember? {
+    return db.select(detailedChannelMemberToJson(channelMember = CHANNEL_MEMBER))
+        .from(CHANNEL_MEMBER)
+        .where(CHANNEL_MEMBER.CHANNEL_ID.eq(channelId))
+        .and(CHANNEL_MEMBER.USER_ID.eq(userId))
+        .fetchOneInto(DetailedChannelMember::class.java)
+}
+
 fun KotlinTransactionContext.getMembersOf(channelId: UUID, userIdFilter: String? = null): List<ChannelMember> {
     return db.select()
         .from(CHANNEL_MEMBER)
         .where(CHANNEL_MEMBER.CHANNEL_ID.eq(channelId))
         .andIf(userIdFilter != null) { CHANNEL_MEMBER.USER_ID.eq(userIdFilter) }
         .fetchInto(ChannelMember::class.java)
+}
+
+fun KotlinTransactionContext.upsertMember(channelId: UUID, userId: String, role: ChannelMemberRole) {
+    db.insertInto(CHANNEL_MEMBER)
+        .set(CHANNEL_MEMBER.CHANNEL_ID, channelId)
+        .set(CHANNEL_MEMBER.USER_ID, userId)
+        .set(CHANNEL_MEMBER.ROLE, role)
+        .onDuplicateKeyUpdate()
+        .set(CHANNEL_MEMBER.ROLE, role)
+        .execute()
 }
 
 fun KotlinTransactionContext.insertMember(member: ChannelMember) {
