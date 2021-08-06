@@ -3,6 +3,7 @@ package clientapi.mutations
 import clientapi.ClientApiException
 import clientapi.models.MessageWritePayload
 import clientapi.resourceNotFound
+import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -108,7 +109,11 @@ class MessageMutationTests {
                 val (_, channel) = createChannel()
                 val (_, user1) = createUser()
                 val (_, user2) = createUser()
-                addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user1!!.id))
+                // Give him admin permissions to make sure that also not admins can edit messages of others.
+                addMember(
+                    channelId = channel!!.id,
+                    member = mockedChannelMember(userId = user1!!.id, role = ChannelMemberRole.admin)
+                )
                 addMember(channelId = channel.id, member = mockedChannelMember(userId = user2!!.id))
 
                 val context1 = mockedAuthContext(userId = user1.id)
@@ -130,6 +135,67 @@ class MessageMutationTests {
 
                 error shouldBe ClientApiException.resourceNotFound()
                 getMessages().map { it.text } shouldNotContain "Updated message 2"
+            }
+        }
+    }
+
+    @Nested
+    inner class DeleteMessageTests {
+        @Test
+        fun `deletes a message`() {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, user) = createUser()
+                addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user!!.id))
+
+                val context = mockedAuthContext(userId = user.id)
+                val otherMessage = messageMutation.sendMessage(
+                    context,
+                    channelId = channel.id,
+                    message = mockedMessage()
+                )
+                val message = messageMutation.sendMessage(
+                    context = context,
+                    channelId = channel.id,
+                    message = mockedMessage()
+                )
+
+                messageMutation.deleteMessage(context, id = message.id)
+
+                with(getMessages()) {
+                    shouldHaveSize(1)
+                    first().id shouldBe otherMessage.id
+                }
+            }
+        }
+
+        @Test
+        fun `returns an error when the user is not the creator of the message`() {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, user1) = createUser()
+                val (_, user2) = createUser()
+                // Give him admin permissions to make sure that also not admins can edit messages of others.
+                addMember(
+                    channelId = channel!!.id,
+                    member = mockedChannelMember(userId = user1!!.id, role = ChannelMemberRole.admin)
+                )
+                addMember(channelId = channel.id, member = mockedChannelMember(userId = user2!!.id))
+
+                val context1 = mockedAuthContext(userId = user1.id)
+                val context2 = mockedAuthContext(userId = user2.id)
+                val message = messageMutation.sendMessage(
+                    context2,
+                    channelId = channel.id,
+                    message = mockedMessage()
+                )
+
+                val error = shouldThrow<ClientApiException> {
+                    messageMutation.deleteMessage(context1, id = message.id)
+                }
+
+                error shouldBe ClientApiException.resourceNotFound()
+                getMessages() shouldHaveSize 1
             }
         }
     }
