@@ -4,8 +4,10 @@ import dev.saibotma.persistence.postgres.jooq.tables.Channel.Companion.CHANNEL
 import dev.saibotma.persistence.postgres.jooq.tables.User.Companion.USER
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
+import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.User
 import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL_MEMBER
+import dev.saibotma.persistence.postgres.jooq.tables.references.MESSAGE
 import di.setupKodein
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
@@ -48,6 +50,12 @@ open class DatabaseTestEnvironment(private val di: DI) {
     suspend fun getMembers(): List<ChannelMember> {
         return database.transaction {
             db.selectFrom(CHANNEL_MEMBER).fetchInto(ChannelMember::class.java)
+        }
+    }
+
+    suspend fun getMessages(): List<Message> {
+        return database.transaction {
+            db.selectFrom(MESSAGE).fetchInto(Message::class.java)
         }
     }
 }

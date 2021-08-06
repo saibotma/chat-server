@@ -1,5 +1,7 @@
-package clientapi
+package clientapi.mutations
 
+import clientapi.ClientApiException
+import clientapi.resourceNotFound
 import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder

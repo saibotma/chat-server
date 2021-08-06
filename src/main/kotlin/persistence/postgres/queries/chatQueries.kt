@@ -1,6 +1,6 @@
 package persistence.postgres.queries
 
-import clientapi.models.DetailedMessage
+import clientapi.models.DetailedMessageReadPayload
 import dev.saibotma.persistence.postgres.jooq.tables.Message.Companion.MESSAGE
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
@@ -8,15 +8,22 @@ import dev.saibotma.persistence.postgres.jooq.tables.records.ChannelMemberRecord
 import dev.saibotma.persistence.postgres.jooq.tables.records.MessageRecord
 import org.jooq.impl.DSL.select
 import persistence.jooq.KotlinTransactionContext
-import persistence.postgres.mappings.detailedMessageToJson
+import persistence.postgres.mappings.detailedMessageReadToJson
 import java.util.*
 
-fun KotlinTransactionContext.getMessagesOf(channelId: UUID, userId: String): List<DetailedMessage> {
-    return db.select(detailedMessageToJson(message = MESSAGE))
+fun KotlinTransactionContext.getMessage(id: UUID): DetailedMessageReadPayload? {
+    return db.select(detailedMessageReadToJson(message = MESSAGE))
+        .from(MESSAGE)
+        .where(MESSAGE.ID.eq(id))
+        .fetchOneInto(DetailedMessageReadPayload::class.java)
+}
+
+fun KotlinTransactionContext.getMessagesOf(channelId: UUID, userId: String): List<DetailedMessageReadPayload> {
+    return db.select(detailedMessageReadToJson(message = MESSAGE))
         .from(MESSAGE)
         .where(MESSAGE.CHANNEL_ID.eq(channelId))
         .and(isMemberOfChannel(channelId = MESSAGE.CHANNEL_ID, userId = userId))
-        .fetchInto(DetailedMessage::class.java)
+        .fetchInto(DetailedMessageReadPayload::class.java)
 }
 
 fun KotlinTransactionContext.insertMessage(message: Message) {
@@ -29,12 +36,10 @@ fun KotlinTransactionContext.updateMessage(
     messageId: UUID,
     text: String,
     respondedMessageId: UUID?,
-    extendedMessageId: UUID?
 ) {
     db.update(MESSAGE)
         .set(MESSAGE.TEXT, text)
         .set(MESSAGE.RESPONDED_MESSAGE_ID, respondedMessageId)
-        .set(MESSAGE.EXTENDED_MESSAGE_ID, extendedMessageId)
         .where(MESSAGE.ID.eq(messageId))
         .execute()
 }

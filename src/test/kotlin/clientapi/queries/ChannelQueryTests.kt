@@ -1,4 +1,4 @@
-package clientapi
+package clientapi.queries
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import models.ChannelReadPayload

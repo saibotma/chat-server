@@ -1,10 +1,12 @@
 package testutil
 
 import clientapi.AuthContext
+import clientapi.models.MessageWritePayload
 import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
 import models.ChannelMemberWritePayload
 import models.ChannelWritePayload
 import models.UserWritePayload
+import java.util.*
 import java.util.UUID.randomUUID
 
 fun mockedChannelWrite(name: String? = null, isManaged: Boolean = false): ChannelWritePayload {
@@ -28,4 +30,8 @@ fun mockedUser(): UserWritePayload {
 
 fun ServerTestEnvironment.mockedAuthContext(userId: String): AuthContext {
     return AuthContext(userId = userId, jwtToken = createUserToken(userId = userId).second!!.jwt)
+}
+
+fun mockedMessage(text: String? = null, respondedMessageId: UUID? = null): MessageWritePayload {
+    return MessageWritePayload(text = text, respondedMessageId = respondedMessageId)
 }

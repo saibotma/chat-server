@@ -2,6 +2,9 @@ package clientapi.mutations
 
 import clientapi.AuthContext
 import clientapi.ClientApiException
+import clientapi.models.DetailedMessageReadPayload
+import clientapi.models.MessageWritePayload
+import clientapi.models.toMessage
 import clientapi.resourceNotFound
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
 import persistence.jooq.KotlinDslContext
@@ -14,26 +17,23 @@ class MessageMutation(private val database: KotlinDslContext) {
     suspend fun sendMessage(
         context: AuthContext,
         channelId: UUID,
-        message: String,
-        respondedMessageId: UUID? = null,
-        extendedMessageId: UUID? = null,
-    ) {
+        message: MessageWritePayload,
+    ): DetailedMessageReadPayload {
         val userId = context.userId
-        database.transaction {
+        return database.transaction {
             if (!isMemberOfChannel(channelId = channelId, userId = userId)) {
                 throw ClientApiException.resourceNotFound()
             }
+            val id = randomUUID()
             insertMessage(
-                Message(
-                    id = randomUUID(),
-                    text = message,
-                    respondedMessageId = respondedMessageId,
-                    extendedMessageId = extendedMessageId,
-                    creatorUserId = userId,
+                message.toMessage(
+                    id = id,
+                    creatorUserId = context.userId,
                     channelId = channelId,
                     createdAt = now(),
                 )
             )
+            getMessage(id)!!
         }
     }
 
@@ -53,7 +53,6 @@ class MessageMutation(private val database: KotlinDslContext) {
                 messageId = messageId,
                 text = message,
                 respondedMessageId = respondedMessageId,
-                extendedMessageId = extendedMessageId,
             )
         }
     }
