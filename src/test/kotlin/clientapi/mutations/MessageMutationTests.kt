@@ -5,8 +5,11 @@ import clientapi.models.MessageWritePayload
 import clientapi.resourceNotFound
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import testutil.mockedAuthContext
@@ -25,8 +28,9 @@ class MessageMutationTests {
                 addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user!!.id))
 
                 val context = mockedAuthContext(userId = user.id)
+                val otherMessageWrite = mockedMessage()
                 val otherMessage =
-                    messageMutation.sendMessage(context, channelId = channel.id, message = mockedMessage())
+                    messageMutation.sendMessage(context, channelId = channel.id, message = otherMessageWrite)
                 val message = mockedMessage(text = "Message 1", respondedMessageId = otherMessage.id)
                 val detailedMessage = messageMutation.sendMessage(
                     context = context,
@@ -34,36 +38,104 @@ class MessageMutationTests {
                     message = message
                 )
 
-                with(getMessages()) {
-                    shouldHaveSize(1)
-                    detailedMessage.id shouldBe first().id
-                    first().toMessageWrite() shouldBe message
-                }
+                getMessages().map { it.toMessageWrite() }
+                    .shouldContainExactlyInAnyOrder(listOf(otherMessageWrite, message))
+                detailedMessage.repliedMessageId shouldNotBe detailedMessage.id
+            }
+        }
+    }
+
+    @Test
+    fun `returns an error when the user is not a member of the channel`() {
+        serverTest {
+            val (_, channel) = createChannel()
+            val (_, user) = createUser()
+
+            val context = mockedAuthContext(userId = user!!.id)
+            val error = shouldThrow<ClientApiException> {
+                messageMutation.sendMessage(
+                    context = context,
+                    channelId = channel!!.id,
+                    message = mockedMessage()
+                )
+            }
+
+            error shouldBe ClientApiException.resourceNotFound()
+            getMessages() shouldHaveSize 0
+        }
+    }
+
+    @Nested
+    inner class EditMessageTests {
+        @Test
+        fun `edits a message and returns it`() {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, user) = createUser()
+                addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user!!.id))
+
+                val context = mockedAuthContext(userId = user.id)
+                val otherMessageWrite = mockedMessage(text = "Message 1")
+                messageMutation.sendMessage(
+                    context,
+                    channelId = channel.id,
+                    message = otherMessageWrite
+                )
+                val messageWrite = mockedMessage(text = "Message 2")
+                val detailedMessage = messageMutation.sendMessage(
+                    context = context,
+                    channelId = channel.id,
+                    message = messageWrite
+                )
+
+                val updatedDetailedMessage =
+                    messageMutation.editMessage(context, id = detailedMessage.id, text = "Updated message 2")
+
+                updatedDetailedMessage.id shouldBe detailedMessage.id
+                getMessages().map { it.toMessageWrite() }
+                    .shouldContainExactlyInAnyOrder(
+                        listOf(
+                            otherMessageWrite,
+                            messageWrite.copy(text = "Updated message 2")
+                        )
+                    )
             }
         }
 
         @Test
-        fun `returns an error when the user is not a member of the channel`() {
+        fun `returns an error when the user is not the creator of the message`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user) = createUser()
+                val (_, user1) = createUser()
+                val (_, user2) = createUser()
+                addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user1!!.id))
+                addMember(channelId = channel.id, member = mockedChannelMember(userId = user2!!.id))
 
-                val context = mockedAuthContext(userId = user!!.id)
+                val context1 = mockedAuthContext(userId = user1.id)
+                messageMutation.sendMessage(
+                    context1,
+                    channelId = channel.id,
+                    message = mockedMessage()
+                )
+                val context2 = mockedAuthContext(userId = user2.id)
+                val message = messageMutation.sendMessage(
+                    context2,
+                    channelId = channel.id,
+                    message = mockedMessage()
+                )
+
                 val error = shouldThrow<ClientApiException> {
-                    messageMutation.sendMessage(
-                        context = context,
-                        channelId = channel!!.id,
-                        message = mockedMessage()
-                    )
+                    messageMutation.editMessage(context1, id = message.id, text = "Updated message 2")
                 }
 
                 error shouldBe ClientApiException.resourceNotFound()
-                getMessages() shouldHaveSize 0
+                getMessages().map { it.text } shouldNotContain "Updated message 2"
             }
         }
     }
 }
 
+
 private fun Message.toMessageWrite(): MessageWritePayload {
-    return MessageWritePayload(text = text, respondedMessageId = respondedMessageId)
+    return MessageWritePayload(text = text, repliedMessageId = repliedMessageId)
 }

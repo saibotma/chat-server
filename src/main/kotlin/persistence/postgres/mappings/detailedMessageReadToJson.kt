@@ -13,7 +13,7 @@ fun detailedMessageReadToJson(message: MessageTable): JSONObjectNullStep<JSON> {
     return jsonObject(
         DetailedMessageReadPayload::id.value(message.ID),
         DetailedMessageReadPayload::text.value(message.TEXT),
-        DetailedMessageReadPayload::respondedMessageId.value(message.RESPONDED_MESSAGE_ID),
+        DetailedMessageReadPayload::repliedMessageId.value(message.REPLIED_MESSAGE_ID),
         DetailedMessageReadPayload::creator.value(
             select(detailedUserReadToJson(user = USER))
                 .from(USER)

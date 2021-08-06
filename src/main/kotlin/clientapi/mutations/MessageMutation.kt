@@ -6,7 +6,6 @@ import clientapi.models.DetailedMessageReadPayload
 import clientapi.models.MessageWritePayload
 import clientapi.models.toMessage
 import clientapi.resourceNotFound
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
 import java.time.Instant.now
@@ -39,21 +38,16 @@ class MessageMutation(private val database: KotlinDslContext) {
 
     suspend fun editMessage(
         context: AuthContext,
-        messageId: UUID,
-        message: String,
-        respondedMessageId: UUID? = null,
-        extendedMessageId: UUID? = null,
-    ) {
+        id: UUID,
+        text: String?,
+    ): DetailedMessageReadPayload {
         val userId = context.userId
-        database.transaction {
-            if (!isCreatorOfMessage(messageId = messageId, userId = userId)) {
+        return database.transaction {
+            if (!isCreatorOfMessage(messageId = id, userId = userId)) {
                 throw ClientApiException.resourceNotFound()
             }
-            updateMessage(
-                messageId = messageId,
-                text = message,
-                respondedMessageId = respondedMessageId,
-            )
+            updateMessage(messageId = id, text = text)
+            getMessage(id)!!
         }
     }
 

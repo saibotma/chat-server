@@ -33,5 +33,5 @@ fun ServerTestEnvironment.mockedAuthContext(userId: String): AuthContext {
 }
 
 fun mockedMessage(text: String? = null, respondedMessageId: UUID? = null): MessageWritePayload {
-    return MessageWritePayload(text = text, respondedMessageId = respondedMessageId)
+    return MessageWritePayload(text = text, repliedMessageId = respondedMessageId)
 }

@@ -7,15 +7,15 @@ import java.util.*
 
 interface MessagePayload {
     val text: String?
-    val respondedMessageId: UUID?
+    val repliedMessageId: UUID?
 }
 
-data class MessageWritePayload(override val text: String?, override val respondedMessageId: UUID?) : MessagePayload
+data class MessageWritePayload(override val text: String?, override val repliedMessageId: UUID?) : MessagePayload
 
 data class DetailedMessageReadPayload(
     val id: UUID,
     override val text: String?,
-    override val respondedMessageId: UUID?,
+    override val repliedMessageId: UUID?,
     val creator: DetailedUserReadPayload?
 ) : MessagePayload
 
@@ -23,7 +23,7 @@ fun MessageWritePayload.toMessage(id: UUID, creatorUserId: String, channelId: UU
     return Message(
         id = id,
         text = text,
-        respondedMessageId = respondedMessageId,
+        repliedMessageId = repliedMessageId,
         creatorUserId = creatorUserId,
         channelId = channelId,
         createdAt = createdAt,

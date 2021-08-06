@@ -33,15 +33,15 @@ CREATE TABLE "channel_member"
 
 CREATE TABLE "message"
 (
-    "id"                   uuid,
-    "text"                 varchar(1048),
-    "responded_message_id" uuid,
-    "creator_user_id"      varchar,
-    "channel_id"           uuid        NOT NULL,
-    "created_at"           timestamptz NOT NULL,
+    "id"                 uuid,
+    "text"               varchar(1048),
+    "replied_message_id" uuid,
+    "creator_user_id"    varchar,
+    "channel_id"         uuid        NOT NULL,
+    "created_at"         timestamptz NOT NULL,
     CONSTRAINT "message_id_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "message_responded_message_id_fkey"
-        FOREIGN KEY ("responded_message_id") REFERENCES "message" ("id") ON DELETE SET NULL,
+    CONSTRAINT "message_replied_message_id_fkey"
+        FOREIGN KEY ("replied_message_id") REFERENCES "message" ("id") ON DELETE SET NULL,
     CONSTRAINT "message_creator_user_id_fkey"
         FOREIGN KEY ("creator_user_id") REFERENCES "user" ("id") ON DELETE SET NULL,
     CONSTRAINT "message_channel_id_fkey"

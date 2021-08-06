@@ -34,12 +34,10 @@ fun KotlinTransactionContext.insertMessage(message: Message) {
 
 fun KotlinTransactionContext.updateMessage(
     messageId: UUID,
-    text: String,
-    respondedMessageId: UUID?,
+    text: String?,
 ) {
     db.update(MESSAGE)
         .set(MESSAGE.TEXT, text)
-        .set(MESSAGE.RESPONDED_MESSAGE_ID, respondedMessageId)
         .where(MESSAGE.ID.eq(messageId))
         .execute()
 }
