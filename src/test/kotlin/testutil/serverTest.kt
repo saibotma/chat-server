@@ -6,6 +6,7 @@ import clientapi.queries.ChannelQuery
 import clientapi.queries.MessageQuery
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import di.setupKodein
 import error.ApiError
 import error.ApiException
 import error.duplicate
@@ -18,26 +19,43 @@ import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import models.*
 import module
-import org.kodein.di.DI
-import org.kodein.di.instance
+import org.jooq.DSLContext
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL
+import org.kodein.di.*
 import org.kodein.di.ktor.closestDI
-import org.kodein.di.subDI
+import org.testcontainers.containers.PostgreSQLContainer
+import persistence.jooq.JacksonKotlinConverterProvider
+import persistence.jooq.KotlinDslContext
 import platformapi.PlatformApiConfig
 import java.util.*
+import javax.sql.DataSource
 
 fun serverTest(
     bindDependencies: DI.MainBuilder.() -> Unit = {},
     test: suspend ServerTestEnvironment.() -> Unit
 ) {
     withTestApplication({
-        module()
-        subDI(parentDI = closestDI()) {
+        module {
+            setupKodein()
             setupTestDependencies()
             bindDependencies()
         }
     }) {
-        val environment = ServerTestEnvironment(this).apply { resetDatabase() }
-        runBlocking { test(environment) }
+        val di = application.closestDI()
+        val database: DSLContext by application.closestDI().instance()
+        val environment = ServerTestEnvironment(this)
+        try {
+            database.transaction { config ->
+                subDI(di) {
+                    bind<DSLContext>(overrides = true) with singleton { DSL.using(config) }
+                    runBlocking { test(environment) }
+                }
+                throw Exception("Trigger rollback")
+            }
+        } catch (e: Exception) {
+            print("")
+        }
     }
 }
 

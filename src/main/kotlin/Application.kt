@@ -2,7 +2,6 @@ import clientapi.ClientApiConfig
 import clientapi.installClientApi
 import clientapi.installClientApiJwtAuthentication
 import error.ApiException
-import persistence.postgres.ChatServerPostgres
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.application.*
@@ -15,6 +14,8 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import di.setupKodein
 import logging.Logging
+import org.flywaydb.core.Flyway
+import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.ktor.DIFeature
@@ -30,11 +31,10 @@ import java.util.*
 import kotlin.reflect.typeOf
 
 
-fun Application.module() {
-    installFeatures()
-
-    val postgres: ChatServerPostgres by closestDI().instance()
-    postgres.runMigration()
+fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupKodein() }) {
+    installFeatures(bindDependencies)
+    val flyway: Flyway by closestDI().instance()
+    flyway.migrate()
 
     routing {
         route("/platform") {
@@ -46,8 +46,8 @@ fun Application.module() {
     }
 }
 
-private fun Application.installFeatures() {
-    install(DIFeature) { setupKodein() }
+private fun Application.installFeatures(bindDependencies: DI.MainBuilder.() -> Unit) {
+    install(DIFeature) { bindDependencies() }
     install(CORS) {
         method(HttpMethod.Get)
         method(HttpMethod.Post)
