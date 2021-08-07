@@ -1,14 +1,9 @@
 package clientapi.queries
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import models.ChannelReadPayload
-import models.DetailedChannelReadPayload
-import models.DetailedUserReadPayload
+import models.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import models.ChannelMemberReadPayload
-import models.DetailedChannelMemberReadPayload
-import models.UserReadPayload
 import testutil.mockedAuthContext
 import testutil.mockedChannelMember
 import testutil.serverTest
@@ -53,14 +48,6 @@ private fun ChannelReadPayload.toDetailed(members: List<DetailedChannelMemberRea
         name = name,
         isManaged = isManaged,
         members = members,
-        createdAt = createdAt,
-    )
-}
-
-private fun UserReadPayload.toDetailed(): DetailedUserReadPayload {
-    return DetailedUserReadPayload(
-        id = id,
-        name = name,
         createdAt = createdAt,
     )
 }

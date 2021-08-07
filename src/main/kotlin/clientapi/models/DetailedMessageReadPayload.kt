@@ -16,7 +16,8 @@ data class DetailedMessageReadPayload(
     val id: UUID,
     override val text: String?,
     override val repliedMessageId: UUID?,
-    val creator: DetailedUserReadPayload?
+    val creator: DetailedUserReadPayload?,
+    val createdAt: Instant,
 ) : MessagePayload
 
 fun MessageWritePayload.toMessage(id: UUID, creatorUserId: String, channelId: UUID, createdAt: Instant): Message {

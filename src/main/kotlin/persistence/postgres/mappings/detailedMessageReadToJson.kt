@@ -18,6 +18,7 @@ fun detailedMessageReadToJson(message: MessageTable): JSONObjectNullStep<JSON> {
             select(detailedUserReadToJson(user = USER))
                 .from(USER)
                 .where(message.CREATOR_USER_ID.eq(USER.ID))
-        )
+        ),
+        DetailedMessageReadPayload::createdAt.value(message.CREATED_AT),
     )
 }

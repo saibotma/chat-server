@@ -21,3 +21,11 @@ fun UserWritePayload.toUser(createdAt: Instant): User {
 fun User.toUserRead(): UserReadPayload {
     return UserReadPayload(id = id!!, name = name, createdAt = createdAt!!)
 }
+
+fun UserReadPayload.toDetailed(): DetailedUserReadPayload {
+    return DetailedUserReadPayload(
+        id = id,
+        name = name,
+        createdAt = createdAt,
+    )
+}
