@@ -45,7 +45,7 @@ fun serverTest(
         val di = application.closestDI()
         val database: DSLContext by application.closestDI().instance()
         val environment = ServerTestEnvironment(this)
-        try {
+        runCatching {
             database.transaction { config ->
                 subDI(di) {
                     bind<DSLContext>(overrides = true) with singleton { DSL.using(config) }
@@ -53,8 +53,6 @@ fun serverTest(
                 }
                 throw Exception("Trigger rollback")
             }
-        } catch (e: Exception) {
-            print("")
         }
     }
 }

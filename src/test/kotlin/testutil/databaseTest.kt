@@ -31,7 +31,7 @@ fun databaseTest(
 
 open class DatabaseTestEnvironment(private val di: DI) {
     val database: KotlinDslContext by di.instance()
-    
+
     suspend fun getChannels(): List<Channel> {
         return database.transaction {
             db.selectFrom(CHANNEL).fetchInto(Channel::class.java)
