@@ -1,22 +1,65 @@
 package persistence.postgres.queries
 
-import clientapi.models.DetailedMessage
+import clientapi.models.DetailedMessageReadPayload
 import dev.saibotma.persistence.postgres.jooq.tables.Message.Companion.MESSAGE
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
 import dev.saibotma.persistence.postgres.jooq.tables.records.ChannelMemberRecord
 import dev.saibotma.persistence.postgres.jooq.tables.records.MessageRecord
-import org.jooq.impl.DSL.select
+import org.jooq.*
+import org.jooq.impl.DSL.*
 import persistence.jooq.KotlinTransactionContext
-import persistence.postgres.mappings.detailedMessageToJson
+import persistence.jooq.andIf
+import persistence.postgres.mappings.detailedMessageReadToJson
+import java.time.Instant
 import java.util.*
 
-fun KotlinTransactionContext.getMessagesOf(channelId: UUID, userId: String): List<DetailedMessage> {
-    return db.select(detailedMessageToJson(message = MESSAGE))
+fun KotlinTransactionContext.getMessage(id: UUID): DetailedMessageReadPayload? {
+    return db.select(detailedMessageReadToJson(message = MESSAGE))
         .from(MESSAGE)
-        .where(MESSAGE.CHANNEL_ID.eq(channelId))
-        .and(isMemberOfChannel(channelId = MESSAGE.CHANNEL_ID, userId = userId))
-        .fetchInto(DetailedMessage::class.java)
+        .where(MESSAGE.ID.eq(id))
+        .fetchOneInto(DetailedMessageReadPayload::class.java)
+}
+
+fun KotlinTransactionContext.getMessagesOf(
+    channelId: UUID,
+    byDateTime: Instant?,
+    byMessageId: UUID?,
+    previousLimit: Int,
+    nextLimit: Int,
+): List<DetailedMessageReadPayload> {
+    fun select(
+        limit: Int,
+        compare: Field<Instant?>.(Field<Instant?>) -> Condition
+    ): SelectSeekStep1<Record1<JSON>, Instant?> {
+        val outerMessage = MESSAGE.`as`("outer_message")
+        val innerMessage = MESSAGE.`as`("inner_message")
+
+        return db.select(detailedMessageReadToJson(message = outerMessage))
+            .from(outerMessage)
+            .where(outerMessage.ID.`in`(
+                select(MESSAGE.ID)
+                    .from(MESSAGE)
+                    .where(MESSAGE.CHANNEL_ID.eq(channelId))
+                    .andIf(byDateTime != null && byMessageId == null) { MESSAGE.CREATED_AT.compare(value(byDateTime!!)) }
+                    .andIf(byDateTime == null && byMessageId != null) {
+                        MESSAGE.CREATED_AT.compare(
+                            select(innerMessage.CREATED_AT)
+                                .from(innerMessage)
+                                .where(innerMessage.ID.eq(byMessageId))
+                                .asField()
+                        )
+                    }
+                    .orderBy(if (limit < 0) MESSAGE.CREATED_AT.desc() else MESSAGE.CREATED_AT.asc())
+                    .limit(kotlin.math.abs(limit))
+            ))
+            .orderBy(outerMessage.CREATED_AT.asc())
+    }
+
+    // One compare also is "equals" in order to include the message specified by date time or message id
+    return select(limit = 0 - (previousLimit + 1)) { le(it) }
+        .unionAll(select(limit = nextLimit) { gt(it) })
+        .fetchInto(DetailedMessageReadPayload::class.java)
 }
 
 fun KotlinTransactionContext.insertMessage(message: Message) {
@@ -27,14 +70,10 @@ fun KotlinTransactionContext.insertMessage(message: Message) {
 
 fun KotlinTransactionContext.updateMessage(
     messageId: UUID,
-    text: String,
-    respondedMessageId: UUID?,
-    extendedMessageId: UUID?
+    text: String?,
 ) {
     db.update(MESSAGE)
         .set(MESSAGE.TEXT, text)
-        .set(MESSAGE.RESPONDED_MESSAGE_ID, respondedMessageId)
-        .set(MESSAGE.EXTENDED_MESSAGE_ID, extendedMessageId)
         .where(MESSAGE.ID.eq(messageId))
         .execute()
 }

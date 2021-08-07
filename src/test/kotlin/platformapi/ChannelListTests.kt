@@ -4,9 +4,9 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import platformapi.models.ChannelReadPayload
-import platformapi.models.ChannelWritePayload
-import platformapi.models.toChannelRead
+import models.ChannelReadPayload
+import models.ChannelWritePayload
+import models.toChannelRead
 import testutil.mockedChannelWrite
 import testutil.serverTest
 

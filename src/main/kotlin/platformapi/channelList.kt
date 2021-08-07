@@ -7,8 +7,8 @@ import io.ktor.response.*
 import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
-import platformapi.models.ChannelWritePayload
-import platformapi.models.toChannel
+import models.ChannelWritePayload
+import models.toChannel
 import java.time.Instant
 import java.util.UUID.randomUUID
 

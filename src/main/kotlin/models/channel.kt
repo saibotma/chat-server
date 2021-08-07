@@ -1,7 +1,6 @@
-package platformapi.models
+package models
 
 import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
-import dev.saibotma.persistence.postgres.jooq.tables.records.ChannelRecord
 import java.time.Instant
 import java.util.*
 
@@ -17,6 +16,14 @@ data class ChannelReadPayload(
     override val name: String?,
     override val isManaged: Boolean,
     val createdAt: Instant
+) : ChannelPayload
+
+data class DetailedChannelReadPayload(
+    val id: UUID,
+    override val name: String?,
+    override val isManaged: Boolean,
+    val members: List<DetailedChannelMemberReadPayload>,
+    val createdAt: Instant,
 ) : ChannelPayload
 
 fun ChannelWritePayload.toChannel(id: UUID, createdAt: Instant): Channel {

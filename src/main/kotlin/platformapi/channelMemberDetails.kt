@@ -9,13 +9,14 @@ import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.deleteMember
 import persistence.postgres.queries.getMembersOf
 import persistence.postgres.queries.updateMember
-import platformapi.models.ChannelMemberWritePayload
-import platformapi.models.toChannelMemberRead
+import models.ChannelMemberWritePayload
+import models.toChannelMemberRead
 
 suspend fun PipelineContext<Unit, ApplicationCall>.updateMember(
     location: ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails,
     database: KotlinDslContext
 ) {
+    // TODO(saibotma): Don't allow admins in a managed channel
     val member = call.receive<ChannelMemberWritePayload>()
     val channelId = location.channelMemberList.channelDetails.channelId
     val userId = location.userId

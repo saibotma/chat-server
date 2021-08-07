@@ -2,8 +2,10 @@ package clientapi.mutations
 
 import clientapi.AuthContext
 import clientapi.ClientApiException
+import clientapi.models.DetailedMessageReadPayload
+import clientapi.models.MessageWritePayload
+import clientapi.models.toMessage
 import clientapi.resourceNotFound
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
 import java.time.Instant.now
@@ -14,47 +16,38 @@ class MessageMutation(private val database: KotlinDslContext) {
     suspend fun sendMessage(
         context: AuthContext,
         channelId: UUID,
-        message: String,
-        respondedMessageId: UUID? = null,
-        extendedMessageId: UUID? = null,
-    ) {
+        message: MessageWritePayload,
+    ): DetailedMessageReadPayload {
         val userId = context.userId
-        database.transaction {
+        return database.transaction {
             if (!isMemberOfChannel(channelId = channelId, userId = userId)) {
                 throw ClientApiException.resourceNotFound()
             }
+            val id = randomUUID()
             insertMessage(
-                Message(
-                    id = randomUUID(),
-                    text = message,
-                    respondedMessageId = respondedMessageId,
-                    extendedMessageId = extendedMessageId,
-                    creatorUserId = userId,
+                message.toMessage(
+                    id = id,
+                    creatorUserId = context.userId,
                     channelId = channelId,
                     createdAt = now(),
                 )
             )
+            getMessage(id)!!
         }
     }
 
     suspend fun editMessage(
         context: AuthContext,
-        messageId: UUID,
-        message: String,
-        respondedMessageId: UUID? = null,
-        extendedMessageId: UUID? = null,
-    ) {
+        id: UUID,
+        text: String?,
+    ): DetailedMessageReadPayload {
         val userId = context.userId
-        database.transaction {
-            if (!isCreatorOfMessage(messageId = messageId, userId = userId)) {
+        return database.transaction {
+            if (!isCreatorOfMessage(messageId = id, userId = userId)) {
                 throw ClientApiException.resourceNotFound()
             }
-            updateMessage(
-                messageId = messageId,
-                text = message,
-                respondedMessageId = respondedMessageId,
-                extendedMessageId = extendedMessageId,
-            )
+            updateMessage(messageId = id, text = text)
+            getMessage(id)!!
         }
     }
 

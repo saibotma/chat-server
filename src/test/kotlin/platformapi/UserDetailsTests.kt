@@ -4,9 +4,9 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import platformapi.models.UserReadPayload
-import platformapi.models.UserWritePayload
-import platformapi.models.toUserRead
+import models.UserReadPayload
+import models.UserWritePayload
+import models.toUserRead
 import testutil.serverTest
 
 class UserDetailsTests {

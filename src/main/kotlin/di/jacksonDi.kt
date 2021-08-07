@@ -1,6 +1,6 @@
 package di
 
-import app.appella.persistence.jooq.JacksonKotlinConverterProvider
+import persistence.jooq.JacksonKotlinConverterProvider
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import jackson.DoNotIgnoreIs
+import jackson.createInstantModule
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -37,7 +38,7 @@ val jacksonDi = DI.Module("jackson") {
 
     bind<JacksonKotlinConverterProvider>() with singleton {
         val mapper = jacksonObjectMapper().apply {
-            registerModules(JavaTimeModule())
+            registerModules(JavaTimeModule(), createInstantModule())
         }
         JacksonKotlinConverterProvider(mapper)
     }

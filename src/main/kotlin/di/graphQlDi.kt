@@ -35,6 +35,7 @@ val graphQlDi = DI.Module("graphql") {
             supportedPackages = listOf(
                 "dev.saibotma.persistence.postgres.jooq.tables.pojos",
                 "dev.saibotma.clientapi.models",
+                "dev.saibotma.models",
             ),
             hooks = ChatServerSchemaGeneratorHooks(),
             dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(objectMapper = objectMapper)
@@ -56,7 +57,7 @@ val graphQlDi = DI.Module("graphql") {
     bind<DataFetcherExceptionHandler>() with singleton { DefaultDataFetcherExceptionHandler(instance()) }
     bind<GraphQL>() with singleton { newGraphQL(instance()).defaultDataFetcherExceptionHandler(instance()).build() }
     bind<GraphQLRequestHandler>() with singleton { GraphQLRequestHandler(instance()) }
-    bind<GraphQLRequestParser<ApplicationRequest>>() with singleton { KtorGraphQLRequestParser(instance()) }
+    bind<GraphQLRequestParser<ApplicationRequest>>() with singleton { KtorGraphQLRequestParser(mapper = instance()) }
     bind<GraphQLContextFactory<AuthContext, ApplicationRequest>>() with singleton { KtorGraphQLContextFactory() }
     bind<GraphQLServer<ApplicationRequest>>() with singleton { KtorGraphQLServer(instance(), instance(), instance()) }
 }

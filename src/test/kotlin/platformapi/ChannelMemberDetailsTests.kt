@@ -6,8 +6,8 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import platformapi.models.toChannelMemberWrite
-import testutil.mockedChannelMemberWrite
+import models.toChannelMemberWrite
+import testutil.mockedChannelMember
 import testutil.serverTest
 
 class ChannelMemberDetailsTests {
@@ -21,11 +21,11 @@ class ChannelMemberDetailsTests {
                 val (_, user2) = createUser()
                 val (memberWrite1, memberRead1) = addMember(
                     channelId = channel!!.id,
-                    mockedChannelMemberWrite(userId = user1!!.id, role = ChannelMemberRole.admin)
+                    mockedChannelMember(userId = user1!!.id, role = ChannelMemberRole.admin)
                 )
                 val (memberWrite2, _) = addMember(
                     channelId = channel.id,
-                    mockedChannelMemberWrite(userId = user2!!.id, role = ChannelMemberRole.admin)
+                    mockedChannelMember(userId = user2!!.id, role = ChannelMemberRole.admin)
                 )
                 val (updatedMemberWrite, updatedMemberRead) = updateMember(
                     channelId = channel.id,
@@ -41,6 +41,7 @@ class ChannelMemberDetailsTests {
 
     @Nested
     inner class DeleteMemberTests {
+        // TODO(saibotma): Also test with same user in different channel as for client api test.
         @Test
         fun `deletes a member`() {
             serverTest {
@@ -49,11 +50,11 @@ class ChannelMemberDetailsTests {
                 val (_, user2) = createUser()
                 val (memberWrite1, _) = addMember(
                     channelId = channel!!.id,
-                    mockedChannelMemberWrite(userId = user1!!.id)
+                    mockedChannelMember(userId = user1!!.id)
                 )
                 val (memberWrite2, _) = addMember(
                     channelId = channel.id,
-                    mockedChannelMemberWrite(userId = user2!!.id)
+                    mockedChannelMember(userId = user2!!.id)
                 )
                 deleteMember(channelId = channel.id, userId = memberWrite1.userId)
                 with(getMembers().map { it.toChannelMemberWrite() }) {

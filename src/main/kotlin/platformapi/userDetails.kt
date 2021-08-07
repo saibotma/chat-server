@@ -9,9 +9,9 @@ import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.deleteUser
 import persistence.postgres.queries.getUser
 import persistence.postgres.queries.insertUser
-import platformapi.models.UserWritePayload
-import platformapi.models.toUser
-import platformapi.models.toUserRead
+import models.UserWritePayload
+import models.toUser
+import models.toUserRead
 import java.time.Instant.now
 
 suspend fun PipelineContext<Unit, ApplicationCall>.createUser(

@@ -1,15 +1,16 @@
 package persistence.postgres.mappings
 
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.User
 import org.jooq.JSON
 import org.jooq.JSONObjectNullStep
 import org.jooq.impl.DSL.jsonObject
 import persistence.jooq.value
+import models.DetailedUserReadPayload
 import dev.saibotma.persistence.postgres.jooq.tables.User as UserTable
 
-fun userToJson(user: UserTable): JSONObjectNullStep<JSON> {
+fun detailedUserReadToJson(user: UserTable): JSONObjectNullStep<JSON> {
     return jsonObject(
-        User::id.value(user.ID),
-        User::name.value(user.NAME)
+        DetailedUserReadPayload::id.value(user.ID),
+        DetailedUserReadPayload::name.value(user.NAME),
+        DetailedUserReadPayload::createdAt.value(user.CREATED_AT),
     )
 }
