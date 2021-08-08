@@ -5,11 +5,10 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import models.toChannelRead
-import testutil.PostgresTest
 import testutil.mockedChannelWrite
 import testutil.serverTest
 
-class ChannelDetailsTests : PostgresTest() {
+class ChannelDetailsTests {
     @Nested
     inner class UpdateChannelTests {
         @Test

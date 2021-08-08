@@ -11,7 +11,6 @@ import dev.saibotma.persistence.postgres.jooq.tables.references.MESSAGE
 import di.setupKodein
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import persistence.jooq.KotlinDslContext
 

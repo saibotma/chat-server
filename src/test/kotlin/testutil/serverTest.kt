@@ -20,16 +20,11 @@ import kotlinx.coroutines.runBlocking
 import models.*
 import module
 import org.jooq.DSLContext
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.kodein.di.*
 import org.kodein.di.ktor.closestDI
-import org.testcontainers.containers.PostgreSQLContainer
-import persistence.jooq.JacksonKotlinConverterProvider
-import persistence.jooq.KotlinDslContext
 import platformapi.PlatformApiConfig
 import java.util.*
-import javax.sql.DataSource
 
 fun serverTest(
     bindDependencies: DI.MainBuilder.() -> Unit = {},
