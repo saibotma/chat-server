@@ -35,7 +35,7 @@ application {
 }
 
 group = "dev.saibotma"
-version = "1.0-SNAPSHOT"
+version = "0.0.1"
 
 repositories {
     mavenCentral()
@@ -178,3 +178,16 @@ tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
     allInputsDeclared.set(true)
     outputs.cacheIf { true }
 }
+
+
+
+abstract class PrintVersionTask : DefaultTask() {
+    @TaskAction
+    fun printVersion() {
+        println(project.version)
+    }
+}
+
+// Create a task using the task type
+tasks.register<PrintVersionTask>("printVersion")
+
