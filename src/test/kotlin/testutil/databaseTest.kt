@@ -1,13 +1,13 @@
 package testutil
 
-import dev.saibotma.persistence.postgres.jooq.tables.Channel.Companion.CHANNEL
-import dev.saibotma.persistence.postgres.jooq.tables.User.Companion.USER
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.User
-import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL_MEMBER
-import dev.saibotma.persistence.postgres.jooq.tables.references.MESSAGE
+import persistence.jooq.tables.Channel.Companion.CHANNEL
+import persistence.jooq.tables.User.Companion.USER
+import persistence.jooq.tables.pojos.Channel
+import persistence.jooq.tables.pojos.ChannelMember
+import persistence.jooq.tables.pojos.Message
+import persistence.jooq.tables.pojos.User
+import persistence.jooq.tables.references.CHANNEL_MEMBER
+import persistence.jooq.tables.references.MESSAGE
 import di.setupKodein
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI

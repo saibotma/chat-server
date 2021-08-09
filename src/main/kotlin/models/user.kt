@@ -1,6 +1,6 @@
 package models
 
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.User
+import persistence.jooq.tables.pojos.User
 import java.time.Instant
 
 interface UserPayload {

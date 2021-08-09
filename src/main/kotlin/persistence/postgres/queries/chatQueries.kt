@@ -1,11 +1,11 @@
 package persistence.postgres.queries
 
 import clientapi.models.DetailedMessageReadPayload
-import dev.saibotma.persistence.postgres.jooq.tables.Message.Companion.MESSAGE
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
-import dev.saibotma.persistence.postgres.jooq.tables.records.ChannelMemberRecord
-import dev.saibotma.persistence.postgres.jooq.tables.records.MessageRecord
+import persistence.jooq.tables.Message.Companion.MESSAGE
+import persistence.jooq.tables.pojos.ChannelMember
+import persistence.jooq.tables.pojos.Message
+import persistence.jooq.tables.records.ChannelMemberRecord
+import persistence.jooq.tables.records.MessageRecord
 import org.jooq.*
 import org.jooq.impl.DSL.*
 import persistence.jooq.KotlinTransactionContext

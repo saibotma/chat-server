@@ -1,13 +1,13 @@
 package persistence.postgres.mappings
 
 import clientapi.models.DetailedMessageReadPayload
-import dev.saibotma.persistence.postgres.jooq.tables.User.Companion.USER
+import persistence.jooq.tables.User.Companion.USER
 import org.jooq.JSON
 import org.jooq.JSONObjectNullStep
 import org.jooq.impl.DSL.jsonObject
 import org.jooq.impl.DSL.select
 import persistence.jooq.value
-import dev.saibotma.persistence.postgres.jooq.tables.Message as MessageTable
+import persistence.jooq.tables.Message as MessageTable
 
 fun detailedMessageReadToJson(message: MessageTable): JSONObjectNullStep<JSON> {
     return jsonObject(

@@ -1,6 +1,6 @@
 package platformapi
 
-import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
+import persistence.jooq.enums.ChannelMemberRole
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe

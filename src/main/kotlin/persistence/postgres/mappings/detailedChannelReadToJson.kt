@@ -1,6 +1,6 @@
 package persistence.postgres.mappings
 
-import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL_MEMBER
+import persistence.jooq.tables.references.CHANNEL_MEMBER
 import models.DetailedChannelReadPayload
 import org.jooq.JSON
 import org.jooq.JSONObjectNullStep
@@ -8,7 +8,7 @@ import org.jooq.impl.DSL.jsonObject
 import org.jooq.impl.DSL.select
 import persistence.jooq.jsonArrayAggNoNull
 import persistence.jooq.value
-import dev.saibotma.persistence.postgres.jooq.tables.Channel as ChannelTable
+import persistence.jooq.tables.Channel as ChannelTable
 
 fun detailedChannelReadToJson(channel: ChannelTable): JSONObjectNullStep<JSON> {
     return jsonObject(

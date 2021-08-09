@@ -33,7 +33,7 @@ val graphQlDi = DI.Module("graphql") {
         }
         val config = SchemaGeneratorConfig(
             supportedPackages = listOf(
-                "persistence.postgres.jooq.tables.pojos",
+                "persistence.jooq.tables.pojos",
                 "clientapi.models",
                 "models",
             ),

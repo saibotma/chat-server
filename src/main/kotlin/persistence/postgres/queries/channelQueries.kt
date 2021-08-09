@@ -1,12 +1,12 @@
 package persistence.postgres.queries
 
-import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
-import dev.saibotma.persistence.postgres.jooq.tables.records.ChannelMemberRecord
-import dev.saibotma.persistence.postgres.jooq.tables.records.ChannelRecord
-import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL
-import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL_MEMBER
+import persistence.jooq.enums.ChannelMemberRole
+import persistence.jooq.tables.Channel.Companion.CHANNEL
+import persistence.jooq.tables.ChannelMember.Companion.CHANNEL_MEMBER
+import persistence.jooq.tables.pojos.Channel
+import persistence.jooq.tables.pojos.ChannelMember
+import persistence.jooq.tables.records.ChannelMemberRecord
+import persistence.jooq.tables.records.ChannelRecord
 import models.DetailedChannelReadPayload
 import org.jooq.*
 import org.jooq.impl.DSL

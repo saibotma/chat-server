@@ -1,6 +1,6 @@
 package models
 
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
+import persistence.jooq.tables.pojos.Channel
 import java.time.Instant
 import java.util.*
 

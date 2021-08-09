@@ -3,8 +3,8 @@ package clientapi.mutations
 import clientapi.ClientApiException
 import clientapi.models.MessageWritePayload
 import clientapi.resourceNotFound
-import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
+import persistence.jooq.enums.ChannelMemberRole
+import persistence.jooq.tables.pojos.Message
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize

@@ -1,8 +1,8 @@
 package persistence.postgres.queries
 
-import dev.saibotma.persistence.postgres.jooq.tables.User.Companion.USER
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.User
-import dev.saibotma.persistence.postgres.jooq.tables.records.UserRecord
+import persistence.jooq.tables.User.Companion.USER
+import persistence.jooq.tables.pojos.User
+import persistence.jooq.tables.records.UserRecord
 import persistence.jooq.KotlinTransactionContext
 
 fun KotlinTransactionContext.insertUser(user: User) {

@@ -1,7 +1,7 @@
 package models
 
-import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.ChannelMember
+import persistence.jooq.enums.ChannelMemberRole
+import persistence.jooq.tables.pojos.ChannelMember
 import java.time.Instant
 import java.util.*
 

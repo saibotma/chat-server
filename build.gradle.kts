@@ -22,6 +22,12 @@ val jacksonDataTypeJsr310Version = "2.12.4"
 val kotestVersion = "4.6.1"
 val junitJupiterVersion = "5.7.2"
 
+kotlin.sourceSets["main"].kotlin.srcDirs("src/main")
+kotlin.sourceSets["test"].kotlin.srcDirs("src/test")
+
+sourceSets["main"].resources.srcDirs("src/main/resources")
+sourceSets["test"].resources.srcDirs("src/test/resources")
+
 plugins {
     application
     kotlin("jvm") version "1.5.21"
@@ -113,7 +119,7 @@ jooq {
                             arrayOf(
                                 org.jooq.meta.jaxb.ForcedType()
                                     .withUserType("java.time.Instant")
-                                    .withConverter("app.appella.persistence.jooq.InstantConverter")
+                                    .withConverter("persistence.jooq.InstantConverter")
                                     // "\\s*" stands for multiple spaces
                                     .withIncludeTypes("timestamp\\s*with\\s*time\\s*zone")
                             )
@@ -127,7 +133,7 @@ jooq {
                         isPojosEqualsAndHashCode = true
                     }
                     target.apply {
-                        packageName = "dev.saibotma.persistence.postgres.jooq"
+                        packageName = "persistence.jooq"
                     }
                     strategy.name = "org.jooq.codegen.DefaultGeneratorStrategy"
                 }
@@ -147,6 +153,13 @@ flyway {
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+}
+
+configurations {
+    // We need to remove the logback-classic package
+    // To avoid: Multiple bindings were found on the class path
+    // From: http://www.slf4j.org/codes.html#multiple_bindings
+    runtime.get().exclude("ch.qos.logback", "logback-classic")
 }
 
 tasks.withType<Jar> {

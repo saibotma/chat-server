@@ -5,7 +5,7 @@ import org.jooq.JSONObjectNullStep
 import org.jooq.impl.DSL.jsonObject
 import persistence.jooq.value
 import models.DetailedUserReadPayload
-import dev.saibotma.persistence.postgres.jooq.tables.User as UserTable
+import persistence.jooq.tables.User as UserTable
 
 fun detailedUserReadToJson(user: UserTable): JSONObjectNullStep<JSON> {
     return jsonObject(

@@ -1,6 +1,6 @@
 package clientapi.models
 
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.Message
+import persistence.jooq.tables.pojos.Message
 import models.DetailedUserReadPayload
 import java.time.Instant
 import java.util.*

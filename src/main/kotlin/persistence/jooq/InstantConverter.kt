@@ -1,4 +1,4 @@
-package app.appella.persistence.jooq
+package persistence.jooq
 
 import org.jooq.Converter
 import java.time.Instant

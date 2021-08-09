@@ -2,7 +2,7 @@ package clientapi.mutations
 
 import clientapi.ClientApiException
 import clientapi.resourceNotFound
-import dev.saibotma.persistence.postgres.jooq.enums.ChannelMemberRole
+import persistence.jooq.enums.ChannelMemberRole
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize

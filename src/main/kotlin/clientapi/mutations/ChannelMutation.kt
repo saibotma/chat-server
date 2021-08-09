@@ -3,7 +3,7 @@ package clientapi.mutations
 import clientapi.AuthContext
 import clientapi.ClientApiException
 import clientapi.resourceNotFound
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.Channel
+import persistence.jooq.tables.pojos.Channel
 import models.DetailedChannelReadPayload
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
