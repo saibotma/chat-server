@@ -33,9 +33,9 @@ val graphQlDi = DI.Module("graphql") {
         }
         val config = SchemaGeneratorConfig(
             supportedPackages = listOf(
-                "dev.saibotma.persistence.postgres.jooq.tables.pojos",
-                "dev.saibotma.clientapi.models",
-                "dev.saibotma.models",
+                "persistence.postgres.jooq.tables.pojos",
+                "clientapi.models",
+                "models",
             ),
             hooks = ChatServerSchemaGeneratorHooks(),
             dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(objectMapper = objectMapper)

@@ -28,9 +28,7 @@ fun mockedUser(): UserWritePayload {
     return UserWritePayload(id = id, name = "name-$id")
 }
 
-fun ServerTestEnvironment.mockedAuthContext(userId: String): AuthContext {
-    return AuthContext(userId = userId, jwtToken = createUserToken(userId = userId).second!!.jwt)
-}
+fun mockedAuthContext(userId: String) = AuthContext(userId = userId)
 
 fun mockedMessage(text: String? = null, respondedMessageId: UUID? = null): MessageWritePayload {
     return MessageWritePayload(text = text, repliedMessageId = respondedMessageId)

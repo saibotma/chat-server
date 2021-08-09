@@ -20,11 +20,15 @@ import kotlinx.coroutines.runBlocking
 import models.*
 import module
 import org.jooq.DSLContext
+import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.kodein.di.*
 import org.kodein.di.ktor.closestDI
+import persistence.jooq.KotlinDslContext
 import platformapi.PlatformApiConfig
 import java.util.*
+
+class TestRollbackException : Exception()
 
 fun serverTest(
     bindDependencies: DI.MainBuilder.() -> Unit = {},
@@ -38,18 +42,20 @@ fun serverTest(
         }
     }) {
         val di = application.closestDI()
-        val database: DSLContext by application.closestDI().instance()
-        val environment = ServerTestEnvironment(this)
-        runCatching {
+        val database: DSLContext by di.instance()
+        try {
             database.transaction { config ->
-                subDI(di) {
-                    bind<DSLContext>(overrides = true) with singleton { DSL.using(config) }
-                    runBlocking { test(environment) }
-                }
-                throw Exception("Trigger rollback")
+                val kotlinDslContext: KotlinDslContext by di.instance()
+                kotlinDslContext.overrideDSLContext = DSL.using(config)
+                val environment = ServerTestEnvironment(this)
+                runBlocking { test(environment) }
+                throw TestRollbackException()
             }
+        } catch (e: TestRollbackException) {
+        } catch (e: DataAccessException) {
         }
     }
+
 }
 
 class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :

@@ -51,7 +51,7 @@ class MessageMutation(private val database: KotlinDslContext) {
         }
     }
 
-    suspend fun deleteMessage(context: AuthContext, id: UUID) {
+    suspend fun deleteMessage(context: AuthContext, id: UUID): Boolean {
         val userId = context.userId
         database.transaction {
             if (!isCreatorOfMessage(messageId = id, userId = userId)) {
@@ -59,5 +59,6 @@ class MessageMutation(private val database: KotlinDslContext) {
             }
             deleteMessage(id = id)
         }
+        return true
     }
 }

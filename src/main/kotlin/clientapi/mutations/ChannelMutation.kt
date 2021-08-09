@@ -46,12 +46,13 @@ class ChannelMutation(
     suspend fun deleteChannel(
         context: AuthContext,
         id: UUID
-    ) {
+    ): Boolean {
         val userId = context.userId
         database.transaction {
             if (!isAdminOfChannel(channelId = id, userId = userId)) throw ClientApiException.resourceNotFound()
             deleteChannel(id)
         }
+        return true
     }
 
     suspend fun upsertMember(
@@ -73,7 +74,7 @@ class ChannelMutation(
         context: AuthContext,
         channelId: UUID,
         userId: String,
-    ) {
+    ): Boolean {
         database.transaction {
             val channel = getChannel(channelId = channelId) ?: throw ClientApiException.resourceNotFound()
             if ((!isAdminOfChannel(channelId = channelId, userId = userId) && userId != context.userId)
@@ -83,5 +84,6 @@ class ChannelMutation(
             }
             deleteMember(channelId = channelId, userId = userId)
         }
+        return true
     }
 }

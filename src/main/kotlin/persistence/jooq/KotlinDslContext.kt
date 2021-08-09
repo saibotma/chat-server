@@ -12,6 +12,9 @@ import persistence.postgres.*
 import util.snakeToCamelCase
 
 class KotlinDslContext(private val dslContext: DSLContext) {
+    // Uses for overriding the dsl context during tests.
+    var overrideDSLContext: DSLContext? = null
+
     /**
      * Starts a transaction that gets executed using the IO dispatcher.
      */
@@ -21,7 +24,7 @@ class KotlinDslContext(private val dslContext: DSLContext) {
         block: suspend (KotlinTransactionContext).() -> T
     ): T = withContext(Dispatchers.IO) {
         try {
-            dslContext.transactionResult { config ->
+            (if (overrideDSLContext != null) overrideDSLContext!! else dslContext).transactionResult { config ->
                 val transactionDslContext = DSL.using(config)
                 if (isolationLevel != null) {
                     transactionDslContext.connection { it.transactionIsolation = isolationLevel }

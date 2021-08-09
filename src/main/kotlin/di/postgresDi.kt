@@ -53,5 +53,5 @@ val postgresDi = DI.Module("postgres") {
             configuration().set(converterProvider)
         }
     }
-    bind<KotlinDslContext>() with provider { KotlinDslContext(instance()) }
+    bind<KotlinDslContext>() with singleton { KotlinDslContext(instance()) }
 }

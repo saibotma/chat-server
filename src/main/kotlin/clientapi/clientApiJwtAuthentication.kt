@@ -2,7 +2,6 @@ package clientapi
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import dev.saibotma.persistence.postgres.jooq.tables.pojos.User
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import io.ktor.routing.*
@@ -27,9 +26,7 @@ fun Authentication.Configuration.installClientApiJwtAuthentication(
         )
         validate { credential ->
             val user = kotlinDslContext.transaction { getUser(credential.payload.subject) } ?: return@validate null
-            ClientApiJwtAuthenticationPrinciple(user = user)
+            AuthContext(userId = user.id!!)
         }
     }
 }
-
-data class ClientApiJwtAuthenticationPrinciple(val user: User) : Principal

@@ -10,7 +10,6 @@ import dev.saibotma.persistence.postgres.jooq.tables.references.CHANNEL_MEMBER
 import models.DetailedChannelReadPayload
 import org.jooq.*
 import org.jooq.impl.DSL
-import org.jooq.impl.DSL.select
 import persistence.jooq.KotlinTransactionContext
 import persistence.jooq.andIf
 import persistence.jooq.funAlias
@@ -18,6 +17,7 @@ import persistence.postgres.mappings.detailedChannelMemberReadToJson
 import persistence.postgres.mappings.detailedChannelReadToJson
 import models.ChannelMemberWritePayload
 import models.DetailedChannelMemberReadPayload
+import org.jooq.impl.DSL.*
 import java.time.Instant.now
 import java.util.*
 
@@ -136,7 +136,7 @@ fun KotlinTransactionContext.getChannelsOf(
 }
 
 fun KotlinTransactionContext.isMemberOfChannel(channelId: UUID, userId: String): Boolean {
-    return db.select(DSL.field(isMemberOfChannel(channelId = DSL.value(channelId), userId = userId)))
+    return db.select(field(isMemberOfChannel(channelId = value(channelId), userId = userId)))
         .fetchOneInto(Boolean::class.java) ?: false
 }
 
@@ -151,7 +151,7 @@ private fun KotlinTransactionContext.selectChannelsOf(
 }
 
 fun isMemberOfChannel(channelId: Field<UUID?>, userId: String): Condition {
-    return DSL.value(userId).`in`(selectUserIdsOfChannel(channelId = channelId))
+    return value(userId).`in`(selectUserIdsOfChannel(channelId = channelId))
 }
 
 private fun selectUserIdsOfChannel(channelId: Field<UUID?>): SelectConditionStep<Record1<String?>> {
