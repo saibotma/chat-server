@@ -23,8 +23,8 @@ class ChannelMutationTests {
         @Test
         fun `creates a channel and returns it`() {
             serverTest {
-                val (_, user1) = createUser()
-                val (_, user2) = createUser()
+                val (_, user1) = upsertUser()
+                val (_, user2) = upsertUser()
 
                 val context = mockedAuthContext(userId = user1!!.id)
                 val members = listOf(mockedChannelMember(user1.id), mockedChannelMember(user2!!.id))
@@ -56,7 +56,7 @@ class ChannelMutationTests {
                 val (_, channel) = createChannel(mockedChannelWrite(name = "Channel"))
                 // Add another channel to check that only the specified one gets updated
                 val (_, otherChannel) = createChannel(mockedChannelWrite(name = "Channel"))
-                val (_, admin) = createUser()
+                val (_, admin) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
@@ -76,7 +76,7 @@ class ChannelMutationTests {
         fun `returns an error when the user is not an admin of the channel`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.user)
@@ -100,7 +100,7 @@ class ChannelMutationTests {
             serverTest {
                 val (_, channel) = createChannel()
                 val (_, otherChannel) = createChannel()
-                val (_, admin) = createUser()
+                val (_, admin) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
@@ -120,7 +120,7 @@ class ChannelMutationTests {
         fun `returns an error when the user is not an admin of the channel`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.user)
@@ -143,8 +143,8 @@ class ChannelMutationTests {
         fun `adds a member and returns it when the user is an admin`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, admin) = createUser()
-                val (_, user) = createUser()
+                val (_, admin) = upsertUser()
+                val (_, user) = upsertUser()
                 val (adminMember, _) = addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
@@ -168,7 +168,7 @@ class ChannelMutationTests {
         fun `updates a member and returns it when the user is an admin and the member already exists`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, admin) = createUser()
+                val (_, admin) = upsertUser()
                 val (member, _) = addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
@@ -194,7 +194,7 @@ class ChannelMutationTests {
         fun `returns an error when the user is not an admin of the channel`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 val (member, _) = addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.user)
@@ -223,8 +223,8 @@ class ChannelMutationTests {
             serverTest {
                 val (_, channel) = createChannel()
                 val (_, otherChannel) = createChannel()
-                val (_, admin) = createUser()
-                val (_, otherAdmin) = createUser()
+                val (_, admin) = upsertUser()
+                val (_, otherAdmin) = upsertUser()
                 val (_, member1) = addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
@@ -254,7 +254,7 @@ class ChannelMutationTests {
         fun `removes a member when the user is the same as the removed member`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, admin) = createUser()
+                val (_, admin) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
@@ -275,8 +275,8 @@ class ChannelMutationTests {
         fun `returns an error when the user is not an admin or the removed member`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user1) = createUser()
-                val (_, user2) = createUser()
+                val (_, user1) = upsertUser()
+                val (_, user2) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = user1!!.id, role = ChannelMemberRole.user)
@@ -304,7 +304,7 @@ class ChannelMutationTests {
         fun `returns an error when the channel is managed`() {
             serverTest {
                 val (_, channel) = createChannel(mockedChannelWrite(isManaged = true))
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
 
                 val context = mockedAuthContext(userId = user.id)

@@ -8,20 +8,21 @@ import io.ktor.util.pipeline.*
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.deleteUser
 import persistence.postgres.queries.getUser
-import persistence.postgres.queries.insertUser
+import persistence.postgres.queries.upsertUser
 import models.UserWritePayload
 import models.toUser
 import models.toUserRead
 import java.time.Instant.now
 
-suspend fun PipelineContext<Unit, ApplicationCall>.createUser(
+suspend fun PipelineContext<Unit, ApplicationCall>.upsertUser(
     location: UserList.UserDetails,
     database: KotlinDslContext
 ) {
+    val userId = location.userId
     val user = call.receive<UserWritePayload>()
     val result = database.transaction {
-        insertUser(user.toUser(createdAt = now()))
-        getUser(user.id)
+        upsertUser(user.toUser(id = userId, createdAt = now()))
+        getUser(userId)
     }
     call.respond(HttpStatusCode.Created, result!!.toUserRead())
 }

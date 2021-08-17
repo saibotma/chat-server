@@ -39,7 +39,7 @@ class MessageQueryTests {
             serverTest {
                 val (_, channel) = createChannel()
                 val (_, otherChannel) = createChannel()
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
                 addMember(channelId = otherChannel!!.id, mockedChannelMember(userId = user.id))
 
@@ -73,8 +73,8 @@ class MessageQueryTests {
         fun `returns correct data`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user1) = createUser()
-                val (_, user2) = createUser()
+                val (_, user1) = upsertUser()
+                val (_, user2) = upsertUser()
                 addMember(channelId = channel!!.id, mockedChannelMember(userId = user1!!.id))
                 addMember(channelId = channel.id, mockedChannelMember(userId = user2!!.id))
 
@@ -119,7 +119,7 @@ class MessageQueryTests {
         fun `returns an error when the user is not a member of the channel`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 val error = shouldThrow<ClientApiException> {
                     messageQuery.messages(
                         context = mockedAuthContext(user!!.id),
@@ -136,7 +136,7 @@ class MessageQueryTests {
     private fun testReturnsMultipleMessages(queryByMessageId: Boolean) {
         serverTest {
             val (_, channel) = createChannel()
-            val (_, user) = createUser()
+            val (_, user) = upsertUser()
             addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
 
             val context = mockedAuthContext(userId = user.id)

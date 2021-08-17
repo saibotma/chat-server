@@ -17,7 +17,7 @@ class ClientApiJwtAuthenticationTests {
     @Test
     fun `grants access with a valid jwt`() {
         serverTest {
-            val (_, user) = createUser()
+            val (_, user) = upsertUser()
             val response = sendRequest(createUserToken(userId = user!!.id).second!!.jwt)
             response.status() shouldBe HttpStatusCode.OK
         }
@@ -37,7 +37,7 @@ class ClientApiJwtAuthenticationTests {
     @Test
     fun `returns an error when the token is expired`() {
         serverTest {
-            val (_, user) = createUser()
+            val (_, user) = upsertUser()
             val clientApiConfig: ClientApiConfig by di.instance()
             val response = sendRequest(
                 JWT.create().withSubject(user!!.id).withExpiresAt(Date.from(now().minusSeconds(60)))

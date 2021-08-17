@@ -1,7 +1,7 @@
 package platformapi
 
 import persistence.jooq.enums.ChannelMemberRole
-import error.ApiException
+import error.PlatformApiException
 import error.managedChannelHasAdmin
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
@@ -23,7 +23,7 @@ class ChannelMemberListTests {
         fun `adds a user to a channel and returns it`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 val (write, read) = addMember(
                     channelId = channel!!.id,
                     member = mockedChannelMember(userId = user!!.id)
@@ -42,13 +42,13 @@ class ChannelMemberListTests {
         fun `returns an error when a managed channel has an admin`() {
             serverTest {
                 val (_, channel) = createChannel(mockedChannelWrite(isManaged = true))
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
                     member = mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.admin)
                 ) { _, _ ->
                     status() shouldBe HttpStatusCode.BadRequest
-                    asApiError() shouldBe ApiException.managedChannelHasAdmin().error
+                    asApiError() shouldBe PlatformApiException.managedChannelHasAdmin().error
                 }
             }
         }
@@ -60,9 +60,9 @@ class ChannelMemberListTests {
         fun `replaces all members of a channel`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user1) = createUser()
-                val (_, user2) = createUser()
-                val (_, user3) = createUser()
+                val (_, user1) = upsertUser()
+                val (_, user2) = upsertUser()
+                val (_, user3) = upsertUser()
                 addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user1!!.id))
                 addMember(
                     channelId = channel.id,
@@ -86,13 +86,13 @@ class ChannelMemberListTests {
         fun `returns an error when a managed channel has an admin`() {
             serverTest {
                 val (_, channel) = createChannel(mockedChannelWrite(isManaged = true))
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 setMembers(
                     channelId = channel!!.id,
                     members = listOf(mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.admin))
                 ) { _, _ ->
                     status() shouldBe HttpStatusCode.BadRequest
-                    asApiError() shouldBe ApiException.managedChannelHasAdmin().error
+                    asApiError() shouldBe PlatformApiException.managedChannelHasAdmin().error
                 }
             }
         }

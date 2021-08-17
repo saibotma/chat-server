@@ -20,7 +20,7 @@ class UserTokenListTest {
         fun `returns a user token`() {
             serverTest {
                 val jwtSecret = di.direct.instance<ClientApiConfig>().jwtSecret
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 val (_, token) = createUserToken(userId = user!!.id)
 
                 with(JWT.decode(token!!.jwt)) {

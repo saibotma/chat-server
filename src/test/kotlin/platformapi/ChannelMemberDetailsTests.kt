@@ -17,8 +17,8 @@ class ChannelMemberDetailsTests {
         fun `updates a member and returns it`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user1) = createUser()
-                val (_, user2) = createUser()
+                val (_, user1) = upsertUser()
+                val (_, user2) = upsertUser()
                 val (memberWrite1, memberRead1) = addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = user1!!.id, role = ChannelMemberRole.admin)
@@ -46,8 +46,8 @@ class ChannelMemberDetailsTests {
         fun `deletes a member`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user1) = createUser()
-                val (_, user2) = createUser()
+                val (_, user1) = upsertUser()
+                val (_, user2) = upsertUser()
                 val (memberWrite1, _) = addMember(
                     channelId = channel!!.id,
                     mockedChannelMember(userId = user1!!.id)

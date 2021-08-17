@@ -16,7 +16,7 @@ class GraphQLInstallationTests {
     fun `is correctly installed`() {
         serverTest {
             val objectMapper = jacksonObjectMapper()
-            val (_, user) = createUser()
+            val (_, user) = upsertUser()
             val (_, channel) = createChannel()
             addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
             val response = testApplicationEngine.handleRequest(HttpMethod.Post, "/client/graphql") {

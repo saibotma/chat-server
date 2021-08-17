@@ -5,8 +5,11 @@ import persistence.jooq.tables.pojos.User
 import persistence.jooq.tables.records.UserRecord
 import persistence.jooq.KotlinTransactionContext
 
-fun KotlinTransactionContext.insertUser(user: User) {
-    db.insertInto(USER).set(UserRecord().apply { from(user) }).execute()
+fun KotlinTransactionContext.upsertUser(user: User) {
+    db.insertInto(USER).set(UserRecord().apply { from(user) })
+        .onDuplicateKeyUpdate()
+        .set(USER.NAME, user.name)
+        .execute()
 }
 
 fun KotlinTransactionContext.deleteUser(userId: String) {
