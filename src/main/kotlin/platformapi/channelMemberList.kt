@@ -1,7 +1,7 @@
 package platformapi
 
 import persistence.jooq.enums.ChannelMemberRole
-import error.ApiException
+import error.PlatformApiException
 import error.managedChannelHasAdmin
 import error.resourceNotFound
 import io.ktor.application.*
@@ -23,9 +23,9 @@ suspend fun PipelineContext<Unit, ApplicationCall>.addMember(
     val member = call.receive<ChannelMemberWritePayload>()
     val channelId = location.channelDetails.channelId
     val result = database.transaction {
-        val channel = getChannel(channelId = channelId) ?: throw ApiException.resourceNotFound()
+        val channel = getChannel(channelId = channelId) ?: throw PlatformApiException.resourceNotFound()
         if (channel.isManaged!! && member.role == ChannelMemberRole.admin) {
-            throw ApiException.managedChannelHasAdmin()
+            throw PlatformApiException.managedChannelHasAdmin()
         }
 
         insertMember(member.toChannelMember(channelId = channelId, addedAt = now()))
@@ -41,9 +41,9 @@ suspend fun PipelineContext<Unit, ApplicationCall>.updateMembers(
     val channelId = location.channelDetails.channelId
     val members = call.receive<Array<ChannelMemberWritePayload>>()
     val result = database.transaction {
-        val channel = getChannel(channelId = channelId) ?: throw ApiException.resourceNotFound()
+        val channel = getChannel(channelId = channelId) ?: throw PlatformApiException.resourceNotFound()
         if (channel.isManaged!! && members.any { it.role == ChannelMemberRole.admin }) {
-            throw ApiException.managedChannelHasAdmin()
+            throw PlatformApiException.managedChannelHasAdmin()
         }
 
         val currentMembers = getMembersOf(channelId).map { it.toChannelMemberWrite() }

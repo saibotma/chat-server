@@ -16,8 +16,8 @@ class ChannelQueryTests {
             serverTest {
                 val (_, channel1) = createChannel()
                 val (_, channel2) = createChannel()
-                val (_, user1) = createUser()
-                val (_, user2) = createUser()
+                val (_, user1) = upsertUser()
+                val (_, user2) = upsertUser()
 
                 val (_, member1) = addMember(channelId = channel1!!.id, mockedChannelMember(userId = user1!!.id))
                 val (_, member2) = addMember(channelId = channel1.id, mockedChannelMember(userId = user2!!.id))

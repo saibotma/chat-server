@@ -9,6 +9,8 @@ import org.kodein.di.instance
 import testutil.ServerTestEnvironment
 import testutil.mockedUser
 import testutil.serverTest
+import java.util.*
+import java.util.UUID.randomUUID
 
 class PlatformApiAccessTokenAuthentication {
     @Test
@@ -29,8 +31,9 @@ class PlatformApiAccessTokenAuthentication {
     }
 
     private fun ServerTestEnvironment.sendRequest(token: String): TestApplicationResponse {
+        val userId = randomUUID()
         val user = mockedUser()
-        return testApplicationEngine.handleRequest(HttpMethod.Put, "/platform/users/${user.id}") {
+        return testApplicationEngine.handleRequest(HttpMethod.Put, "/platform/users/$userId") {
             val objectMapper = jacksonObjectMapper()
             addHeader("Content-Type", "application/json")
             addHeader("X-Chat-Server-Platform-Api-Access-Token", token)

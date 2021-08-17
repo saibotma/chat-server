@@ -4,17 +4,16 @@ import persistence.jooq.tables.pojos.User
 import java.time.Instant
 
 interface UserPayload {
-    val id: String
     val name: String?
 }
 
-data class UserWritePayload(override val id: String, override val name: String?) : UserPayload
-data class UserReadPayload(override val id: String, override val name: String?, val createdAt: Instant) : UserPayload
+data class UserWritePayload(override val name: String?) : UserPayload
+data class UserReadPayload(val id: String, override val name: String?, val createdAt: Instant) : UserPayload
 
-data class DetailedUserReadPayload(override val id: String, override val name: String?, val createdAt: Instant) :
+data class DetailedUserReadPayload(val id: String, override val name: String?, val createdAt: Instant) :
     UserPayload
 
-fun UserWritePayload.toUser(createdAt: Instant): User {
+fun UserWritePayload.toUser(id: String, createdAt: Instant): User {
     return User(id = id, name = name, createdAt = createdAt)
 }
 

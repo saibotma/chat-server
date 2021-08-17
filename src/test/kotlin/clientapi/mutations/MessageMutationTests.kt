@@ -25,7 +25,7 @@ class MessageMutationTests {
         fun `sends a message and returns it`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user!!.id))
 
                 val context = mockedAuthContext(userId = user.id)
@@ -50,7 +50,7 @@ class MessageMutationTests {
     fun `returns an error when the user is not a member of the channel`() {
         serverTest {
             val (_, channel) = createChannel()
-            val (_, user) = createUser()
+            val (_, user) = upsertUser()
 
             val context = mockedAuthContext(userId = user!!.id)
             val error = shouldThrow<ClientApiException> {
@@ -72,7 +72,7 @@ class MessageMutationTests {
         fun `edits a message and returns it`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user!!.id))
 
                 val context = mockedAuthContext(userId = user.id)
@@ -107,8 +107,8 @@ class MessageMutationTests {
         fun `returns an error when the user is not the creator of the message`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user1) = createUser()
-                val (_, user2) = createUser()
+                val (_, user1) = upsertUser()
+                val (_, user2) = upsertUser()
                 // Give him admin permissions to make sure that also not admins can edit messages of others.
                 addMember(
                     channelId = channel!!.id,
@@ -145,7 +145,7 @@ class MessageMutationTests {
         fun `deletes a message`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user) = createUser()
+                val (_, user) = upsertUser()
                 addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user!!.id))
 
                 val context = mockedAuthContext(userId = user.id)
@@ -173,8 +173,8 @@ class MessageMutationTests {
         fun `returns an error when the user is not the creator of the message`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user1) = createUser()
-                val (_, user2) = createUser()
+                val (_, user1) = upsertUser()
+                val (_, user2) = upsertUser()
                 // Give him admin permissions to make sure that also not admins can edit messages of others.
                 addMember(
                     channelId = channel!!.id,

@@ -7,7 +7,6 @@ import models.ChannelMemberWritePayload
 import models.ChannelWritePayload
 import models.UserWritePayload
 import java.util.*
-import java.util.UUID.randomUUID
 
 fun mockedChannelWrite(name: String? = null, isManaged: Boolean = false): ChannelWritePayload {
     return ChannelWritePayload(
@@ -23,9 +22,8 @@ fun mockedChannelMember(
     return ChannelMemberWritePayload(userId = userId, role = role)
 }
 
-fun mockedUser(): UserWritePayload {
-    val id = randomUUID().toString()
-    return UserWritePayload(id = id, name = "name-$id")
+fun mockedUser(name: String = "name"): UserWritePayload {
+    return UserWritePayload(name = name)
 }
 
 fun mockedAuthContext(userId: String) = AuthContext(userId = userId)

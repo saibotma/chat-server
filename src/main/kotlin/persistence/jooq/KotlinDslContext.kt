@@ -53,11 +53,11 @@ class KotlinDslContext(private val dslContext: DSLContext) {
 private fun handleGenericPostgresError(e: PSQLException): Nothing {
     with(e) {
         when {
-            isUniqueViolation() -> throw ApiException.duplicate(
+            isUniqueViolation() -> throw PlatformApiException.duplicate(
                 serverErrorMessage?.detail?.extractKeyColumnNames()!!.first().snakeToCamelCase(),
                 serverErrorMessage?.detail?.extractKeyColumnValues()!!.first()
             )
-            isForeignKeyViolation() -> throw ApiException.dependencyNotFound(
+            isForeignKeyViolation() -> throw PlatformApiException.dependencyNotFound(
                 serverErrorMessage?.detail?.extractKeyColumnNames()!!.first().snakeToCamelCase(),
                 serverErrorMessage?.detail?.extractKeyColumnValues()!!.first()
             )

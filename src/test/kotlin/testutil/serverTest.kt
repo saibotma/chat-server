@@ -7,8 +7,8 @@ import clientapi.queries.MessageQuery
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import di.setupKodein
-import error.ApiError
-import error.ApiException
+import error.PlatformApiError
+import error.PlatformApiException
 import error.duplicate
 import error.resourceNotFound
 import io.kotest.matchers.collections.shouldBeIn
@@ -27,6 +27,7 @@ import org.kodein.di.ktor.closestDI
 import persistence.jooq.KotlinDslContext
 import platformapi.PlatformApiConfig
 import java.util.*
+import java.util.UUID.randomUUID
 
 class TestRollbackException : Exception()
 
@@ -116,11 +117,12 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
         return put(members, "/platform/channels/$channelId/members", response)
     }
 
-    fun createUser(
+    fun upsertUser(
+        id: String = randomUUID().toString(),
         user: UserWritePayload = mockedUser(),
         response: TestApplicationResponse.(UserWritePayload, UserReadPayload?) -> Unit = { _, _ -> ensureSuccess() }
     ): Pair<UserWritePayload, UserReadPayload?> {
-        return put(user, "/platform/users/${user.id}", response)
+        return put(user, "/platform/users/$id", response)
     }
 
     fun createUserToken(
@@ -216,7 +218,7 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
         duplicatePropertyName: String,
         duplicatePropertyValue: String
     ) {
-        val expectedError = ApiException.duplicate(duplicatePropertyName, duplicatePropertyValue).error
+        val expectedError = PlatformApiException.duplicate(duplicatePropertyName, duplicatePropertyValue).error
         asApiError() shouldBe expectedError
 
         status() shouldBe HttpStatusCode.BadRequest
@@ -228,11 +230,11 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
     }
 
     fun TestApplicationResponse.ensureResourceNotFound() {
-        asApiError() shouldBe ApiException.resourceNotFound().error
+        asApiError() shouldBe PlatformApiException.resourceNotFound().error
         status() shouldBe HttpStatusCode.NotFound
     }
 
-    fun TestApplicationResponse.asApiError(): ApiError {
+    fun TestApplicationResponse.asApiError(): PlatformApiError {
         return objectMapper.readValue(content!!)
     }
 

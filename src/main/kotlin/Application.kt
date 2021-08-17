@@ -1,7 +1,7 @@
 import clientapi.ClientApiConfig
 import clientapi.installClientApi
 import clientapi.installClientApiJwtAuthentication
-import error.ApiException
+import error.PlatformApiException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.application.*
@@ -136,7 +136,7 @@ private fun Application.installFeatures(bindDependencies: DI.MainBuilder.() -> U
                 is com.fasterxml.jackson.core.JsonParseException -> {
                     call.respond(HttpStatusCode.BadRequest, "Json body could not be parsed.\n${t.originalMessage}")
                 }
-                is ApiException -> {
+                is PlatformApiException -> {
                     call.respond(t.statusCode, t.error)
                 }
                 else -> {
