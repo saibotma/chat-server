@@ -6,8 +6,5 @@ import io.ktor.auth.*
 import io.ktor.request.*
 
 class KtorGraphQLContextFactory : GraphQLContextFactory<AuthContext, ApplicationRequest> {
-
-    override suspend fun generateContext(request: ApplicationRequest): AuthContext {
-        return request.call.principal()!!
-    }
+    override suspend fun generateContext(request: ApplicationRequest): AuthContext? = request.call.principal()
 }

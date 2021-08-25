@@ -1,9 +1,10 @@
 import clientapi.ClientApiConfig
 import clientapi.installClientApi
 import clientapi.installClientApiJwtAuthentication
-import error.PlatformApiException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import di.setupKodein
+import error.PlatformApiException
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -12,7 +13,6 @@ import io.ktor.jackson.*
 import io.ktor.locations.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import di.setupKodein
 import logging.Logging
 import org.flywaydb.core.Flyway
 import org.kodein.di.DI
