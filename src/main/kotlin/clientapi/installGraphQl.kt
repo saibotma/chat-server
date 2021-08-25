@@ -20,8 +20,8 @@ fun Route.installClientApi() {
     val objectMapper: ObjectMapper by closestDI().instance()
 
     // To get the GraphQL schema comment this back in and
-    // remove the "appWriteAuthenticate" block
-    // installGraphQlPlayground()
+    // remove the authentication block.
+    // installGraphQlPlayGround()
 
     clientApiJwtAuthenticate {
         post("/graphql") {
@@ -39,8 +39,14 @@ fun Route.installClientApi() {
     }
 }
 
-private fun Routing.installGraphQlPlayground() {
-    static("/graphql") {
-        resource("/", "graphql-playground.html")
+private fun Route.installGraphQlPlayground() {
+    get("playground") {
+        this.call.respondText(buildPlaygroundHtml("/client/graphql", "subscriptions"), ContentType.Text.Html)
     }
 }
+
+private fun buildPlaygroundHtml(graphQLEndpoint: String, subscriptionsEndpoint: String) =
+    Application::class.java.classLoader.getResource("graphql-playground.html")?.readText()
+        ?.replace("\${graphQLEndpoint}", graphQLEndpoint)
+        ?.replace("\${subscriptionsEndpoint}", subscriptionsEndpoint)
+        ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")

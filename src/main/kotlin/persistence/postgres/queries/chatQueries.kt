@@ -50,7 +50,8 @@ fun KotlinTransactionContext.getMessagesOf(
                                 .asField()
                         )
                     }
-                    .orderBy(if (limit < 0) MESSAGE.CREATED_AT.desc() else MESSAGE.CREATED_AT.asc())
+                    // Fallback ordering by id to ensure deterministic results.
+                    .orderBy(if (limit < 0) MESSAGE.CREATED_AT.desc() else MESSAGE.CREATED_AT.asc(), MESSAGE.ID)
                     .limit(kotlin.math.abs(limit))
             ))
             .orderBy(outerMessage.CREATED_AT.asc())
