@@ -1,5 +1,6 @@
 package models
 
+import clientapi.models.DetailedMessageReadPayload
 import persistence.jooq.tables.pojos.Channel
 import java.time.Instant
 import java.util.*
@@ -23,6 +24,7 @@ data class DetailedChannelReadPayload(
     override val name: String?,
     override val isManaged: Boolean,
     val members: List<DetailedChannelMemberReadPayload>,
+    val messages: List<DetailedMessageReadPayload>,
     val createdAt: Instant,
 ) : ChannelPayload
 
