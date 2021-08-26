@@ -52,8 +52,8 @@ fun serverTest(
                 runBlocking { test(environment) }
                 throw TestRollbackException()
             }
-        } catch (e: TestRollbackException) {
         } catch (e: DataAccessException) {
+            if (e.cause !is TestRollbackException) throw e
         }
     }
 

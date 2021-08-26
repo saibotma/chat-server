@@ -35,6 +35,16 @@ class MessageQueryTests {
         }
 
         @Test
+        fun `returns the latest messages`() {
+            testReturnsFirstOrLatest(shouldReturnLatest = true)
+        }
+
+        @Test
+        fun `returns the first messages`() {
+            testReturnsFirstOrLatest(shouldReturnLatest = false)
+        }
+
+        @Test
         fun `only returns messages of the specified channel`() {
             serverTest {
                 val (_, channel) = createChannel()
@@ -164,6 +174,40 @@ class MessageQueryTests {
             )
 
             val expectedDetailedMessages = listOf(message2, message3, message4)
+            detailedMessages shouldContainExactly expectedDetailedMessages
+        }
+    }
+
+    private fun testReturnsFirstOrLatest(shouldReturnLatest: Boolean) {
+        serverTest {
+            val (_, channel) = createChannel()
+            val (_, user) = upsertUser()
+            addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
+
+            val context = mockedAuthContext(userId = user.id)
+            suspend fun sendMessage(text: String): DetailedMessageReadPayload {
+                return messageMutation.sendMessage(
+                    context = context,
+                    channelId = channel.id,
+                    message = mockedMessage(text = text)
+                )
+            }
+
+            val message1 = sendMessage("1")
+            val message2 = sendMessage("2")
+            val message3 = sendMessage("3")
+
+            val detailedMessages = messageQuery.messages(
+                context = context,
+                channelId = channel.id,
+                byDateTime = null,
+                byMessageId = null,
+                previousLimit = if (shouldReturnLatest) 2 else 0,
+                nextLimit = if (shouldReturnLatest) 0 else 2,
+            )
+
+            val expectedDetailedMessages =
+                if (shouldReturnLatest) listOf(message2, message3) else listOf(message1, message2)
             detailedMessages shouldContainExactly expectedDetailedMessages
         }
     }
