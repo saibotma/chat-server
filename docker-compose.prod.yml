@@ -1,7 +1,7 @@
 version: '3'
 services:
   api:
-    image: "saibotma/chat-server:0.0.7"
+    image: "saibotma/chat-server:0.0.8"
     # The env file is just used for running the production environment on on a local development system
     env_file:
       - .env

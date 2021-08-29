@@ -43,7 +43,7 @@ application {
 }
 
 group = "dev.saibotma"
-version = "0.0.7"
+version = "0.0.8"
 
 repositories {
     mavenCentral()
