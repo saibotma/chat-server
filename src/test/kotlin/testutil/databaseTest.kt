@@ -2,10 +2,6 @@ package testutil
 
 import persistence.jooq.tables.Channel.Companion.CHANNEL
 import persistence.jooq.tables.User.Companion.USER
-import persistence.jooq.tables.pojos.Channel
-import persistence.jooq.tables.pojos.ChannelMember
-import persistence.jooq.tables.pojos.Message
-import persistence.jooq.tables.pojos.User
 import persistence.jooq.tables.references.CHANNEL_MEMBER
 import persistence.jooq.tables.references.MESSAGE
 import di.setupKodein
@@ -13,6 +9,8 @@ import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.instance
 import persistence.jooq.KotlinDslContext
+import persistence.jooq.tables.pojos.*
+import persistence.jooq.tables.references.FIREBASE_PUSH_TOKEN
 
 fun databaseTest(
     bindDependencies: DI.MainBuilder.() -> Unit = {},
@@ -52,6 +50,12 @@ open class DatabaseTestEnvironment(private val di: DI) {
     suspend fun getMessages(): List<Message> {
         return database.transaction {
             db.selectFrom(MESSAGE).fetchInto(Message::class.java)
+        }
+    }
+
+    suspend fun getFirebasePushTokens(): List<FirebasePushToken> {
+        return database.transaction {
+            db.selectFrom(FIREBASE_PUSH_TOKEN).fetchInto(FirebasePushToken::class.java)
         }
     }
 }
