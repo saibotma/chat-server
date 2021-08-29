@@ -14,6 +14,7 @@ services:
       - POSTGRES_DB
       - PLATFORM_API_ACCESS_TOKEN
       - CLIENT_API_JWT_SECRET
+      - FIREBASE_CREDENTIALS
     restart: "unless-stopped"
     ports:
       - "127.0.0.1:${KTOR_DEPLOYMENT_PORT}:${KTOR_DEPLOYMENT_PORT}"
