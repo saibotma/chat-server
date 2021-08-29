@@ -3,6 +3,7 @@ package di
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseOptions
 import io.ktor.config.*
+import io.ktor.util.*
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -12,6 +13,7 @@ import push.PushNotificationSender
 import push.PushService
 import util.firebaseCredentials
 import java.nio.charset.StandardCharsets
+import java.util.*
 
 val pushDi = DI.Module("push") {
     bind<PushNotificationSender>() with singleton { PushNotificationSender(instance()) }
@@ -20,7 +22,9 @@ val pushDi = DI.Module("push") {
     bind<FirebaseOptions>() with singleton {
         val config: HoconApplicationConfig by di.instance()
         val credentials = GoogleCredentials.fromStream(
-            config.firebaseCredentials.trimIndent().byteInputStream(StandardCharsets.UTF_8)
+            String(Base64.getDecoder().decode(config.firebaseCredentials))
+                .trimIndent()
+                .byteInputStream(StandardCharsets.UTF_8)
         )
 
         FirebaseOptions.Builder().setCredentials(credentials).build()
