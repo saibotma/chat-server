@@ -3,6 +3,7 @@ package di
 import clientapi.AuthContext
 import clientapi.mutations.ChannelMutation
 import clientapi.mutations.MessageMutation
+import clientapi.mutations.PushMutation
 import clientapi.queries.ChannelQuery
 import clientapi.queries.MessageQuery
 import com.expediagroup.graphql.generator.SchemaGeneratorConfig
@@ -26,7 +27,8 @@ val graphQlDi = DI.Module("graphql") {
     bind<ChannelQuery>() with singleton { ChannelQuery(instance()) }
     bind<MessageQuery>() with singleton { MessageQuery(instance()) }
     bind<ChannelMutation>() with singleton { ChannelMutation(instance()) }
-    bind<MessageMutation>() with singleton { MessageMutation(instance()) }
+    bind<MessageMutation>() with singleton { MessageMutation(instance(), instance()) }
+    bind<PushMutation>() with singleton { PushMutation(instance()) }
     bind<GraphQLSchema>() with singleton {
         val objectMapper = jacksonObjectMapper().apply {
             registerModule(JavaTimeModule())
@@ -49,6 +51,7 @@ val graphQlDi = DI.Module("graphql") {
         val mutations = listOf(
             instance<ChannelMutation>(),
             instance<MessageMutation>(),
+            instance<PushMutation>(),
         ).map { TopLevelObject(it) }
 
         toSchema(config, queries, mutations)

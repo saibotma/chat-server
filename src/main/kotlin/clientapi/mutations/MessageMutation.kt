@@ -8,18 +8,19 @@ import clientapi.models.toMessage
 import clientapi.resourceNotFound
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
+import push.PushService
 import java.time.Instant.now
 import java.util.*
 import java.util.UUID.randomUUID
 
-class MessageMutation(private val database: KotlinDslContext) {
+class MessageMutation(private val database: KotlinDslContext, val pushService: PushService) {
     suspend fun sendMessage(
         context: AuthContext,
         channelId: UUID,
         message: MessageWritePayload,
     ): DetailedMessageReadPayload {
         val userId = context.userId
-        return database.transaction {
+        val result = database.transaction {
             if (!isMemberOfChannel(channelId = channelId, userId = userId)) {
                 throw ClientApiException.resourceNotFound()
             }
@@ -27,13 +28,15 @@ class MessageMutation(private val database: KotlinDslContext) {
             insertMessage(
                 message.toMessage(
                     id = id,
-                    creatorUserId = context.userId,
+                    creatorUserId = userId,
                     channelId = channelId,
                     createdAt = now(),
                 )
             )
             getMessage(id)!!
         }
+        pushService.sendPushNotificationForNewMessage(channelId = channelId, creatorId = userId, message = message)
+        return result
     }
 
     suspend fun editMessage(

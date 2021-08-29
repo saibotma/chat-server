@@ -2,6 +2,7 @@ package testutil
 
 import clientapi.mutations.ChannelMutation
 import clientapi.mutations.MessageMutation
+import clientapi.mutations.PushMutation
 import clientapi.queries.ChannelQuery
 import clientapi.queries.MessageQuery
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -68,6 +69,7 @@ class ServerTestEnvironment(val testApplicationEngine: TestApplicationEngine) :
     val messageQuery: MessageQuery by di.instance()
     val channelMutation: ChannelMutation by di.instance()
     val messageMutation: MessageMutation by di.instance()
+    val pushMutation: PushMutation by di.instance()
 
     fun createChannel(
         channel: ChannelWritePayload = mockedChannelWrite(),
