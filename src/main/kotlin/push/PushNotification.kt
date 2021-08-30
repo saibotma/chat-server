@@ -10,11 +10,16 @@ sealed class PushNotification(
 ) {
     sealed class Channel(creatorName: String, channelName: String?, message: String, channelId: UUID) :
         PushNotification(
-            title = "$creatorName${if (channelName != null) "@ $channelName" else ""}",
+            title = "$creatorName${if (channelName != null) " @ $channelName" else ""}",
             message = message,
             data = mapOf("type" to "channel", "channelId" to channelId)
         ) {
-        data class NewMessage(val creatorName: String, val channelName: String?, val text: String, val channelId: UUID) :
+        data class NewMessage(
+            val creatorName: String,
+            val channelName: String?,
+            val text: String,
+            val channelId: UUID
+        ) :
             Channel(
                 creatorName = creatorName,
                 channelName = channelName,
