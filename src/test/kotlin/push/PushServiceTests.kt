@@ -106,11 +106,12 @@ class PushServiceTests {
     ) {
         serverTest(
             bindDependencies = {
-                bind<PushNotificationSender>(overrides = true) with singleton {
-                    mockedPushNotificationSender(onNotification)
+                bind<Optional<PushNotificationSender>>(overrides = true) with singleton {
+                    Optional.of(mockedPushNotificationSender(onNotification))
                 }
-                bind<PushService>(overrides = true) with singleton {
-                    PushService(instance(), instance(), sendNotificationsBlocking = true)
+                bind<Optional<PushService>>(overrides = true) with singleton {
+                    val pushNotificationSender: Optional<PushNotificationSender> by di.instance()
+                    Optional.of(PushService(instance(), pushNotificationSender.get(), sendNotificationsBlocking = true))
                 }
             },
             test = test,

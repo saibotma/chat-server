@@ -13,7 +13,7 @@ import java.time.Instant.now
 import java.util.*
 import java.util.UUID.randomUUID
 
-class MessageMutation(private val database: KotlinDslContext, val pushService: PushService) {
+class MessageMutation(private val database: KotlinDslContext, private val pushService: Optional<PushService>) {
     suspend fun sendMessage(
         context: AuthContext,
         channelId: UUID,
@@ -35,7 +35,10 @@ class MessageMutation(private val database: KotlinDslContext, val pushService: P
             )
             getMessage(id)!!
         }
-        pushService.sendPushNotificationForNewMessage(channelId = channelId, creatorId = userId, message = message)
+        if (pushService.isPresent) {
+            pushService.get()
+                .sendPushNotificationForNewMessage(channelId = channelId, creatorId = userId, message = message)
+        }
         return result
     }
 

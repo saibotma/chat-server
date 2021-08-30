@@ -3,11 +3,11 @@ package testutil
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
-import persistence.postgres.PostgresConfig
 import push.FirebaseInitializer
 import push.PushNotificationSender
+import java.util.*
 
 fun DI.MainBuilder.setupTestDependencies() {
-    bind<FirebaseInitializer>(overrides = true) with singleton { mockedFirebaseInitializer() }
-    bind<PushNotificationSender>(overrides = true) with singleton { mockedPushNotificationSender() }
+    bind<Optional<FirebaseInitializer>>(overrides = true) with singleton { Optional.of(mockedFirebaseInitializer()) }
+    bind<Optional<PushNotificationSender>>(overrides = true) with singleton { Optional.of(mockedPushNotificationSender()) }
 }

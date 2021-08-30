@@ -23,5 +23,5 @@ val HoconApplicationConfig.platformApiAccessToken: String
 val HoconApplicationConfig.clientApiJwtSecret: String
     get() = property("clientApi.jwtSecret").getString()
 
-val HoconApplicationConfig.firebaseCredentials: String
-    get() = property("firebase.credentials").getString()
+val HoconApplicationConfig.firebaseCredentials: String?
+    get() = propertyOrNull("firebase.credentials")?.getString()

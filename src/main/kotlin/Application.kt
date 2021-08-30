@@ -37,8 +37,8 @@ fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupKode
     val flyway: Flyway by closestDI().instance()
     flyway.migrate()
 
-    val firebaseInitializer: FirebaseInitializer by closestDI().instance()
-    firebaseInitializer.init()
+    val firebaseInitializer: Optional<FirebaseInitializer> by closestDI().instance()
+    if (firebaseInitializer.isPresent) firebaseInitializer.get().init()
 
     routing {
         route("/platform") {
