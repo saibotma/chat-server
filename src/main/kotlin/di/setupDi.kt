@@ -7,4 +7,5 @@ fun DI.MainBuilder.setupKodein() {
     import(utilDi)
     import(postgresDi)
     import(graphQlDi)
+    import(pushDi)
 }

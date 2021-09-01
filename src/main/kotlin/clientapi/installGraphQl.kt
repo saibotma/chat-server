@@ -21,7 +21,7 @@ fun Route.installClientApi() {
 
     // To get the GraphQL schema comment this back in and
     // remove the authentication block.
-    // installGraphQlPlayGround()
+    // installGraphQlPlayground()
 
     clientApiJwtAuthenticate {
         post("/graphql") {

@@ -24,6 +24,7 @@ import persistence.jooq.KotlinDslContext
 import platformapi.PlatformApiConfig
 import platformapi.installPlatformApi
 import platformapi.installPlatformApiAccessTokenAuthentication
+import push.FirebaseInitializer
 import util.GenericTypeConversionService
 import java.time.Instant
 import java.time.LocalDate
@@ -35,6 +36,9 @@ fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupKode
     installFeatures(bindDependencies)
     val flyway: Flyway by closestDI().instance()
     flyway.migrate()
+
+    val firebaseInitializer: Optional<FirebaseInitializer> by closestDI().instance()
+    if (firebaseInitializer.isPresent) firebaseInitializer.get().init()
 
     routing {
         route("/platform") {

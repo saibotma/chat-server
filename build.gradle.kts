@@ -15,12 +15,14 @@ val log4jVersion = "2.14.1"
 val log4jApiKotlinVersion = "1.0.0"
 val graphQlJavaVersion = "16.2"
 val graphQlKotlinVersion = "4.1.1"
+val firebaseAdminVersion = "6.9.0"
 val jooqVersion = "3.15.1"
 val flywayCoreVersion = "7.11.4"
 val kodeinVersion = "7.6.0"
 val jacksonDataTypeJsr310Version = "2.12.4"
 val kotestVersion = "4.6.1"
 val junitJupiterVersion = "5.7.2"
+val mockkVersion = "1.12.0"
 
 kotlin.sourceSets["main"].kotlin.srcDirs("src/main")
 kotlin.sourceSets["test"].kotlin.srcDirs("src/test")
@@ -41,7 +43,7 @@ application {
 }
 
 group = "dev.saibotma"
-version = "0.0.6"
+version = "0.0.9"
 
 repositories {
     mavenCentral()
@@ -69,6 +71,8 @@ dependencies {
     implementation("com.expediagroup", "graphql-kotlin-schema-generator", graphQlKotlinVersion)
     implementation("com.expediagroup", "graphql-kotlin-server", graphQlKotlinVersion)
 
+    implementation("com.google.firebase", "firebase-admin", firebaseAdminVersion)
+
     implementation("org.flywaydb", "flyway-core", flywayCoreVersion)
     implementation("org.postgresql", "postgresql", postgreSqlJdbcVersion)
     jooqGenerator("org.postgresql", "postgresql", postgreSqlJdbcVersion)
@@ -85,6 +89,7 @@ dependencies {
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitJupiterVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-params", junitJupiterVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitJupiterVersion)
+    testImplementation("io.mockk", "mockk", mockkVersion)
 }
 
 tasks.test {
