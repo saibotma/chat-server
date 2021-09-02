@@ -1,5 +1,6 @@
 package di
 
+import flyway.FlywayConfig
 import io.ktor.config.*
 import org.flywaydb.core.Flyway
 import org.jooq.DSLContext
@@ -14,8 +15,13 @@ import util.*
 import javax.sql.DataSource
 
 val postgresDi = DI.Module("postgres") {
+    bind<FlywayConfig>() with singleton {
+        val hocon: HoconApplicationConfig by di.instance()
+        FlywayConfig(baselineVersion = hocon.flywayBaselineVersion, shouldBaseline = hocon.flywayShouldBaseline)
+    }
+
     bind<PostgresConfig>() with singleton {
-        val hocon: HoconApplicationConfig = instance()
+        val hocon: HoconApplicationConfig by di.instance()
         PostgresConfig(
             user = hocon.postgresUser,
             password = hocon.postgresPassword,
@@ -39,9 +45,11 @@ val postgresDi = DI.Module("postgres") {
         }
     }
     bind<Flyway>() with singleton {
+        val config: FlywayConfig by di.instance()
         // ⚠️ Configuration here must be the same as in build.gradle.kts
         Flyway.configure()
             .dataSource(instance())
+            .baselineVersion(config.baselineVersion)
             .load()
     }
     bind<DSLContext>() with singleton {

@@ -1,7 +1,7 @@
 version: '3'
 services:
   api:
-    image: "saibotma/chat-server:0.1.0"
+    image: "saibotma/chat-server:0.1.1"
     # The env file is just used for running the production environment on on a local development system
     env_file:
       - .env
@@ -15,6 +15,8 @@ services:
       - PLATFORM_API_ACCESS_TOKEN
       - CLIENT_API_JWT_SECRET
       - FIREBASE_CREDENTIALS
+      - FLYWAY_BASELINE
+      - FLYWAY_SHOULD_BASELINE
     restart: "unless-stopped"
     ports:
       - "127.0.0.1:${KTOR_DEPLOYMENT_PORT}:${KTOR_DEPLOYMENT_PORT}"

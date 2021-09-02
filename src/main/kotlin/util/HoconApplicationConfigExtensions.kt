@@ -25,3 +25,9 @@ val HoconApplicationConfig.clientApiJwtSecret: String
 
 val HoconApplicationConfig.firebaseCredentials: String?
     get() = propertyOrNull("firebase.credentials")?.getString()
+
+val HoconApplicationConfig.flywayBaselineVersion: String
+    get() = property("flyway.baselineVersion").getString()
+
+val HoconApplicationConfig.flywayShouldBaseline: Boolean
+    get() = property("flyway.shouldBaseline").getString().toBoolean()

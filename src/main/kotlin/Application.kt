@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import di.setupKodein
 import error.PlatformApiException
+import flyway.FlywayConfig
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -34,7 +35,9 @@ import kotlin.reflect.typeOf
 
 fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupKodein() }) {
     installFeatures(bindDependencies)
+    val flywayConfig: FlywayConfig by closestDI().instance()
     val flyway: Flyway by closestDI().instance()
+    if (flywayConfig.shouldBaseline) flyway.baseline()
     flyway.migrate()
 
     val firebaseInitializer: Optional<FirebaseInitializer> by closestDI().instance()
