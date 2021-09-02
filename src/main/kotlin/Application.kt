@@ -37,6 +37,10 @@ fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupKode
     installFeatures(bindDependencies)
     val flywayConfig: FlywayConfig by closestDI().instance()
     val flyway: Flyway by closestDI().instance()
+    // Need to support this in for databases that are not empty,
+    // otherwise the migrations will not work.
+    // In such a case the first (or the migrations until (including) the baseline)
+    // have to be executed by hand.
     if (flywayConfig.shouldBaseline) flyway.baseline()
     flyway.migrate()
 
