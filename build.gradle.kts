@@ -43,7 +43,7 @@ application {
 }
 
 group = "dev.saibotma"
-version = "0.0.9"
+version = "0.1.0"
 
 repositories {
     mavenCentral()
@@ -151,8 +151,6 @@ flyway {
     url = postgresUrl
     user = postgresUser
     password = postgresPassword
-    baselineOnMigrate = true
-    baselineVersion = "1"
 }
 
 java {

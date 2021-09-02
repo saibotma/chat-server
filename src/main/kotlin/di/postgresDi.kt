@@ -41,8 +41,6 @@ val postgresDi = DI.Module("postgres") {
     bind<Flyway>() with singleton {
         // ⚠️ Configuration here must be the same as in build.gradle.kts
         Flyway.configure()
-            .baselineVersion("1")
-            .baselineOnMigrate(true)
             .dataSource(instance())
             .load()
     }
