@@ -52,6 +52,27 @@ class ChannelMemberListTests {
                 }
             }
         }
+
+        @Test
+        fun `returns an error when the member already exists`() {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, user) = upsertUser()
+                val (write, _) = addMember(
+                    channelId = channel!!.id,
+                    member = mockedChannelMember(userId = user!!.id)
+                )
+                addMember(
+                    channelId = channel.id,
+                    member = write
+                ) { _, _ ->
+                    ensureBadRequestWithDuplicate(
+                        duplicatePropertyName = "channelId",
+                        duplicatePropertyValue = channel.id.toString()
+                    )
+                }
+            }
+        }
     }
 
     @Nested
