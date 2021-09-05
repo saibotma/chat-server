@@ -10,6 +10,8 @@ import org.jooq.impl.DSL
 import org.postgresql.util.PSQLException
 import persistence.postgres.*
 import util.snakeToCamelCase
+import java.sql.BatchUpdateException
+import java.sql.SQLException
 
 class KotlinDslContext(private val dslContext: DSLContext) {
     // Uses for overriding the dsl context during tests.
@@ -34,14 +36,18 @@ class KotlinDslContext(private val dslContext: DSLContext) {
         } catch (e: DataAccessException) {
             onRollback(e)
             val cause = e.cause
-            if (cause is PSQLException) {
-                if (cause.isSerializationFailure()) {
-                    transaction(isolationLevel = isolationLevel, block = block)
-                } else {
-                    handleGenericPostgresError(cause)
-                }
+            val psqlException: PSQLException = if (cause is PSQLException) {
+                cause
+            } else if (cause is BatchUpdateException && cause.cause is PSQLException) {
+                cause.cause as PSQLException
             } else {
                 throw cause ?: e
+            }
+
+            if (psqlException.isSerializationFailure()) {
+                transaction(isolationLevel = isolationLevel, block = block)
+            } else {
+                handleGenericPostgresError(psqlException)
             }
         }
     }

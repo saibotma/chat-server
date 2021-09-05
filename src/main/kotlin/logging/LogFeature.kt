@@ -116,7 +116,7 @@ open class Logging(config: Configuration) {
             if (logBody) {
                 try {
                     // new line before body as in HTTP request
-                    appendLine()
+                    appendLine("Body:")
                     // have to receive ByteArray for DoubleReceive to work
                     // new line after body because in the log there might be additional info after "log message"
                     appendLine(String(call.receive<ByteArray>()))
@@ -139,7 +139,7 @@ open class Logging(config: Configuration) {
             }
             if (logBody && subject is OutgoingContent.ByteArrayContent) {
                 // new line before body as in HTTP response
-                appendLine()
+                appendLine("Body:")
                 // new line after body because in the log there might be additional info after "log message"
                 appendLine(String(subject.bytes()))
             }
