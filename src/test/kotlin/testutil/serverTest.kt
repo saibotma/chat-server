@@ -7,7 +7,7 @@ import clientapi.queries.ChannelQuery
 import clientapi.queries.MessageQuery
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import di.setupKodein
+import di.setupDi
 import error.PlatformApiError
 import error.PlatformApiException
 import error.duplicate
@@ -38,7 +38,7 @@ fun serverTest(
 ) {
     withTestApplication({
         module {
-            setupKodein()
+            setupDi()
             setupTestDependencies()
             bindDependencies()
         }

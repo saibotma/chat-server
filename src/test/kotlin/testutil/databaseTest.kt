@@ -4,7 +4,7 @@ import persistence.jooq.tables.Channel.Companion.CHANNEL
 import persistence.jooq.tables.User.Companion.USER
 import persistence.jooq.tables.references.CHANNEL_MEMBER
 import persistence.jooq.tables.references.MESSAGE
-import di.setupKodein
+import di.setupDi
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -17,7 +17,7 @@ fun databaseTest(
     test: suspend DatabaseTestEnvironment.() -> Unit
 ) {
     val kodein = DI {
-        setupKodein()
+        setupDi()
         setupTestDependencies()
         bindDependencies()
     }

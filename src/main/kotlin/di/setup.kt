@@ -2,7 +2,7 @@ package di
 
 import org.kodein.di.DI
 
-fun DI.MainBuilder.setupKodein() {
+fun DI.MainBuilder.setupDi() {
     import(jacksonDi)
     import(utilDi)
     import(postgresDi)

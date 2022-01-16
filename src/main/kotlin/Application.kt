@@ -3,7 +3,7 @@ import clientapi.installClientApi
 import clientapi.installClientApiJwtAuthentication
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import di.setupKodein
+import di.setupDi
 import error.PlatformApiException
 import flyway.FlywayConfig
 import io.ktor.application.*
@@ -33,7 +33,7 @@ import java.util.*
 import kotlin.reflect.typeOf
 
 
-fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupKodein() }) {
+fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupDi() }) {
     installFeatures(bindDependencies)
     val flywayConfig: FlywayConfig by closestDI().instance()
     val flyway: Flyway by closestDI().instance()
