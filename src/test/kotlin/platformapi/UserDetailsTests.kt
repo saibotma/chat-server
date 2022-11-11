@@ -9,7 +9,9 @@ import models.UserReadPayload
 import models.UserWritePayload
 import models.toUserRead
 import testutil.mockedUser
-import testutil.serverTest
+import testutil.servertest.delete.deleteUser
+import testutil.servertest.put.upsertUser
+import testutil.servertest.serverTest
 
 class UserDetailsTests {
     @Nested

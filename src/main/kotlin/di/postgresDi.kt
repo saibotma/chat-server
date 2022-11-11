@@ -1,7 +1,7 @@
 package di
 
 import flyway.FlywayConfig
-import io.ktor.config.*
+import io.ktor.server.config.*
 import org.flywaydb.core.Flyway
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
@@ -16,12 +16,12 @@ import javax.sql.DataSource
 
 val postgresDi = DI.Module("postgres") {
     bind<FlywayConfig>() with singleton {
-        val hocon: HoconApplicationConfig by di.instance()
+        val hocon: ApplicationConfig by di.instance()
         FlywayConfig(baselineVersion = hocon.flywayBaselineVersion, shouldBaseline = hocon.flywayShouldBaseline)
     }
 
     bind<PostgresConfig>() with singleton {
-        val hocon: HoconApplicationConfig by di.instance()
+        val hocon: ApplicationConfig by di.instance()
         PostgresConfig(
             user = hocon.postgresUser,
             password = hocon.postgresPassword,

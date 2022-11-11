@@ -14,7 +14,13 @@ import models.ChannelMemberWritePayload
 import models.toChannelMemberRead
 import testutil.mockedChannelMember
 import testutil.mockedChannelWrite
-import testutil.serverTest
+import testutil.servertest.asApiError
+import testutil.servertest.ensureBadRequestWithDuplicate
+import testutil.servertest.post.addMember
+import testutil.servertest.post.createChannel
+import testutil.servertest.put.setMembers
+import testutil.servertest.put.upsertUser
+import testutil.servertest.serverTest
 
 class ChannelMemberListTests {
     @Nested
@@ -47,7 +53,7 @@ class ChannelMemberListTests {
                     channelId = channel!!.id,
                     member = mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.admin)
                 ) { _, _ ->
-                    status() shouldBe HttpStatusCode.BadRequest
+                    status shouldBe HttpStatusCode.BadRequest
                     asApiError() shouldBe PlatformApiException.managedChannelHasAdmin().error
                 }
             }
@@ -112,7 +118,7 @@ class ChannelMemberListTests {
                     channelId = channel!!.id,
                     members = listOf(mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.admin))
                 ) { _, _ ->
-                    status() shouldBe HttpStatusCode.BadRequest
+                    status shouldBe HttpStatusCode.BadRequest
                     asApiError() shouldBe PlatformApiException.managedChannelHasAdmin().error
                 }
             }

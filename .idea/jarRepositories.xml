@@ -31,5 +31,10 @@
       <option name="name" value="maven" />
       <option name="url" value="https://dl.bintray.com/kodein-framework/Kodein-DI/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven" />
+      <option name="name" value="maven" />
+      <option name="url" value="https://s01.oss.sonatype.org/content/repositories/snapshots/" />
+    </remote-repository>
   </component>
 </project>

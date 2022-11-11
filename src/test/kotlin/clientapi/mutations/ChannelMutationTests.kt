@@ -15,7 +15,10 @@ import models.toChannelMemberWrite
 import testutil.mockedAuthContext
 import testutil.mockedChannelMember
 import testutil.mockedChannelWrite
-import testutil.serverTest
+import testutil.servertest.post.addMember
+import testutil.servertest.post.createChannel
+import testutil.servertest.put.upsertUser
+import testutil.servertest.serverTest
 
 class ChannelMutationTests {
     @Nested

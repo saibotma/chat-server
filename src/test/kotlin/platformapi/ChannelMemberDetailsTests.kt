@@ -8,7 +8,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import models.toChannelMemberWrite
 import testutil.mockedChannelMember
-import testutil.serverTest
+import testutil.servertest.delete.deleteMember
+import testutil.servertest.post.addMember
+import testutil.servertest.post.createChannel
+import testutil.servertest.put.updateMember
+import testutil.servertest.put.upsertUser
+import testutil.servertest.serverTest
 
 class ChannelMemberDetailsTests {
     @Nested

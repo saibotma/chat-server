@@ -17,7 +17,7 @@ import graphql.*
 import graphql.GraphQL.newGraphQL
 import graphql.execution.DataFetcherExceptionHandler
 import graphql.schema.GraphQLSchema
-import io.ktor.request.*
+import io.ktor.server.request.*
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance

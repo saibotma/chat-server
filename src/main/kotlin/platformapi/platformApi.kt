@@ -1,13 +1,15 @@
 package platformapi
 
 import clientapi.ClientApiConfig
-import io.ktor.locations.*
-import io.ktor.locations.post
-import io.ktor.locations.put
-import io.ktor.routing.*
+import io.ktor.server.auth.*
+import io.ktor.server.locations.*
+import io.ktor.server.locations.post
+import io.ktor.server.locations.put
+import io.ktor.server.routing.*
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import persistence.jooq.KotlinDslContext
+import platformapi.authentication.accesstoken.platformApiAccessTokenAuthentication
 import java.util.*
 
 @Location("/channels")
@@ -32,7 +34,7 @@ object UserList {
 }
 
 fun Route.installPlatformApi() {
-    platformApiAccessTokenAuthenticate {
+    authenticate(platformApiAccessTokenAuthentication) {
         val database: KotlinDslContext by closestDI().instance()
         val clientApiConfig: ClientApiConfig by closestDI().instance()
 
