@@ -48,7 +48,6 @@ fun serverTest(
         application { chatServer(di = di) }
 
         val client = createClient {
-            // TODO(saibotma): Why does this not work? It works in Appella.. maybe reset ide?
             install(ContentNegotiation) {
                 jackson { di.direct.instance<ObjectMapper.() -> Unit>()() }
             }
