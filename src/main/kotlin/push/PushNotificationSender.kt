@@ -3,6 +3,7 @@ package push
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingException
+import com.google.firebase.messaging.MessagingErrorCode
 import org.apache.logging.log4j.kotlin.logger
 import persistence.jooq.tables.pojos.FirebasePushToken
 import util.convertToStringMap
@@ -31,7 +32,7 @@ class PushNotificationSender(private val objectMapper: ObjectMapper) {
             FirebaseMessaging.getInstance().send(message)
             return true
         } catch (t: FirebaseMessagingException) {
-            if (t.errorCode == "UNREGISTERED") {
+            if (t.messagingErrorCode == MessagingErrorCode.UNREGISTERED) {
                 logger().info("Firebase token $firebasePushToken not registered.", t)
                 return false
             }

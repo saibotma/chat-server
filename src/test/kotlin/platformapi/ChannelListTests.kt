@@ -8,7 +8,8 @@ import models.ChannelReadPayload
 import models.ChannelWritePayload
 import models.toChannelRead
 import testutil.mockedChannelWrite
-import testutil.serverTest
+import testutil.servertest.post.createChannel
+import testutil.servertest.serverTest
 
 class ChannelListTests {
     @Nested

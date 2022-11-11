@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import persistence.jooq.tables.pojos.FirebasePushToken
 import testutil.mockedAuthContext
-import testutil.serverTest
+import testutil.servertest.put.upsertUser
+import testutil.servertest.serverTest
 
 class PushMutationTests {
     @Nested

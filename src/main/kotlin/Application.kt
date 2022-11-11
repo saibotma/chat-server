@@ -1,40 +1,69 @@
 import clientapi.ClientApiConfig
+import clientapi.authentication.jwt.installClientApiJwtAuthentication
 import clientapi.installClientApi
-import clientapi.installClientApiJwtAuthentication
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import di.setupKodein
+import com.typesafe.config.ConfigFactory
+import di.setupDi
 import error.PlatformApiException
 import flyway.FlywayConfig
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.jackson.*
-import io.ktor.locations.*
-import io.ktor.response.*
-import io.ktor.routing.*
-import logging.Logging
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.config.*
+import io.ktor.server.engine.*
+import io.ktor.server.locations.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.*
+import io.ktor.server.plugins.callid.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.dataconversion.*
+import io.ktor.server.plugins.doublereceive.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import logging.LoggingPlugin
+import org.apache.logging.log4j.kotlin.logger
 import org.flywaydb.core.Flyway
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.ktor.DIFeature
-import org.kodein.di.ktor.closestDI
 import persistence.jooq.KotlinDslContext
 import platformapi.PlatformApiConfig
 import platformapi.installPlatformApi
-import platformapi.installPlatformApiAccessTokenAuthentication
 import push.FirebaseInitializer
-import util.GenericTypeConversionService
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
-import kotlin.reflect.typeOf
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.ktor.closestDI
+import org.kodein.di.ktor.di
+import platformapi.authentication.accesstoken.installPlatformApiAccessTokenAuthentication
+import util.serverPort
 
+fun main() {
+    // Execute using embedded server because wih automatic module loading
+    // a second config file without module loading setting would be required
+    // for tests. This would be a lot of duplicate config properties.
+    embeddedServer(
+        Netty,
+        environment = applicationEngineEnvironment {
+            config = HoconApplicationConfig(ConfigFactory.load())
+            connector {
+                port = config.serverPort
+                // Needs to be "0.0.0.0" otherwise it does not work
+                // with docker and the current port forwarding configuration
+                // in the docker compose files.
+                host = "0.0.0.0"
+            }
+            module { chatServer() }
+        }
+    ).start(wait = true)
+}
 
-fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupKodein() }) {
-    installFeatures(bindDependencies)
+fun Application.chatServer(di: DI? = null) {
+    installFeatures(di ?: DI { setupDi(environment.config) })
+
     val flywayConfig: FlywayConfig by closestDI().instance()
     val flyway: Flyway by closestDI().instance()
     // Need to support this in for databases that are not empty,
@@ -57,102 +86,90 @@ fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupKode
     }
 }
 
-private fun Application.installFeatures(bindDependencies: DI.MainBuilder.() -> Unit) {
-    install(DIFeature) { bindDependencies() }
-    install(CORS) {
-        method(HttpMethod.Get)
-        method(HttpMethod.Post)
-        header(HttpHeaders.Accept)
-        header(HttpHeaders.Authorization)
-        header(HttpHeaders.ContentType)
-        allowCredentials = true
-        // TODO(saibotma): Make more strict
-        anyHost()
-    }
-    // Currently only required for the Logging feature
-    install(CallId) {
-        // No special reason why this uses this generator
-        generate(10)
-    }
-    install(DoubleReceive)
-    install(Logging) {
-        logRequests = true
-        logResponses = true
-        logHeaders = true
-        logBody = false
-        logFullUrl = true
-    }
-    install(Locations) {}
-    install(Authentication) {
-        val platformApiConfig: PlatformApiConfig by closestDI().instance()
-        val clientApiConfig: ClientApiConfig by closestDI().instance()
-        val kotlinDslContext: KotlinDslContext by closestDI().instance()
+private fun Application.installFeatures(di: DI) {
+    val log = logger()
 
-        installPlatformApiAccessTokenAuthentication(expectedAccessToken = platformApiConfig.accessToken)
+    di { extend(di) }
+
+    // Currently, only required for the Logging feature
+    install(CallId) { generate(10, CALL_ID_DEFAULT_DICTIONARY) }
+    install(DoubleReceive)
+    install(Locations)
+    install(LoggingPlugin)
+
+    install(Authentication) {
+        val platformApiConfig: PlatformApiConfig by di.instance()
+        val clientApiConfig: ClientApiConfig by di.instance()
+        val kotlinDslContext: KotlinDslContext by di.instance()
+
+        installPlatformApiAccessTokenAuthentication(accessToken = platformApiConfig.accessToken)
         installClientApiJwtAuthentication(jwtSecret = clientApiConfig.jwtSecret, kotlinDslContext = kotlinDslContext)
     }
+
     install(ContentNegotiation) {
-        jackson { closestDI().direct.instance<ObjectMapper.() -> Unit>()() }
+        jackson { di.direct.instance<ObjectMapper.() -> Unit>()() }
     }
 
     install(DataConversion) {
         convert<LocalDate> {
-            decode { values, _ -> LocalDate.parse(values.first()) }
+            decode { values -> LocalDate.parse(values.first()) }
         }
 
         convert<Instant> {
-            decode { values, _ -> Instant.parse(values.first()) }
+            decode { values -> Instant.parse(values.first()) }
         }
 
         convert<UUID> {
-            decode { values, _ -> UUID.fromString(values.first()) }
+            decode { values -> UUID.fromString(values.first()) }
         }
 
-        val type = typeOf<List<UUID>>()
-        convert(type, GenericTypeConversionService(type::class).apply {
-            decode { values, _ -> values.first().split(",").map { UUID.fromString(it) } }
-        })
+        convert<List<UUID>> {
+            decode { values -> values.first().split(",").map { UUID.fromString(it) } }
+        }
     }
 
     install(StatusPages) {
-        exception<Throwable> { t ->
-            when (t) {
+        exception<Throwable> { call, cause ->
+            when (cause) {
                 is ContentTransformationException -> {
-                    call.respond(
-                        HttpStatusCode.BadRequest, """
-                        Request parameters could not be parsed.
-                        ${t.message}
-                    """.trimIndent()
+                    call.respondText(
+                        "Request parameters could not be parsed. ${cause.message}", status = HttpStatusCode.BadRequest,
                     )
                 }
+
                 is ParameterConversionException -> {
-                    call.respond(
-                        HttpStatusCode.BadRequest,
-                        "Parameter \"${t.parameterName}\" could not be parsed.\nPlease check that the type fulfils the specification."
+                    call.respondText(
+                        "Parameter \"${cause.parameterName}\" could not be parsed.\n" +
+                                "Please check that the type fulfils the specification.",
+                        status = HttpStatusCode.BadRequest,
                     )
                 }
+
                 is JsonMappingException -> {
-                    val locationMessage = t.location?.let {
+                    val locationMessage = cause.location?.let {
                         "Error at line ${it.lineNr} and column ${it.columnNr}"
                     }
-                    call.respond(
-                        HttpStatusCode.BadRequest,
-                        """
-                            Json body could not be parsed.
-                            Please check that the values fulfil the specification.
-                            ${locationMessage ?: ""}
-                        """.trimIndent()
+                    call.respondText(
+                        "Json body could not be parsed. " +
+                                "Please check that the values fulfil the specification ${locationMessage ?: ""}",
+                        status = HttpStatusCode.BadRequest,
                     )
                 }
+
                 is com.fasterxml.jackson.core.JsonParseException -> {
-                    call.respond(HttpStatusCode.BadRequest, "Json body could not be parsed.\n${t.originalMessage}")
+                    call.respondText(
+                        "Json body could not be parsed.\n${cause.originalMessage}",
+                        status = HttpStatusCode.BadRequest
+                    )
                 }
+
                 is PlatformApiException -> {
-                    call.respond(t.statusCode, t.error)
+                    call.respond(cause.statusCode, cause.error)
                 }
+
                 else -> {
                     call.respond(HttpStatusCode.InternalServerError)
-                    throw t
+                    log.error("Unhandled exception", cause)
                 }
             }
         }

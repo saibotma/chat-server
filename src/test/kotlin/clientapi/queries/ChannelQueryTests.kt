@@ -3,21 +3,15 @@ package clientapi.queries
 import clientapi.models.DetailedMessageReadPayload
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import models.*
-import org.jooq.JSON
-import org.jooq.impl.DSL
-import org.jooq.impl.DSL.value
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import persistence.jooq.jsonArrayAggNoNull
-import persistence.jooq.nowInstant
-import persistence.jooq.tables.references.CHANNEL
-import persistence.postgres.queries.selectMessagesOf
 import testutil.mockedAuthContext
 import testutil.mockedChannelMember
 import testutil.mockedMessage
-import testutil.serverTest
-import java.time.Instant
-import java.time.Instant.now
+import testutil.servertest.post.addMember
+import testutil.servertest.post.createChannel
+import testutil.servertest.put.upsertUser
+import testutil.servertest.serverTest
 
 class ChannelQueryTests {
     @Nested
