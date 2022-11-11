@@ -5,22 +5,21 @@ val postgresPort = System.getenv("POSTGRES_PORT") ?: "54324"
 val postgresDb = System.getenv("POSTGRES_DB") ?: "chat-server"
 val postgresUrl = "jdbc:postgresql://$postgresServerName:$postgresPort/$postgresDb"
 
-val ktorVersion = "2.1.3"
 val kotlinVersion = "1.7.21"
-val postgreSqlJdbcVersion = "42.2.23"
-val log4jVersion = "2.14.1"
-val log4jApiKotlinVersion = "1.0.0"
-val graphQlJavaVersion = "16.2"
-val graphQlKotlinVersion = "4.1.1"
-val firebaseAdminVersion = "6.9.0"
+val ktorVersion = "2.1.3"
+val log4jVersion = "2.19.0"
+val log4jApiKotlinVersion = "1.2.0"
+val graphQlKotlinVersion = "6.3.0"
+val firebaseAdminVersion = "9.1.1"
+val flywayCoreVersion = "9.7.0"
+val postgreSqlJdbcVersion = "42.5.0"
 val jooqVersion = "3.17.4"
-val flywayCoreVersion = "7.11.4"
 // TODO(saibotma): Remove me when https://github.com/Kodein-Framework/Kodein-DI/issues/410 is resolved.
 val kodeinVersion = "8.0.0-ktor-2-SNAPSHOT"
-val jacksonDataTypeJsr310Version = "2.12.4"
-val kotestVersion = "4.6.1"
-val junitJupiterVersion = "5.7.2"
-val mockkVersion = "1.12.0"
+val jacksonDataTypeJsr310Version = "2.14.0"
+val kotestVersion = "5.5.4"
+val junitJupiterVersion = "5.9.1"
+val mockkVersion = "1.13.2"
 
 kotlin.sourceSets["main"].kotlin.srcDirs("src/main")
 kotlin.sourceSets["test"].kotlin.srcDirs("src/test")
@@ -61,16 +60,17 @@ dependencies {
     implementation("io.ktor:ktor-server-double-receive:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
-    implementation("io.ktor", "ktor-server-test-host", ktorVersion)
+    implementation("io.ktor:ktor-server-test-host:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
     // Out of some reason the plugin returns 403 in case CORS would not be allowed. Related issues:
     // https://youtrack.jetbrains.com/issue/KTOR-4237/CORS-the-plugin-responds-with-403-although-specification-doesnt-contain-such-information
     // https://youtrack.jetbrains.com/issue/KTOR-4236/CORS-Plugin-should-log-reason-for-returning-403-Forbidden-errors
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
-
     implementation("io.ktor", "ktor-client-core", ktorVersion)
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    testImplementation("io.ktor", "ktor-server-tests", ktorVersion)
+
 
     implementation("org.apache.logging.log4j", "log4j-api", log4jVersion)
     implementation("org.apache.logging.log4j", "log4j-core", log4jVersion)
@@ -89,15 +89,17 @@ dependencies {
 
     runtimeOnly("org.kodein.di", "kodein-di-jvm", kodeinVersion)
     implementation("org.kodein.di", "kodein-di-framework-ktor-server-jvm", kodeinVersion)
+
     implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", jacksonDataTypeJsr310Version)
 
-    testImplementation(kotlin("test-junit5"))
     testImplementation("io.kotest", "kotest-assertions-core", kotestVersion)
     testImplementation("io.kotest", "kotest-property", kotestVersion)
-    testImplementation("io.ktor", "ktor-server-tests", ktorVersion)
+
+    testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitJupiterVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-params", junitJupiterVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitJupiterVersion)
+
     testImplementation("io.mockk", "mockk", mockkVersion)
 }
 
@@ -160,6 +162,8 @@ flyway {
     url = postgresUrl
     user = postgresUser
     password = postgresPassword
+    // The default is true, and Flyway gradle plugin will not be executed in production environment.
+    cleanDisabled = false
 }
 
 java {
@@ -191,7 +195,7 @@ tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
     outputs.cacheIf { true }
 }
 
-// Requireded because of https://github.com/gradle/gradle/issues/17236
+// Required because of https://github.com/gradle/gradle/issues/17236
 tasks.named<Copy>("processResources") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
