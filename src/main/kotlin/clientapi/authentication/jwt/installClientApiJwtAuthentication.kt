@@ -1,24 +1,20 @@
-package clientapi
+package clientapi.authentication.jwt
 
+import clientapi.AuthContext
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.routing.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.getUser
 
-private const val configurationName = "ClientApiJwtAuthentication"
+const val clientApiJwtAuthentication = "clientApiJwtAuthentication"
 
-fun Route.clientApiJwtAuthenticate(build: Route.() -> Unit) {
-    authenticate(configurationName, build = build)
-}
-
-fun Authentication.Configuration.installClientApiJwtAuthentication(
+fun AuthenticationConfig.installClientApiJwtAuthentication(
     jwtSecret: String,
     kotlinDslContext: KotlinDslContext,
 ) {
-    jwt(configurationName) {
+    jwt(clientApiJwtAuthentication) {
         verifier(
             JWT
                 .require(Algorithm.HMAC256(jwtSecret))

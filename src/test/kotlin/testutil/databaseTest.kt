@@ -6,27 +6,41 @@ import persistence.jooq.tables.references.CHANNEL_MEMBER
 import persistence.jooq.tables.references.MESSAGE
 import di.setupDi
 import kotlinx.coroutines.runBlocking
+import org.flywaydb.core.Flyway
+import org.jooq.DSLContext
+import org.jooq.exception.DataAccessException
+import org.jooq.impl.DSL
 import org.kodein.di.DI
 import org.kodein.di.instance
 import persistence.jooq.KotlinDslContext
 import persistence.jooq.tables.pojos.*
 import persistence.jooq.tables.references.FIREBASE_PUSH_TOKEN
+import testutil.servertest.BindDependencies
 
 fun databaseTest(
-    bindDependencies: DI.MainBuilder.() -> Unit = {},
+    useTransaction: Boolean = true,
+    bindDependencies: BindDependencies = {},
     test: suspend DatabaseTestEnvironment.() -> Unit
 ) {
-    val kodein = DI {
-        setupDi()
+    val di = DI {
         setupTestDependencies()
         bindDependencies()
     }
-    val environment = DatabaseTestEnvironment(kodein)
-    runBlocking { test(environment) }
+    val flyway: Flyway by di.instance()
+    val environment = DatabaseTestEnvironment(di)
+
+    handleCleanUp(flyway)
+
+    if (useTransaction) {
+        environment.scopedTest(test)
+    } else {
+        runBlocking { test(environment) }
+        restoreDatabase(flyway)
+    }
 }
 
 
-open class DatabaseTestEnvironment(private val di: DI) {
+open class DatabaseTestEnvironment(val di: DI) {
     val database: KotlinDslContext by di.instance()
 
     suspend fun getChannels(): List<Channel> {
@@ -58,4 +72,28 @@ open class DatabaseTestEnvironment(private val di: DI) {
             db.selectFrom(FIREBASE_PUSH_TOKEN).fetchInto(FirebasePushToken::class.java)
         }
     }
+
+    // region helpers
+
+    @JvmName("scopedTestDatabase")
+    fun scopedTest(block: suspend DatabaseTestEnvironment.() -> Unit) {
+        return scopedTest(this, block)
+    }
+
+    protected fun <T : DatabaseTestEnvironment> scopedTest(environment: T, block: suspend T.() -> Unit) {
+        val dslContext: DSLContext by di.instance()
+
+        try {
+            dslContext.transaction { config ->
+                val kotlinDslContext: KotlinDslContext by di.instance()
+                kotlinDslContext.overrideDSLContext = DSL.using(config)
+                runBlocking { environment.block() }
+                throw TestRollbackException()
+            }
+        } catch (e: DataAccessException) {
+            if (e.cause !is TestRollbackException) throw e
+        }
+    }
+
+    // endregion
 }

@@ -11,7 +11,10 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.kodein.di.direct
 import org.kodein.di.instance
-import testutil.serverTest
+import testutil.servertest.ensureResourceNotFound
+import testutil.servertest.post.createUserToken
+import testutil.servertest.put.upsertUser
+import testutil.servertest.serverTest
 
 class UserTokenListTest {
     @Nested

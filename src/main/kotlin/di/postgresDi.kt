@@ -1,8 +1,10 @@
 package di
 
 import flyway.FlywayConfig
-import io.ktor.config.*
+import io.ktor.server.config.*
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.configuration.Configuration
+import org.flywaydb.core.api.configuration.FluentConfiguration
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
@@ -16,12 +18,12 @@ import javax.sql.DataSource
 
 val postgresDi = DI.Module("postgres") {
     bind<FlywayConfig>() with singleton {
-        val hocon: HoconApplicationConfig by di.instance()
+        val hocon: ApplicationConfig by di.instance()
         FlywayConfig(baselineVersion = hocon.flywayBaselineVersion, shouldBaseline = hocon.flywayShouldBaseline)
     }
 
     bind<PostgresConfig>() with singleton {
-        val hocon: HoconApplicationConfig by di.instance()
+        val hocon: ApplicationConfig by di.instance()
         PostgresConfig(
             user = hocon.postgresUser,
             password = hocon.postgresPassword,
@@ -45,12 +47,8 @@ val postgresDi = DI.Module("postgres") {
         }
     }
     bind<Flyway>() with singleton {
-        val config: FlywayConfig by di.instance()
-        // ⚠️ Configuration here must be the same as in build.gradle.kts
-        Flyway.configure()
-            .dataSource(instance())
-            .baselineVersion(config.baselineVersion)
-            .load()
+        val configuration = buildFlywayConfiguration(dataSource = instance(), isCleanDisabled = true)
+        Flyway(configuration)
     }
     bind<DSLContext>() with singleton {
         val dataSource: DataSource by di.instance()
@@ -61,3 +59,13 @@ val postgresDi = DI.Module("postgres") {
     }
     bind<KotlinDslContext>() with singleton { KotlinDslContext(instance()) }
 }
+
+// ⚠️ Configuration here should be the same as in build.gradle.kts
+fun buildFlywayConfiguration(dataSource: DataSource, isCleanDisabled: Boolean): Configuration {
+    return FluentConfiguration()
+        .baselineVersion("1")
+        .baselineOnMigrate(true)
+        .dataSource(dataSource)
+        .cleanDisabled(isCleanDisabled)
+}
+

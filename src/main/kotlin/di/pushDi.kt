@@ -2,8 +2,7 @@ package di
 
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseOptions
-import io.ktor.config.*
-import io.ktor.util.*
+import io.ktor.server.config.*
 import org.kodein.di.*
 import push.FirebaseInitializer
 import push.PushNotificationSender
@@ -25,7 +24,7 @@ val pushDi = DI.Module("push") {
     }
 
     bind<Optional<FirebaseInitializer>>() with singleton {
-        val config: HoconApplicationConfig by di.instance()
+        val config: ApplicationConfig by di.instance()
         val firebaseCredentials = config.firebaseCredentials ?: return@singleton Optional.empty<FirebaseInitializer>()
 
         val credentials = GoogleCredentials.fromStream(

@@ -2,14 +2,14 @@ package platformapi
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.shouldBe
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.server.testing.*
 import org.junit.jupiter.api.Test
 import org.kodein.di.instance
-import testutil.ServerTestEnvironment
 import testutil.mockedUser
-import testutil.serverTest
-import java.util.*
+import testutil.servertest.ServerTestEnvironment
+import testutil.servertest.serverTest
 import java.util.UUID.randomUUID
 
 class PlatformApiAccessTokenAuthentication {
@@ -18,7 +18,7 @@ class PlatformApiAccessTokenAuthentication {
         serverTest {
             val platformApiConfig: PlatformApiConfig by di.instance()
             val response = sendRequest(platformApiConfig.accessToken)
-            response.status() shouldBe HttpStatusCode.Created
+            response.status shouldBe HttpStatusCode.Created
         }
     }
 
@@ -26,19 +26,19 @@ class PlatformApiAccessTokenAuthentication {
     fun `returns an error when the token is invalid`() {
         serverTest {
             val response = sendRequest("invalid token")
-            response.status() shouldBe HttpStatusCode.Unauthorized
+            response.status shouldBe HttpStatusCode.Unauthorized
         }
     }
 
-    private fun ServerTestEnvironment.sendRequest(token: String): TestApplicationResponse {
+    private suspend fun ServerTestEnvironment.sendRequest(token: String): HttpResponse {
         val userId = randomUUID()
         val user = mockedUser()
-        return testApplicationEngine.handleRequest(HttpMethod.Put, "/platform/users/$userId") {
+        return client.put("/platform/users/$userId") {
             val objectMapper = jacksonObjectMapper()
-            addHeader("Content-Type", "application/json")
-            addHeader("X-Chat-Server-Platform-Api-Access-Token", token)
+            header("Content-Type", "application/json")
+            header("X-Chat-Server-Platform-Api-Access-Token", token)
             val body = objectMapper.writeValueAsString(user)
             setBody(body)
-        }.response
+        }
     }
 }

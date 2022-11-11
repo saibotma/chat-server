@@ -4,11 +4,16 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.maps.shouldNotContainKey
 import io.kotest.matchers.shouldBe
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.server.testing.*
 import org.junit.jupiter.api.Test
 import testutil.mockedChannelMember
-import testutil.serverTest
+import testutil.servertest.post.addMember
+import testutil.servertest.post.createChannel
+import testutil.servertest.post.createUserToken
+import testutil.servertest.put.upsertUser
+import testutil.servertest.serverTest
 
 class GraphQLInstallationTests {
 
@@ -19,15 +24,15 @@ class GraphQLInstallationTests {
             val (_, user) = upsertUser()
             val (_, channel) = createChannel()
             addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
-            val response = testApplicationEngine.handleRequest(HttpMethod.Post, "/client/graphql") {
-                addHeader("Content-Type", "application/json")
-                addHeader("Authorization", "Bearer ${createUserToken(user.id).second!!.jwt}")
+            val response = client.post("/client/graphql") {
+                header("Content-Type", "application/json")
+                header("Authorization", "Bearer ${createUserToken(user.id).second!!.jwt}")
                 val body = objectMapper.writeValueAsString(mapOf("query" to "{ channels { id } }"))
                 setBody(body)
-            }.response
+            }
 
-            response.status() shouldBe HttpStatusCode.OK
-            val json = objectMapper.readValue<Map<String, Any>>(response.content!!)
+            response.status shouldBe HttpStatusCode.OK
+            val json = objectMapper.readValue<Map<String, Any>>(response.bodyAsText())
             json shouldNotContainKey "errors"
         }
     }

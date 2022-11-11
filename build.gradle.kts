@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 val postgresUser = System.getenv("POSTGRES_USER") ?: "postgres"
 val postgresPassword = System.getenv("POSTGRES_PASSWORD") ?: "postgres"
 val postgresServerName = System.getenv("POSTGRES_SERVERNAME") ?: "localhost"
@@ -7,22 +5,21 @@ val postgresPort = System.getenv("POSTGRES_PORT") ?: "54324"
 val postgresDb = System.getenv("POSTGRES_DB") ?: "chat-server"
 val postgresUrl = "jdbc:postgresql://$postgresServerName:$postgresPort/$postgresDb"
 
-val ktorVersion = "1.6.1"
-val kotlinVersion = "1.5.21"
-val kotlinxCoroutinesVersion = "1.5.1"
-val postgreSqlJdbcVersion = "42.2.23"
-val log4jVersion = "2.14.1"
-val log4jApiKotlinVersion = "1.0.0"
-val graphQlJavaVersion = "16.2"
-val graphQlKotlinVersion = "4.1.1"
-val firebaseAdminVersion = "6.9.0"
-val jooqVersion = "3.15.1"
-val flywayCoreVersion = "7.11.4"
-val kodeinVersion = "7.6.0"
-val jacksonDataTypeJsr310Version = "2.12.4"
-val kotestVersion = "4.6.1"
-val junitJupiterVersion = "5.7.2"
-val mockkVersion = "1.12.0"
+val kotlinVersion = "1.7.21"
+val ktorVersion = "2.1.3"
+val log4jVersion = "2.19.0"
+val log4jApiKotlinVersion = "1.2.0"
+val graphQlKotlinVersion = "6.3.0"
+val firebaseAdminVersion = "9.1.1"
+val flywayCoreVersion = "9.7.0"
+val postgreSqlJdbcVersion = "42.5.0"
+val jooqVersion = "3.17.4"
+// TODO(saibotma): Remove me when https://github.com/Kodein-Framework/Kodein-DI/issues/410 is resolved.
+val kodeinVersion = "8.0.0-ktor-2-SNAPSHOT"
+val jacksonDataTypeJsr310Version = "2.14.0"
+val kotestVersion = "5.5.4"
+val junitJupiterVersion = "5.9.1"
+val mockkVersion = "1.13.2"
 
 kotlin.sourceSets["main"].kotlin.srcDirs("src/main")
 kotlin.sourceSets["test"].kotlin.srcDirs("src/test")
@@ -32,10 +29,10 @@ sourceSets["test"].resources.srcDirs("src/test/resources")
 
 plugins {
     application
-    kotlin("jvm") version "1.5.21"
-    id("com.github.johnrengelman.shadow") version "6.1.0"
-    id("org.flywaydb.flyway") version "7.11.4"
-    id("nu.studer.jooq") version "6.0"
+    kotlin("jvm") version "1.7.21"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("org.flywaydb.flyway") version "9.7.0"
+    id("nu.studer.jooq") version "8.0"
 }
 
 application {
@@ -47,21 +44,33 @@ version = "0.1.2"
 
 repositories {
     mavenCentral()
-    jcenter()
-    maven { url = uri("https://dl.bintray.com/kodein-framework/Kodein-DI/") }
+    // TODO(saibotma): Remove me when https://github.com/Kodein-Framework/Kodein-DI/issues/410 is resolved.
+    maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
 }
 
 dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", kotlinxCoroutinesVersion)
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-reactive", kotlinxCoroutinesVersion)
 
     implementation("io.ktor", "ktor-server-netty", ktorVersion)
-    implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("io.ktor", "ktor-jackson", ktorVersion)
-    implementation("io.ktor", "ktor-locations", ktorVersion)
-    implementation("io.ktor", "ktor-server-test-host", ktorVersion)
-    implementation("io.ktor", "ktor-auth-jwt", ktorVersion)
+    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-data-conversion:$ktorVersion")
+    implementation("io.ktor:ktor-server-locations:$ktorVersion")
+    implementation("io.ktor:ktor-server-call-id:$ktorVersion")
+    implementation("io.ktor:ktor-server-double-receive:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
+    implementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
+    // Out of some reason the plugin returns 403 in case CORS would not be allowed. Related issues:
+    // https://youtrack.jetbrains.com/issue/KTOR-4237/CORS-the-plugin-responds-with-403-although-specification-doesnt-contain-such-information
+    // https://youtrack.jetbrains.com/issue/KTOR-4236/CORS-Plugin-should-log-reason-for-returning-403-Forbidden-errors
+    implementation("io.ktor:ktor-server-cors:$ktorVersion")
+    implementation("io.ktor", "ktor-client-core", ktorVersion)
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    testImplementation("io.ktor", "ktor-server-tests", ktorVersion)
+
 
     implementation("org.apache.logging.log4j", "log4j-api", log4jVersion)
     implementation("org.apache.logging.log4j", "log4j-core", log4jVersion)
@@ -80,15 +89,17 @@ dependencies {
 
     runtimeOnly("org.kodein.di", "kodein-di-jvm", kodeinVersion)
     implementation("org.kodein.di", "kodein-di-framework-ktor-server-jvm", kodeinVersion)
+
     implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", jacksonDataTypeJsr310Version)
 
-    testImplementation(kotlin("test-junit5"))
     testImplementation("io.kotest", "kotest-assertions-core", kotestVersion)
     testImplementation("io.kotest", "kotest-property", kotestVersion)
-    testImplementation("io.ktor", "ktor-server-tests", ktorVersion)
+
+    testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitJupiterVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-params", junitJupiterVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitJupiterVersion)
+
     testImplementation("io.mockk", "mockk", mockkVersion)
 }
 
@@ -151,18 +162,20 @@ flyway {
     url = postgresUrl
     user = postgresUser
     password = postgresPassword
+    // The default is true, and Flyway gradle plugin will not be executed in production environment.
+    cleanDisabled = false
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
-configurations {
+configurations.implementation {
     // We need to remove the logback-classic package
     // To avoid: Multiple bindings were found on the class path
     // From: http://www.slf4j.org/codes.html#multiple_bindings
-    runtime.get().exclude("ch.qos.logback", "logback-classic")
+    exclude("ch.qos.logback", "logback-classic")
 }
 
 tasks.withType<Jar> {
@@ -171,19 +184,6 @@ tasks.withType<Jar> {
     }
     isZip64 = true
     archiveFileName.set("chat-server.jar")
-}
-
-tasks.withType<KotlinCompile>() {
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
-    }
-
-    // Disable Kotlin experimental warnings
-    kotlinOptions.freeCompilerArgs += listOf(
-        "-Xuse-experimental=kotlin.Experimental",
-        "-Xuse-experimental=io.ktor.locations.KtorExperimentalLocationsAPI",
-        "-Xuse-experimental=kotlin.ExperimentalStdlibApi"
-    )
 }
 
 tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
@@ -195,7 +195,10 @@ tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
     outputs.cacheIf { true }
 }
 
-
+// Required because of https://github.com/gradle/gradle/issues/17236
+tasks.named<Copy>("processResources") {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
 
 abstract class PrintVersionTask : DefaultTask() {
     @TaskAction

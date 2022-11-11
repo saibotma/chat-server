@@ -1,17 +1,14 @@
 package clientapi
 
+import clientapi.authentication.jwt.clientApiJwtAuthentication
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import com.fasterxml.jackson.databind.ObjectMapper
-import graphql.ExecutionInput
-import graphql.GraphQL
-import graphql.KtorGraphQLServer
-import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
-import io.ktor.http.content.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
@@ -23,7 +20,7 @@ fun Route.installClientApi() {
     // remove the authentication block.
     // installGraphQlPlayground()
 
-    clientApiJwtAuthenticate {
+    authenticate(clientApiJwtAuthentication) {
         post("/graphql") {
             // Execute the query against the schema
             val result = graphQLServer.execute(call.request)

@@ -17,7 +17,7 @@ import graphql.*
 import graphql.GraphQL.newGraphQL
 import graphql.execution.DataFetcherExceptionHandler
 import graphql.schema.GraphQLSchema
-import io.ktor.request.*
+import io.ktor.server.request.*
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -30,9 +30,6 @@ val graphQlDi = DI.Module("graphql") {
     bind<MessageMutation>() with singleton { MessageMutation(instance(), instance()) }
     bind<PushMutation>() with singleton { PushMutation(instance()) }
     bind<GraphQLSchema>() with singleton {
-        val objectMapper = jacksonObjectMapper().apply {
-            registerModule(JavaTimeModule())
-        }
         val config = SchemaGeneratorConfig(
             supportedPackages = listOf(
                 "persistence.jooq.tables.pojos",
@@ -40,7 +37,7 @@ val graphQlDi = DI.Module("graphql") {
                 "models",
             ),
             hooks = ChatServerSchemaGeneratorHooks(),
-            dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(objectMapper = objectMapper)
+            dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider()
         )
 
         val queries = listOf(
