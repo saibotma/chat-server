@@ -30,8 +30,8 @@ sourceSets["test"].resources.srcDirs("src/test/resources")
 plugins {
     application
     kotlin("jvm") version "1.7.21"
-    id("com.github.johnrengelman.shadow") version "6.1.0"
-    id("org.flywaydb.flyway") version "7.11.4"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("org.flywaydb.flyway") version "9.7.0"
     id("nu.studer.jooq") version "8.0"
 }
 
