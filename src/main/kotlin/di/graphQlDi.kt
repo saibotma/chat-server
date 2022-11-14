@@ -5,14 +5,12 @@ import clientapi.mutations.ChannelMutation
 import clientapi.mutations.MessageMutation
 import clientapi.mutations.PushMutation
 import clientapi.queries.ChannelQuery
-import clientapi.queries.MessageQuery
+import clientapi.queries.ChannelEventQuery
 import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.execution.SimpleKotlinDataFetcherFactoryProvider
 import com.expediagroup.graphql.generator.toSchema
 import com.expediagroup.graphql.server.execution.*
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import graphql.*
 import graphql.GraphQL.newGraphQL
 import graphql.execution.DataFetcherExceptionHandler
@@ -25,7 +23,7 @@ import org.kodein.di.singleton
 
 val graphQlDi = DI.Module("graphql") {
     bind<ChannelQuery>() with singleton { ChannelQuery(instance()) }
-    bind<MessageQuery>() with singleton { MessageQuery(instance()) }
+    bind<ChannelEventQuery>() with singleton { ChannelEventQuery(instance()) }
     bind<ChannelMutation>() with singleton { ChannelMutation(instance()) }
     bind<MessageMutation>() with singleton { MessageMutation(instance(), instance()) }
     bind<PushMutation>() with singleton { PushMutation(instance()) }
@@ -42,7 +40,7 @@ val graphQlDi = DI.Module("graphql") {
 
         val queries = listOf(
             instance<ChannelQuery>(),
-            instance<MessageQuery>(),
+            instance<ChannelEventQuery>(),
         ).map { TopLevelObject(it) }
 
         val mutations = listOf(

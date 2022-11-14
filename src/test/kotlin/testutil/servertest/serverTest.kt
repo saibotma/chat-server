@@ -5,7 +5,7 @@ import clientapi.mutations.ChannelMutation
 import clientapi.mutations.MessageMutation
 import clientapi.mutations.PushMutation
 import clientapi.queries.ChannelQuery
-import clientapi.queries.MessageQuery
+import clientapi.queries.ChannelEventQuery
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -77,7 +77,7 @@ class ServerTestEnvironment(val client: HttpClient, di: DI) :
     val objectMapper: ObjectMapper by di.instance()
 
     val channelQuery: ChannelQuery by di.instance()
-    val messageQuery: MessageQuery by di.instance()
+    val messageQuery: ChannelEventQuery by di.instance()
     val channelMutation: ChannelMutation by di.instance()
     val messageMutation: MessageMutation by di.instance()
     val pushMutation: PushMutation by di.instance()
