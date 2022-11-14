@@ -2,14 +2,16 @@ package clientapi.queries
 
 import clientapi.AuthContext
 import models.DetailedChannelReadPayload
-import org.jooq.impl.DSL.jsonObject
-import org.jooq.impl.DSL.select
+import org.jooq.impl.DSL.*
 import persistence.jooq.KotlinDslContext
 import persistence.jooq.tables.references.CHANNEL
+import persistence.jooq.tables.references.CHANNEL_EVENT
+import persistence.jooq.tables.references.CHANNEL_META_EVENT
 import persistence.jooq.value
 import persistence.postgres.queries.ChannelEvent
 import persistence.postgres.queries.EventType
 import persistence.postgres.queries.getChannelsOf
+import persistence.postgres.queries.isMemberOfChannel
 import java.util.*
 
 class ChannelQuery(
@@ -30,11 +32,27 @@ class ChannelQuery(
         take: Int,
         fromChannelId: UUID,
         takeEvents: Int,
-        essentialEventTypes: List<EventType>,
+        mustIncludeEventOfType: List<EventType>,
     ): DetailedChannelRead2Payload {
         database.transaction {
             db.select(
-                jsonObject {
+                select(CHANNEL_EVENT.ID)
+                    .from(CHANNEL_EVENT)
+                    .where(
+                        exists(
+                            selectFrom(CHANNEL_META_EVENT).where(
+                                CHANNEL_META_EVENT.CHANNEL_EVENT_ID.eq(CHANNEL_EVENT.ID)
+                            )
+                        ).or(
+                            exists(
+                                selectFrom(CHANNEL_MEMBER_EV).where(
+                                    CHANNEL_META_EVENT.CHANNEL_EVENT_ID.eq(CHANNEL_EVENT.ID)
+                                )
+                            )
+                        )
+                    ).orderBy(CHANNEL_EVENT.ID.desc())
+                    .limit(1),
+                        jsonObject {
                     DetailedChannelRead2Payload::id.value(CHANNEL.ID),
                     DetailedChannelRead2Payload::essentialEvents.value(
                         select()
