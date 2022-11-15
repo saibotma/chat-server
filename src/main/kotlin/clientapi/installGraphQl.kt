@@ -1,26 +1,28 @@
 package clientapi
 
-import clientapi.authentication.jwt.clientApiJwtAuthentication
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import com.fasterxml.jackson.databind.ObjectMapper
+import graphql.GraphQL
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
+import io.ktor.websocket.*
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
 fun Route.installClientApi() {
     val graphQLServer: GraphQLServer<ApplicationRequest> by closestDI().instance()
     val objectMapper: ObjectMapper by closestDI().instance()
+    val graphQl: GraphQL by closestDI().instance()
 
     // To get the GraphQL schema comment this back in and
     // remove the authentication block.
-    // installGraphQlPlayground()
+    installGraphQlPlayground()
 
-    authenticate(clientApiJwtAuthentication) {
+    //authenticate(clientApiJwtAuthentication) {
         post("/graphql") {
             // Execute the query against the schema
             val result = graphQLServer.execute(call.request)
@@ -33,12 +35,20 @@ fun Route.installClientApi() {
                 call.respond(HttpStatusCode.BadRequest, "Invalid request")
             }
         }
-    }
+
+        webSocket("/subscriptions") {
+            print("🔥 incoming, ${call.receiveText()}")
+            for (frame in incoming) {
+                val pimmel = frame as? Frame.Text ?: continue
+                print("🔥 ${pimmel.readText()}")
+            }
+        }
+    //}
 }
 
 private fun Route.installGraphQlPlayground() {
-    get("playground") {
-        this.call.respondText(buildPlaygroundHtml("/client/graphql", "subscriptions"), ContentType.Text.Html)
+    get("/playground") {
+        this.call.respondText(buildPlaygroundHtml("client/graphql", "client/subscriptions"), ContentType.Text.Html)
     }
 }
 

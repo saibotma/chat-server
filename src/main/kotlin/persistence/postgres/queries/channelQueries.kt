@@ -18,6 +18,7 @@ import persistence.postgres.mappings.detailedChannelReadToJson
 import models.ChannelMemberWritePayload
 import models.DetailedChannelMemberReadPayload
 import org.jooq.impl.DSL.*
+import persistence.postgres.queries.channelmember.isMemberOfChannel
 import java.time.Instant.now
 import java.util.*
 
@@ -127,37 +128,5 @@ fun KotlinTransactionContext.deleteMember(channelId: UUID, userId: String) {
         .execute()
 }
 
-fun KotlinTransactionContext.getChannelsOf(
-    userId: String,
-    channelIdFilter: UUID? = null
-): List<DetailedChannelReadPayload> {
-    return selectChannelsOf(userId = userId, channelIdFilter = channelIdFilter)
-        .fetchInto(DetailedChannelReadPayload::class.java)
-}
 
-fun KotlinTransactionContext.isMemberOfChannel(channelId: UUID, userId: String): Boolean {
-    return db.select(field(isMemberOfChannel(channelId = value(channelId), userId = userId)))
-        .fetchOneInto(Boolean::class.java) ?: false
-}
 
-private fun KotlinTransactionContext.selectChannelsOf(
-    userId: String,
-    channelIdFilter: UUID? = null
-): SelectConditionStep<Record1<JSON>> {
-    return db.select(detailedChannelReadToJson(channel = CHANNEL))
-        .from(CHANNEL)
-        .where(isMemberOfChannel(channelId = CHANNEL.ID, userId = userId))
-        .andIf(channelIdFilter != null) { CHANNEL.ID.eq(channelIdFilter) }
-}
-
-fun isMemberOfChannel(channelId: Field<UUID?>, userId: String): Condition {
-    return value(userId).`in`(selectUserIdsOfChannel(channelId = channelId))
-}
-
-private fun selectUserIdsOfChannel(channelId: Field<UUID?>): SelectConditionStep<Record1<String?>> {
-    val funName = ::selectUserIdsOfChannel.name
-    val channelMemberAlias = CHANNEL_MEMBER.funAlias(funName)
-    return select(channelMemberAlias.USER_ID)
-        .from(channelMemberAlias)
-        .where(channelMemberAlias.CHANNEL_ID.eq(channelId))
-}

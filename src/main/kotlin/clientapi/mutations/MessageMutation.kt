@@ -8,6 +8,7 @@ import clientapi.models.toMessage
 import clientapi.resourceNotFound
 import persistence.jooq.KotlinDslContext
 import persistence.postgres.queries.*
+import persistence.postgres.queries.channelmember.isMemberOfChannel
 import push.PushService
 import java.time.Instant.now
 import java.util.*

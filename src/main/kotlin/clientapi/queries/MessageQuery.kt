@@ -5,8 +5,9 @@ import clientapi.ClientApiException
 import clientapi.models.DetailedMessageReadPayload
 import clientapi.resourceNotFound
 import persistence.jooq.KotlinDslContext
+import persistence.postgres.queries.channelmember.isMemberOfChannel
+import persistence.postgres.queries.getMessage
 import persistence.postgres.queries.getMessagesOf
-import persistence.postgres.queries.isMemberOfChannel
 import java.time.Instant
 import java.util.*
 
@@ -21,8 +22,10 @@ class MessageQuery(private val database: KotlinDslContext) {
     ): List<DetailedMessageReadPayload> {
         // TODO(saibotma): https://github.com/saibotma/chat-server/issues/5
         val userId = context.userId
+        val isMemberOfChannel = database.transaction { isMemberOfChannel(channelId = channelId, userId = userId) }
+        if (!isMemberOfChannel) throw ClientApiException.resourceNotFound()
+
         return database.transaction {
-            if (!isMemberOfChannel(channelId = channelId, userId = userId)) throw ClientApiException.resourceNotFound()
             getMessagesOf(
                 channelId = channelId,
                 byDateTime = byDateTime,
@@ -31,5 +34,13 @@ class MessageQuery(private val database: KotlinDslContext) {
                 nextLimit = nextLimit
             )
         }
+    }
+
+    suspend fun message(context: AuthContext, channelId: UUID, messageId: UUID) {
+        val isMemberOfChannel =
+            database.transaction { isMemberOfChannel(channelId = channelId, userId = context.userId) }
+        if (!isMemberOfChannel) throw ClientApiException.resourceNotFound()
+
+        return database.transaction { getMessage(messageId) }
     }
 }

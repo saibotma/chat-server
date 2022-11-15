@@ -67,8 +67,10 @@ dependencies {
     // https://youtrack.jetbrains.com/issue/KTOR-4237/CORS-the-plugin-responds-with-403-although-specification-doesnt-contain-such-information
     // https://youtrack.jetbrains.com/issue/KTOR-4236/CORS-Plugin-should-log-reason-for-returning-403-Forbidden-errors
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
+    implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor", "ktor-client-core", ktorVersion)
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-server-websockets-jvm:2.1.3")
     testImplementation("io.ktor", "ktor-server-tests", ktorVersion)
 
 
@@ -101,6 +103,9 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitJupiterVersion)
 
     testImplementation("io.mockk", "mockk", mockkVersion)
+
+    // TODO(saibotma): Remove me.
+    implementation("io.projectreactor:reactor-core:3.5.0")
 }
 
 tasks.test {

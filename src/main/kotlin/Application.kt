@@ -23,23 +23,25 @@ import io.ktor.server.plugins.doublereceive.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
 import logging.LoggingPlugin
 import org.apache.logging.log4j.kotlin.logger
 import org.flywaydb.core.Flyway
-import persistence.jooq.KotlinDslContext
-import platformapi.PlatformApiConfig
-import platformapi.installPlatformApi
-import push.FirebaseInitializer
-import java.time.Instant
-import java.time.LocalDate
-import java.util.*
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
+import persistence.jooq.KotlinDslContext
+import platformapi.PlatformApiConfig
 import platformapi.authentication.accesstoken.installPlatformApiAccessTokenAuthentication
+import platformapi.installPlatformApi
+import push.FirebaseInitializer
 import util.serverPort
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.util.*
 
 fun main() {
     // Execute using embedded server because wih automatic module loading
@@ -96,6 +98,10 @@ private fun Application.installFeatures(di: DI) {
     install(DoubleReceive)
     install(Locations)
     install(LoggingPlugin)
+    install(WebSockets) {
+        // https://security.stackexchange.com/a/113306/282454
+        masking = true
+    }
 
     install(Authentication) {
         val platformApiConfig: PlatformApiConfig by di.instance()

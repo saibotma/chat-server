@@ -1,9 +1,14 @@
-CREATE TYPE channel_event_type AS ENUM
-CREATE TYPE channel_member_event_type AS ENUM ('create', 'update', 'delete');
-CREATE TYPE channel_message_event_type AS ENUM ('create', 'update', 'delete');
+ALTER TABLE "user"
+    ADD COLUMN "updated_at" timestamptz NULL;
+
+ALTER TABLE "channel_member"
+    ADD COLUMN "updated_at" timestamptz NULL;
 
 ALTER TABLE "channel"
     ADD COLUMN "description" text NULL;
+
+ALTER TABLE "channel"
+    ADD COLUMN "updated_at" timestamptz NULL;
 
 ALTER TABLE "channel"
     ADD COLUMN "creator_user_id" varchar NULL;
@@ -11,57 +16,42 @@ ALTER TABLE "channel"
     ADD CONSTRAINT "channel_creator_user_id_fkey"
         FOREIGN KEY ("creator_user_id") REFERENCES "user" ("id") ON DELETE SET NULL;
 
+CREATE TYPE "channel_event_type" AS ENUM (
+    'create',
+    'set_channel_name',
+    'set_channel_description',
+    'add_member',
+    'update_member_role',
+    'remove_member',
+    'send_message',
+    'update_message_text',
+    'update_message_replied_message_id',
+    'delete_message',
+    'delete'
+);
+
 CREATE TABLE "channel_event"
 (
     id         bigserial,
     channel_id uuid,
-    created_at timestamptz NOT NULL,
+    type       "channel_event_type" NOT NULL,
+    data       jsonb NULL,
+    created_at timestamptz          NOT NULL,
     CONSTRAINT "channel_event_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "channel_event_channel_id_fkey"
         FOREIGN KEY ("channel_id") REFERENCES "channel" ("id") ON DELETE CASCADE
 );
 
-CREATE TABLE "channel_meta_event"
-(
-    "channel_event_id" bigint,
-    "name"             varchar(512) NULL,
-    "description"      varchar(4096) NULL,
-    "creator_user_id"  varchar NULL,
-    CONSTRAINT "channel_meta_event_channel_event_id_pkey" PRIMARY KEY ("channel_event_id"),
-    CONSTRAINT "channel_meta_event_channel_event_id_fkey"
-        FOREIGN KEY ("channel_event_id") REFERENCES "channel_event" ("id") ON DELETE CASCADE,
-    CONSTRAINT "channel_meta_event_creator_user_id_fkey"
-        FOREIGN KEY ("creator_user_id") REFERENCES "user" ("id") ON DELETE SET NULL
+CREATE TYPE "user_event_type" AS ENUM (
+    'update_name',
 );
 
-CREATE TABLE "channel_member_event"
+CREATE TABLE "user_event"
 (
-    "channel_event_id" bigint,
-    "type"             "channel_member_event_type" NOT NULL,
-    "user_id"          varchar NULL,
-    "role"             channel_member_role NULL,
-    "creator_user_id"  varchar NULL,
-    CONSTRAINT "channel_member_event_pkey" PRIMARY KEY ("channel_event_id"),
-    CONSTRAINT "channel_member_event_channel_event_id_fkey"
-        FOREIGN KEY ("channel_event_id") REFERENCES "channel_event" ("id") ON DELETE CASCADE,
-    CONSTRAINT "channel_member_event_user_id_fkey"
-        FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE SET NULL,
-    CONSTRAINT "channel_member_event_creator_user_id_fkey"
-        FOREIGN KEY ("creator_user_id") REFERENCES "user" ("id") ON DELETE SET NULL
+    id         bigserial,
+    user_id    varchar           NOT NULL,
+    type       "user_event_type" NOT NULL,
+    data       jsonb NULL,
+    created_at timestamptz       NOT NULL,
+    CONSTRAINT "user_event_pkey" PRIMARY KEY ("id")
 );
-
-CREATE TABLE "channel_message_event"
-(
-    "channel_event_id" bigint,
-    "type"             "channel_message_event_type" NOT NULL,
-    "message_id"       uuid                         NOT NULL,
-    CONSTRAINT "channel_message_event_pkey" PRIMARY KEY ("channel_event_id")
-);
-
-/*
--- Migrate all channel members to new event structure.
-INSERT INTO "create_member_event" values ()
-
--- Migrate all messages to new event structure.
-INSERT INTO "create_message_event" ("")
-*/
