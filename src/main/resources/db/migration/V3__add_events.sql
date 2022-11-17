@@ -59,14 +59,14 @@ BEGIN
     is_insert = tg_op = 'INSERT';
     is_update = tg_op = 'UPDATE';
     is_delete = tg_op = 'DELETE';
-    IF (is_update AND OLD."name" != NEW."name") THEN
+    IF (is_update AND OLD."name" IS DISTINCT FROM NEW."name") THEN
         CALL insert_channel_event(
                 "channel_id" => NEW."id",
                 "type" => 'set_channel_name',
                 "data" => jsonb_build_object('version', '1.0', 'name', NEW."name")
             );
     END IF;
-    IF (is_update AND OLD."description" != NEW."description") THEN
+    IF (is_update AND OLD."description" IS DISTINCT FROM NEW."description") THEN
         CALL insert_channel_event(
                 "channel_id" => NEW."id",
                 "type" => 'set_channel_description',
@@ -95,7 +95,7 @@ BEGIN
                 "data" => jsonb_build_object('version', '1.0', 'user_id', NEW."user_id", 'role', NEW."role")
             );
     END IF;
-    IF (is_update AND OLD."role" != NEW."role") THEN
+    IF (is_update AND OLD."role" IS DISTINCT FROM NEW."role") THEN
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'update_member_role',
@@ -137,7 +137,7 @@ BEGIN
                     )
             );
     END IF;
-    IF (is_update AND OLD."text" != NEW."text") THEN
+    IF (is_update AND OLD."text" IS DISTINCT FROM NEW."text") THEN
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'update_message_text',
@@ -224,7 +224,7 @@ CREATE FUNCTION create_user_event() RETURNS TRIGGER AS
 $$
 BEGIN
     IF (tg_op = 'UPDATE') THEN
-        IF (OLD."name" != NEW."name") THEN
+        IF (OLD."name" IS DISTINCT FROM NEW."name") THEN
             INSERT INTO "user_event" ("user_id", "type", "data", "created_at")
             VALUES (NEW."id", 'update_name', jsonb_build_object('version', '1.0.0', 'name', NEW."name"), now());
         END IF;
