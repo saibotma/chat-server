@@ -83,30 +83,32 @@ DECLARE
     is_insert bool;
     is_update bool;
     is_delete bool;
+    reference jsonb;
 BEGIN
     is_insert = tg_op = 'INSERT';
     is_update = tg_op = 'UPDATE';
     is_delete = tg_op = 'DELETE';
+    reference = jsonb_build_object('user_id', NEW."user_id");
 
     IF (is_insert) THEN
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'add_member',
-                "data" => jsonb_build_object('version', '1.0', 'user_id', NEW."user_id", 'role', NEW."role")
+                "data" => reference || jsonb_build_object('version', '1.0', 'role', NEW."role")
             );
     END IF;
     IF (is_update AND OLD."role" IS DISTINCT FROM NEW."role") THEN
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'update_member_role',
-                "data" => jsonb_build_object('version', '1.0', 'user_id', NEW."user_id", 'role', NEW."role")
+                "data" => reference || jsonb_build_object('version', '1.0', 'role', NEW."role")
             );
     END IF;
     IF (is_delete) THEN
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'remove_member',
-                "data" => jsonb_build_object('version', '1.0', 'user_id', NEW."user_id")
+                "data" => reference || jsonb_build_object('version', '1.0')
             );
     END IF;
     RETURN NULL;
@@ -119,18 +121,19 @@ DECLARE
     is_insert bool;
     is_update bool;
     is_delete bool;
+    reference jsonb;
 BEGIN
     is_insert = tg_op = 'INSERT';
     is_update = tg_op = 'UPDATE';
     is_delete = tg_op = 'DELETE';
+    reference = jsonb_build_object('message_id', NEW."id");
 
     IF (is_insert) THEN
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'send_message',
-                "data" => jsonb_build_object(
+                "data" => reference || jsonb_build_object(
                         'version', '1.0',
-                        'id', NEW."id",
                         'text', NEW."text",
                         'replied_message_id', NEW."replied_message_id",
                         'creator_user_id', NEW."creator_user_id"
@@ -141,16 +144,15 @@ BEGIN
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'update_message_text',
-                "data" => jsonb_build_object('version', '1.0', 'id', NEW."id", 'text', NEW."text")
+                "data" => reference || jsonb_build_object('version', '1.0', 'text', NEW."text")
             );
     END IF;
     IF (is_update AND OLD."replied_message_id" != NEW."replied_message_id") THEN
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'update_message_replied_message_id',
-                "data" => jsonb_build_object(
+                "data" => reference || jsonb_build_object(
                         'version', '1.0',
-                        'id', NEW."id",
                         'replied_message_id', NEW."replied_message_id"
                     )
             );
@@ -159,7 +161,7 @@ BEGIN
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'delete_message',
-                "data" => jsonb_build_object('version', '1.0', 'id', NEW."id")
+                "data" => reference || jsonb_build_object('version', '1.0')
             );
     END IF;
     RETURN NULL;
@@ -242,7 +244,7 @@ EXECUTE PROCEDURE create_user_event();
 CREATE FUNCTION notify_channel_event() RETURNS TRIGGER AS
 $$
 BEGIN
-    PERFORM pg_notify('channel_event', NEW."id");
+    PERFORM pg_notify('channel_event', NEW."id"::text);
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
@@ -256,7 +258,7 @@ EXECUTE PROCEDURE notify_channel_event();
 CREATE FUNCTION notify_user_event() RETURNS TRIGGER AS
 $$
 BEGIN
-    PERFORM pg_notify('user_event', NEW."id");
+    PERFORM pg_notify('user_event', NEW."id"::text);
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;

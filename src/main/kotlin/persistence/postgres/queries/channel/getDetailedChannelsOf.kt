@@ -6,6 +6,7 @@ import org.jooq.JSON
 import org.jooq.Record1
 import org.jooq.SelectConditionStep
 import org.jooq.impl.DSL.select
+import org.jooq.impl.DSL.value
 import persistence.jooq.KotlinTransactionContext
 import persistence.jooq.andIf
 import persistence.jooq.enums.ChannelEventType
@@ -31,7 +32,7 @@ fun KotlinTransactionContext.getDetailedChannelsOf(
         detailedChannelRead2ToJson(channel = CHANNEL, lastEventType = lastEventType.toSet())
     )
         .from(CHANNEL)
-        .where(isMemberOfChannel(channelId = CHANNEL.ID, userId = userId))
+        .where(isMemberOfChannel(channelId = CHANNEL.ID, userId = value(userId)))
         .orderBy(CHANNEL_EVENT.ID.desc())
         .fetchInto(DetailedChannelReadPayload2::class.java)
 }
@@ -50,6 +51,6 @@ private fun KotlinTransactionContext.selectDetailedChannelsOf(
 ): SelectConditionStep<Record1<JSON>> {
     return db.select(detailedChannelReadToJson(channel = Channel.CHANNEL))
         .from(Channel.CHANNEL)
-        .where(isMemberOfChannel(channelId = Channel.CHANNEL.ID, userId = userId))
+        .where(isMemberOfChannel(channelId = Channel.CHANNEL.ID, userId = value(userId)))
         .andIf(channelIdFilter != null) { Channel.CHANNEL.ID.eq(channelIdFilter) }
 }

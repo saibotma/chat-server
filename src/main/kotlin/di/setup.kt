@@ -12,4 +12,5 @@ fun DI.MainBuilder.setupDi(config: ApplicationConfig) {
     import(postgresDi)
     import(graphQlDi)
     import(pushDi)
+    import(clientEventsDi)
 }

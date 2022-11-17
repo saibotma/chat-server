@@ -1,6 +1,10 @@
+
 import clientapi.ClientApiConfig
+import clientapi.TargetedMessageSessionManager
+import clientapi.UserId
 import clientapi.authentication.jwt.installClientApiJwtAuthentication
 import clientapi.installClientApi
+import clientapi.models.UserEventReadPayload
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.typesafe.config.ConfigFactory
@@ -24,6 +28,14 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
+import io.ktor.websocket.*
+import io.r2dbc.postgresql.PostgresqlConnectionConfiguration
+import io.r2dbc.postgresql.PostgresqlConnectionFactory
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitFirst
 import logging.LoggingPlugin
 import org.apache.logging.log4j.kotlin.logger
 import org.flywaydb.core.Flyway
@@ -33,12 +45,15 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import persistence.jooq.KotlinDslContext
+import persistence.jooq.tables.references.USER
+import persistence.jooq.tables.references.USER_EVENT
+import persistence.postgres.PostgresConfig
+import persistence.postgres.mappings.userEventReadPayloadToJson
 import platformapi.PlatformApiConfig
 import platformapi.authentication.accesstoken.installPlatformApiAccessTokenAuthentication
 import platformapi.installPlatformApi
 import push.FirebaseInitializer
 import util.serverPort
-import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
@@ -86,6 +101,74 @@ fun Application.chatServer(di: DI? = null) {
             installClientApi()
         }
     }
+
+    launchDatabaseListener()
+}
+
+fun Application.launchDatabaseListener() {
+    val sessionManager: TargetedMessageSessionManager by closestDI().instance()
+    val database: KotlinDslContext by closestDI().instance()
+    val config: PostgresConfig by closestDI().instance()
+    val connectionFactory = PostgresqlConnectionFactory(
+        PostgresqlConnectionConfiguration.builder()
+            .host(config.serverName)
+            .port(config.port)
+            .username(config.user)
+            .password(config.password)
+            .database(config.db)
+            .build()
+    )
+
+    launch {
+        // TODO(saibotma): Remove prints
+        suspend fun connectAndListen() {
+            suspend fun handleDisconnect() {
+                sessionManager.lock()
+                sessionManager.closeAllSessions(
+                    closeReason = CloseReason(
+                        CloseReason.Codes.INTERNAL_ERROR,
+                        message = "Lost connection to database."
+                    )
+                )
+                // TODO(saibotma): Cancel all websocket connections.
+                println("Waiting to reconnect..")
+                delay(1000)
+                connectAndListen()
+            }
+
+            try {
+                println("Connecting..")
+                val connection = connectionFactory.create().awaitFirst()
+                println("Connected")
+                connection.createStatement("LISTEN user_event")
+                    .execute().asFlow().collect()
+                sessionManager.unlock()
+                connection.notifications.asFlow().collect { notification ->
+                    val event = database.transaction {
+                        db.select(userEventReadPayloadToJson(userEvent = USER_EVENT))
+                            .from(USER_EVENT)
+                            .where(USER_EVENT.ID.eq(notification.parameter!!.toLong()))
+                            .fetchOneInto(UserEventReadPayload::class.java)
+                    }!!
+
+                    val userIds = database.transaction {
+                        db.select(USER.ID)
+                            .from(USER)
+                            //.where(areMembersOfSameChannel(userId1 = USER.ID, userId2 = value(event.userId)))
+                            .fetchInto(String::class.java)
+                    }.map(::UserId).toSet()
+                    sessionManager.dispatch(userIds = userIds, message = event)
+                }
+            } catch (e: Exception) {
+                println(e)
+                handleDisconnect()
+            } finally {
+                handleDisconnect()
+            }
+        }
+
+        connectAndListen()
+    }
 }
 
 private fun Application.installFeatures(di: DI) {
@@ -98,10 +181,7 @@ private fun Application.installFeatures(di: DI) {
     install(DoubleReceive)
     install(Locations)
     install(LoggingPlugin)
-    install(WebSockets) {
-        // https://security.stackexchange.com/a/113306/282454
-        masking = true
-    }
+    install(WebSockets)
 
     install(Authentication) {
         val platformApiConfig: PlatformApiConfig by di.instance()

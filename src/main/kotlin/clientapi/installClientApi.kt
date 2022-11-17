@@ -1,28 +1,29 @@
 package clientapi
 
+import clientapi.authentication.jwt.clientApiJwtAuthentication
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import com.fasterxml.jackson.databind.ObjectMapper
-import graphql.GraphQL
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
-import io.ktor.websocket.*
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
 fun Route.installClientApi() {
     val graphQLServer: GraphQLServer<ApplicationRequest> by closestDI().instance()
     val objectMapper: ObjectMapper by closestDI().instance()
-    val graphQl: GraphQL by closestDI().instance()
+    val socketManager: TargetedMessageSessionManager by closestDI().instance()
 
     // To get the GraphQL schema comment this back in and
     // remove the authentication block.
-    installGraphQlPlayground()
+    // installGraphQlPlayground()
 
-    //authenticate(clientApiJwtAuthentication) {
+    authenticate(clientApiJwtAuthentication) {
+        // TODO(saibotma): Rename to graphql-api and also move to apis folder.
         post("/graphql") {
             // Execute the query against the schema
             val result = graphQLServer.execute(call.request)
@@ -36,14 +37,24 @@ fun Route.installClientApi() {
             }
         }
 
-        webSocket("/subscriptions") {
-            print("🔥 incoming, ${call.receiveText()}")
-            for (frame in incoming) {
-                val pimmel = frame as? Frame.Text ?: continue
-                print("🔥 ${pimmel.readText()}")
+        webSocket("/events", protocol = "chat-server-authenticated-client") {
+            val context = call.principal<AuthContext>()!!
+            val userId = UserId(context.userId)
+            val session = SimpleWebSocketSession(this)
+            socketManager.maybeAddSession(userId = userId, session = session)
+
+            try {
+                for (frame in incoming) {
+                    continue
+                }
+            } finally {
+                // Does not enter catch and thus need to handle web socket
+                // close in finally block:
+                // https://youtrack.jetbrains.com/issue/KTOR-5191/How-to-get-cancel-reason-when-client-closes-web-socket-connection
+                socketManager.removeSession(session)
             }
         }
-    //}
+    }
 }
 
 private fun Route.installGraphQlPlayground() {

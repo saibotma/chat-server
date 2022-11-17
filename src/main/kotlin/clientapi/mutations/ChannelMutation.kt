@@ -3,13 +3,14 @@ package clientapi.mutations
 import clientapi.AuthContext
 import clientapi.ClientApiException
 import clientapi.resourceNotFound
-import persistence.jooq.tables.pojos.Channel
-import models.DetailedChannelReadPayload
-import persistence.jooq.KotlinDslContext
-import persistence.postgres.queries.*
 import models.ChannelMemberWritePayload
 import models.DetailedChannelMemberReadPayload
+import models.DetailedChannelReadPayload
 import models.toChannelMember
+import persistence.jooq.KotlinDslContext
+import persistence.jooq.tables.pojos.Channel
+import persistence.postgres.queries.*
+import persistence.postgres.queries.channel.getDetailedChannelsOf
 import java.time.Instant.now
 import java.util.*
 import java.util.UUID.randomUUID
@@ -26,7 +27,7 @@ class ChannelMutation(
             val id = randomUUID()
             insertChannel(Channel(id = id, name = name, isManaged = false, createdAt = now()))
             insertMembers(members.map { it.toChannelMember(channelId = id, addedAt = now()) })
-            getChannelsOf(userId = context.userId, channelIdFilter = id).first()
+            getDetailedChannelsOf(userId = context.userId, channelIdFilter = id).first()
         }
     }
 
@@ -39,7 +40,7 @@ class ChannelMutation(
         return database.transaction {
             if (!isAdminOfChannel(channelId = id, userId = userId)) throw ClientApiException.resourceNotFound()
             updateChannel(id = id, name = name)
-            getChannelsOf(userId, channelIdFilter = id).first()
+            getDetailedChannelsOf(userId, channelIdFilter = id).first()
         }
     }
 

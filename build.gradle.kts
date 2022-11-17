@@ -106,6 +106,8 @@ dependencies {
 
     // TODO(saibotma): Remove me.
     implementation("io.projectreactor:reactor-core:3.5.0")
+    // TODO(saibotma): Add version variable.
+    implementation("org.postgresql:r2dbc-postgresql:1.0.0.RELEASE")
 }
 
 tasks.test {
