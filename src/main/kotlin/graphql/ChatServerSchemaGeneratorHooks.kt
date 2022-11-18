@@ -22,9 +22,16 @@ class ChatServerSchemaGeneratorHooks : SchemaGeneratorHooks {
         )
     }
 
+    private val graphQlLongType = newScalar {
+        name("Long")
+        description("A 64 bit large integer number.")
+        coercing(parseValue = { it?.toLong() }, serialize = { it.toString() })
+    }
+
     override fun willGenerateGraphQLType(type: KType) = when (type.classifier as? KClass<*>) {
         UUID::class -> graphQlUUIDType
         Instant::class -> graphQlUtcDateTime
+        Long::class -> graphQlLongType
         else -> null
     }
 }

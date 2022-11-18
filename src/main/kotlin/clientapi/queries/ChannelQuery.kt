@@ -18,7 +18,7 @@ class ChannelQuery(
         }
     }
 
-    suspend fun channels(
+    suspend fun channels2(
         context: AuthContext,
         lastEventType: List<ChannelEventType>,
     ): List<DetailedChannelReadPayload2> {

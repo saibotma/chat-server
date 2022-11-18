@@ -1,5 +1,6 @@
 package clientapi
 
+import clientapi.authentication.jwt.clientApiJwtAuthentication
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.*
@@ -17,11 +18,18 @@ fun Route.installClientApi() {
     val objectMapper: ObjectMapper by closestDI().instance()
     val socketManager: TargetedMessageSessionManager by closestDI().instance()
 
-    // To get the GraphQL schema comment this back in and
-    // remove the authentication block.
-    installGraphQlPlayground()
+    // To get the GraphQL schema comment this back in.
+    /*
+    val schema: GraphQLSchema by closestDI().instance()
+    val sdlString = SchemaPrinter().print(schema)
+    println(sdlString)
+     */
 
-    //authenticate(clientApiJwtAuthentication) {
+
+    // To access playground comment this back in and remove authenticate block.
+    //installGraphQlPlayground()
+
+    authenticate(clientApiJwtAuthentication) {
         // TODO(saibotma): Rename to graphql-api and also move to apis folder.
         post("/graphql") {
             // Execute the query against the schema
@@ -53,9 +61,12 @@ fun Route.installClientApi() {
                 socketManager.removeSession(session)
             }
         }
-    //}
+    }
 }
 
+// Issues:
+// - https://github.com/graphql/graphql-playground/issues/1396
+// - https://github.com/graphql/graphql-playground/issues/1288
 private fun Route.installGraphQlPlayground() {
     get("/playground") {
         this.call.respondText(buildPlaygroundHtml("client/graphql", "client/subscriptions"), ContentType.Text.Html)

@@ -36,11 +36,11 @@ class MessageQuery(private val database: KotlinDslContext) {
         }
     }
 
-    suspend fun message(context: AuthContext, channelId: UUID, messageId: UUID) {
+    suspend fun message(context: AuthContext, channelId: UUID, messageId: UUID): DetailedMessageReadPayload {
         val isMemberOfChannel =
             database.transaction { isMemberOfChannel(channelId = channelId, userId = context.userId) }
         if (!isMemberOfChannel) throw ClientApiException.resourceNotFound()
 
-        return database.transaction { getMessage(messageId) }
+        return database.transaction { getMessage(messageId) } ?: throw ClientApiException.resourceNotFound()
     }
 }

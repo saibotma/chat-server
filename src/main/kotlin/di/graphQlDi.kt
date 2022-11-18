@@ -27,7 +27,7 @@ val graphQlDi = DI.Module("graphql") {
     bind<ChannelQuery>() with singleton { ChannelQuery(database = instance(), objectMapper = instance()) }
     bind<ChannelEventQuery>() with singleton { ChannelEventQuery(database = instance(), objectMapper = instance()) }
     bind<MessageQuery>() with singleton { MessageQuery(instance()) }
-    bind<UserEventQuery>() with singleton { UserEventQuery(instance()) }
+    bind<UserEventQuery>() with singleton { UserEventQuery(database = instance(), objectMapper = instance()) }
     bind<UserQuery>() with singleton { UserQuery(instance()) }
 
     bind<ChannelMutation>() with singleton { ChannelMutation(instance()) }
