@@ -1,6 +1,5 @@
 package clientapi
 
-import clientapi.authentication.jwt.clientApiJwtAuthentication
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.*
@@ -20,9 +19,9 @@ fun Route.installClientApi() {
 
     // To get the GraphQL schema comment this back in and
     // remove the authentication block.
-    // installGraphQlPlayground()
+    installGraphQlPlayground()
 
-    authenticate(clientApiJwtAuthentication) {
+    //authenticate(clientApiJwtAuthentication) {
         // TODO(saibotma): Rename to graphql-api and also move to apis folder.
         post("/graphql") {
             // Execute the query against the schema
@@ -54,7 +53,7 @@ fun Route.installClientApi() {
                 socketManager.removeSession(session)
             }
         }
-    }
+    //}
 }
 
 private fun Route.installGraphQlPlayground() {

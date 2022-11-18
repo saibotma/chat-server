@@ -33,7 +33,7 @@ CREATE TABLE "channel_event"
     id         bigserial,
     channel_id uuid,
     type       "channel_event_type" NOT NULL,
-    data       jsonb                NULL,
+    data       jsonb                NOT NULL,
     created_at timestamptz          NOT NULL,
     CONSTRAINT "channel_event_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "channel_event_channel_id_fkey"
@@ -168,8 +168,7 @@ BEGIN
         -- can remove all previous events of this message.
         DELETE
         FROM "channel_event"
-        where "data" is not null
-          and "data" -> 'message_id' = message_id;
+        where "data" -> 'message_id' = message_id;
 
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
@@ -230,7 +229,7 @@ CREATE TABLE "user_event"
     id         bigserial,
     user_id    varchar           NOT NULL,
     type       "user_event_type" NOT NULL,
-    data       jsonb             NULL,
+    data       jsonb             NOT NULL,
     created_at timestamptz       NOT NULL,
     CONSTRAINT "user_event_pkey" PRIMARY KEY ("id")
 );

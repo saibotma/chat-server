@@ -1,4 +1,6 @@
 import clientapi.TargetedMessageSessionManager
+import clientapi.models.toReadPayload
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.server.application.*
 import io.ktor.websocket.*
 import io.r2dbc.postgresql.PostgresqlConnectionConfiguration
@@ -21,6 +23,8 @@ import persistence.postgres.queries.userevent.getUserIdsForUserEvent
 fun Application.listenForDatabaseNotifications() {
     val log = logger(Application::listenForDatabaseNotifications.name)
     val sessionManager: TargetedMessageSessionManager by closestDI().instance()
+    val objectMapper: ObjectMapper by closestDI().instance()
+
     val database: KotlinDslContext by closestDI().instance()
     val config: PostgresConfig by closestDI().instance()
     val connectionFactory = PostgresqlConnectionFactory(
@@ -59,6 +63,7 @@ fun Application.listenForDatabaseNotifications() {
                     val eventId = notification.parameter!!.toLong()
                     if (notification.name == "user_event") {
                         val event = database.transaction { getUserEvent(eventId) }
+                            ?.toReadPayload(objectMapper = objectMapper)
                         if (event != null) {
                             val userIds = database.transaction { getUserIdsForUserEvent(event.userId) }
                             sessionManager.dispatch(userIds = userIds, message = event)
@@ -67,11 +72,11 @@ fun Application.listenForDatabaseNotifications() {
 
                     if (notification.name == "channel_event") {
                         val event = database.transaction { getChannelEvent(eventId) }
+                            ?.toReadPayload(objectMapper = objectMapper)
                         if (event != null) {
                             val userIds = database.transaction { getUserIdsForChannelEvent(event.channelId) }
                             sessionManager.dispatch(userIds = userIds, message = event)
                         }
-
                     }
                 }
             } catch (e: Exception) {

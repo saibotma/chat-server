@@ -4,7 +4,7 @@ import clientapi.AuthContext
 import clientapi.mutations.ChannelMutation
 import clientapi.mutations.MessageMutation
 import clientapi.mutations.PushMutation
-import clientapi.queries.ChannelQuery
+import clientapi.queries.*
 import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.execution.SimpleKotlinDataFetcherFactoryProvider
@@ -24,8 +24,12 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 
 val graphQlDi = DI.Module("graphql") {
-    bind<ChannelQuery>() with singleton { ChannelQuery(instance()) }
-    //bind<ChannelEventQuery>() with singleton { ChannelEventQuery(instance()) }
+    bind<ChannelQuery>() with singleton { ChannelQuery(database = instance(), objectMapper = instance()) }
+    bind<ChannelEventQuery>() with singleton { ChannelEventQuery(database = instance(), objectMapper = instance()) }
+    bind<MessageQuery>() with singleton { MessageQuery(instance()) }
+    bind<UserEventQuery>() with singleton { UserEventQuery(instance()) }
+    bind<UserQuery>() with singleton { UserQuery(instance()) }
+
     bind<ChannelMutation>() with singleton { ChannelMutation(instance()) }
     bind<MessageMutation>() with singleton { MessageMutation(instance(), instance()) }
     bind<PushMutation>() with singleton { PushMutation(instance()) }
@@ -36,8 +40,6 @@ val graphQlDi = DI.Module("graphql") {
                 "persistence.jooq.tables.pojos",
                 "clientapi.models",
                 "models",
-                //"clientapi",
-                //"persistence.postgres.queries",
             ),
             hooks = ChatServerSchemaGeneratorHooks(),
             dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider()
@@ -45,7 +47,10 @@ val graphQlDi = DI.Module("graphql") {
 
         val queries = listOf(
             instance<ChannelQuery>(),
-            //instance<ChannelEventQuery>(),
+            instance<ChannelEventQuery>(),
+            instance<MessageQuery>(),
+            instance<UserEventQuery>(),
+            instance<UserQuery>(),
         ).map { TopLevelObject(it) }
 
         val mutations = listOf(
