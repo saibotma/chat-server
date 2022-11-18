@@ -83,12 +83,15 @@ DECLARE
     is_insert bool;
     is_update bool;
     is_delete bool;
+    user_id   varchar;
     reference jsonb;
 BEGIN
     is_insert = tg_op = 'INSERT';
     is_update = tg_op = 'UPDATE';
     is_delete = tg_op = 'DELETE';
-    reference = jsonb_build_object('user_id', NEW."user_id");
+    -- Need this, because OLD/NEW are null depending on tg_op.
+    user_id = coalesce(OLD."user_id", NEW."user_id");
+    reference = jsonb_build_object('user_id', user_id);
 
     IF (is_insert) THEN
         CALL insert_channel_event(
@@ -118,15 +121,18 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION create_message_channel_event() RETURNS TRIGGER AS
 $$
 DECLARE
-    is_insert bool;
-    is_update bool;
-    is_delete bool;
-    reference jsonb;
+    is_insert  bool;
+    is_update  bool;
+    is_delete  bool;
+    message_id uuid;
+    reference  jsonb;
 BEGIN
     is_insert = tg_op = 'INSERT';
     is_update = tg_op = 'UPDATE';
     is_delete = tg_op = 'DELETE';
-    reference = jsonb_build_object('message_id', NEW."id");
+    -- Need this, because OLD/NEW are null depending on tg_op.
+    message_id = coalesce(OLD."id", NEW."id");
+    reference = jsonb_build_object('message_id', message_id);
 
     IF (is_insert) THEN
         CALL insert_channel_event(
@@ -158,6 +164,13 @@ BEGIN
             );
     END IF;
     IF (is_delete) THEN
+        -- Don't need the message history and to improve data privacy
+        -- can remove all previous events of this message.
+        DELETE
+        FROM "channel_event"
+        where "data" is not null
+          and "data" -> 'message_id' = message_id;
+
         CALL insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'delete_message',
