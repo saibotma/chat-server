@@ -46,7 +46,7 @@ data class DetailedChannelReadPayload2(
      */
     override val name: String?,
     override val isManaged: Boolean,
-    val members: List<DetailedChannelMemberReadPayload>,
+    val members: List<DetailedChannelMemberReadPayload2>,
     /**
      * The last event of the channel of the type that the user requested.
      */

@@ -3,6 +3,8 @@ package clientapi
 import clientapi.authentication.jwt.clientApiJwtAuthentication
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import com.fasterxml.jackson.databind.ObjectMapper
+import graphql.schema.GraphQLSchema
+import graphql.schema.idl.SchemaPrinter
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -19,11 +21,10 @@ fun Route.installClientApi() {
     val socketManager: TargetedMessageSessionManager by closestDI().instance()
 
     // To get the GraphQL schema comment this back in.
-    /*
+    // TODO(saibotma): Comment out
     val schema: GraphQLSchema by closestDI().instance()
     val sdlString = SchemaPrinter().print(schema)
     println(sdlString)
-     */
 
 
     // To access playground comment this back in and remove authenticate block.

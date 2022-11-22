@@ -2,7 +2,7 @@ package persistence.postgres.queries.channel
 
 import clientapi.models.toReadPayload
 import com.fasterxml.jackson.databind.ObjectMapper
-import models.DetailedChannelMemberReadPayload
+import models.DetailedChannelMemberReadPayload2
 import models.DetailedChannelReadPayload
 import models.DetailedChannelReadPayload2
 import org.jooq.JSON
@@ -16,7 +16,7 @@ import persistence.jooq.tables.pojos.ChannelEvent
 import persistence.jooq.tables.references.CHANNEL
 import persistence.jooq.tables.references.CHANNEL_EVENT
 import persistence.jooq.tables.references.CHANNEL_MEMBER
-import persistence.postgres.mappings.detailedChannelMemberReadToJson
+import persistence.postgres.mappings.detailedChannelMemberRead2ToJson
 import persistence.postgres.mappings.detailedChannelReadToJson
 import persistence.postgres.queries.channelmember.isMemberOfChannel
 import java.util.*
@@ -38,10 +38,10 @@ fun KotlinTransactionContext.getDetailedChannelsOf(
         CHANNEL.NAME,
         CHANNEL.IS_MANAGED,
         multiset(
-            select(detailedChannelMemberReadToJson(channelMember = CHANNEL_MEMBER))
+            select(detailedChannelMemberRead2ToJson(channelMember = CHANNEL_MEMBER))
                 .from(CHANNEL_MEMBER)
                 .where(CHANNEL_MEMBER.CHANNEL_ID.eq(CHANNEL.ID))
-        ).convertFrom { it.into(DetailedChannelMemberReadPayload::class.java) },
+        ).convertFrom { it.into(DetailedChannelMemberReadPayload2::class.java) },
         row(
             selectFrom(innerChannelEvent)
                 .where(innerChannelEvent.CHANNEL_ID.eq(CHANNEL.ID))

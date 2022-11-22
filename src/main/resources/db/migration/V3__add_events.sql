@@ -280,3 +280,15 @@ CREATE TRIGGER "channel_event_insert_notify_channel_event"
     ON "user_event"
     FOR EACH ROW
 EXECUTE PROCEDURE notify_user_event();
+
+
+-- TODO(saibotma): Send notification when new contact got added and when data of (implicit) contact changes. do not send notification when data of ancient contact changes.
+CREATE TABLE "contact"
+(
+    user_id_1  varchar NOT NULL,
+    user_id_2  varchar NOT NULL,
+    is_managed bool    NOT NULL,
+    CONSTRAINT "contact_pkey" PRIMARY KEY ("user_id_1", "user_id_2"),
+    CONSTRAINT "contact_user_id_1_fkey" FOREIGN KEY ("user_id_1") REFERENCES "user" ("id"),
+    CONSTRAINT "contact_user_id_2_fkey" FOREIGN KEY ("user_id_2") REFERENCES "user" ("id")
+);

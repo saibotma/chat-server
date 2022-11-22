@@ -23,7 +23,15 @@ data class ChannelMemberReadPayload(
 data class DetailedChannelMemberReadPayload(
     val channelId: UUID,
     override val userId: String,
+    // TODO(saibotma): Remove this?
     val user: DetailedUserReadPayload,
+    override val role: ChannelMemberRole,
+    val addedAt: Instant,
+) : ChannelMemberPayload
+
+data class DetailedChannelMemberReadPayload2(
+    val channelId: UUID,
+    override val userId: String,
     override val role: ChannelMemberRole,
     val addedAt: Instant,
 ) : ChannelMemberPayload
