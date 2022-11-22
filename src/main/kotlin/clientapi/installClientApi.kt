@@ -25,7 +25,6 @@ fun Route.installClientApi() {
     println(sdlString)
      */
 
-
     // To access playground comment this back in and remove authenticate block.
     //installGraphQlPlayground()
 

@@ -1,10 +1,5 @@
 package testutil
 
-import persistence.jooq.tables.Channel.Companion.CHANNEL
-import persistence.jooq.tables.User.Companion.USER
-import persistence.jooq.tables.references.CHANNEL_MEMBER
-import persistence.jooq.tables.references.MESSAGE
-import di.setupDi
 import kotlinx.coroutines.runBlocking
 import org.flywaydb.core.Flyway
 import org.jooq.DSLContext
@@ -13,8 +8,13 @@ import org.jooq.impl.DSL
 import org.kodein.di.DI
 import org.kodein.di.instance
 import persistence.jooq.KotlinDslContext
+import persistence.jooq.tables.Channel.Companion.CHANNEL
+import persistence.jooq.tables.User.Companion.USER
 import persistence.jooq.tables.pojos.*
+import persistence.jooq.tables.references.CHANNEL_MEMBER
+import persistence.jooq.tables.references.CONTACT
 import persistence.jooq.tables.references.FIREBASE_PUSH_TOKEN
+import persistence.jooq.tables.references.MESSAGE
 import testutil.servertest.BindDependencies
 
 fun databaseTest(
@@ -70,6 +70,12 @@ open class DatabaseTestEnvironment(val di: DI) {
     suspend fun getFirebasePushTokens(): List<FirebasePushToken> {
         return database.transaction {
             db.selectFrom(FIREBASE_PUSH_TOKEN).fetchInto(FirebasePushToken::class.java)
+        }
+    }
+
+    suspend fun getContacts(): List<Contact> {
+        return database.transaction {
+            db.selectFrom(CONTACT).fetchInto(Contact::class.java)
         }
     }
 

@@ -1,11 +1,9 @@
 package testutil.servertest.put
 
-import io.ktor.client.call.body
-import io.ktor.client.request.put
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import testutil.servertest.ServerTestEnvironment
 
 suspend inline fun <reified T, reified R> ServerTestEnvironment.put(

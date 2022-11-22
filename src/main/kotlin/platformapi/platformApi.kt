@@ -33,6 +33,12 @@ object UserList {
     }
 }
 
+@Location("/contacts")
+object ContactList {
+    @Location("")
+    data class ContactDetails(val userId1: String, val userId2: String)
+}
+
 fun Route.installPlatformApi() {
     authenticate(platformApiAccessTokenAuthentication) {
         val database: KotlinDslContext by closestDI().instance()
@@ -50,6 +56,8 @@ fun Route.installPlatformApi() {
 
         put<UserList.UserDetails> { upsertUser(it, database) }
         delete<UserList.UserDetails> { deleteUser(it, database) }
+
+        put<ContactList.ContactDetails> { upsertContact(it, database) }
 
         post<UserList.UserDetails.UserTokenList> { createUserToken(it, database, clientApiConfig.jwtSecret) }
     }

@@ -36,7 +36,7 @@ data class DetailedChannelReadPayload(
     val members: List<DetailedChannelMemberReadPayload>,
     val messages: List<DetailedMessageReadPayload>,
     override val createdAt: Instant,
-    override val updatedAt: Instant,
+    override val updatedAt: Instant?,
 ) : ChannelReadPayloadInterface
 
 data class DetailedChannelReadPayload2(

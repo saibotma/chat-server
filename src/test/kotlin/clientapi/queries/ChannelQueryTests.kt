@@ -61,6 +61,7 @@ private fun ChannelReadPayload.toDetailed(
         members = members,
         messages = messages,
         createdAt = createdAt,
+        updatedAt = updatedAt,
     )
 }
 
