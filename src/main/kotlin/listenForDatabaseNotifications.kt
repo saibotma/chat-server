@@ -17,8 +17,6 @@ import persistence.jooq.KotlinDslContext
 import persistence.postgres.PostgresConfig
 import persistence.postgres.queries.channelevent.getChannelEvent
 import persistence.postgres.queries.channelevent.getUserIdsForChannelEvent
-import persistence.postgres.queries.userevent.getUserEvent
-import persistence.postgres.queries.userevent.getUserIdsForUserEvent
 
 fun Application.listenForDatabaseNotifications() {
     val log = logger(Application::listenForDatabaseNotifications.name)
@@ -61,15 +59,6 @@ fun Application.listenForDatabaseNotifications() {
                 sessionManager.unlock()
                 connection.notifications.asFlow().collect { notification ->
                     val eventId = notification.parameter!!.toLong()
-                    if (notification.name == "user_event") {
-                        val event = database.transaction { getUserEvent(eventId) }
-                            ?.toReadPayload(objectMapper = objectMapper)
-                        if (event != null) {
-                            val userIds = database.transaction { getUserIdsForUserEvent(event.userId) }
-                            sessionManager.dispatch(userIds = userIds, message = event)
-                        }
-                    }
-
                     if (notification.name == "channel_event") {
                         val event = database.transaction { getChannelEvent(eventId) }
                             ?.toReadPayload(objectMapper = objectMapper)

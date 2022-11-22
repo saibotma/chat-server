@@ -11,7 +11,7 @@ data class ChannelEventReadPayload(
     val id: Long,
     val channelId: UUID,
     val type: ChannelEventType,
-    val data: ChannelEventData?,
+    val data: ChannelEventData,
     val createdAt: Instant,
 )
 

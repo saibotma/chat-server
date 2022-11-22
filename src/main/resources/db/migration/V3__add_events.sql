@@ -222,37 +222,6 @@ CREATE TRIGGER "message_delete_create_message_channel_event"
     FOR EACH ROW
 EXECUTE PROCEDURE create_message_channel_event();
 
-CREATE TYPE "user_event_type" AS ENUM ('update_name');
-
-CREATE TABLE "user_event"
-(
-    id         bigserial,
-    user_id    varchar           NOT NULL,
-    type       "user_event_type" NOT NULL,
-    data       jsonb             NOT NULL,
-    created_at timestamptz       NOT NULL,
-    CONSTRAINT "user_event_pkey" PRIMARY KEY ("id")
-);
-
-CREATE FUNCTION create_user_event() RETURNS TRIGGER AS
-$$
-BEGIN
-    IF (tg_op = 'UPDATE') THEN
-        IF (OLD."name" IS DISTINCT FROM NEW."name") THEN
-            INSERT INTO "user_event" ("user_id", "type", "data", "created_at")
-            VALUES (NEW."id", 'update_name', jsonb_build_object('version', '1.0.0', 'name', NEW."name"), now());
-        END IF;
-    END IF;
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER "user_update_create_user_event"
-    AFTER UPDATE
-    ON "user"
-    FOR EACH ROW
-EXECUTE PROCEDURE create_user_event();
-
 CREATE FUNCTION notify_channel_event() RETURNS TRIGGER AS
 $$
 BEGIN
@@ -267,27 +236,10 @@ CREATE TRIGGER "channel_event_insert_notify_channel_event"
     FOR EACH ROW
 EXECUTE PROCEDURE notify_channel_event();
 
-CREATE FUNCTION notify_user_event() RETURNS TRIGGER AS
-$$
-BEGIN
-    PERFORM pg_notify('user_event', NEW."id"::text);
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER "channel_event_insert_notify_channel_event"
-    AFTER INSERT
-    ON "user_event"
-    FOR EACH ROW
-EXECUTE PROCEDURE notify_user_event();
-
-
--- TODO(saibotma): Send notification when new contact got added and when data of (implicit) contact changes. do not send notification when data of ancient contact changes.
 CREATE TABLE "contact"
 (
-    user_id_1  varchar NOT NULL,
-    user_id_2  varchar NOT NULL,
-    is_managed bool    NOT NULL,
+    user_id_1 varchar NOT NULL,
+    user_id_2 varchar NOT NULL,
     CONSTRAINT "contact_pkey" PRIMARY KEY ("user_id_1", "user_id_2"),
     CONSTRAINT "contact_user_id_1_fkey" FOREIGN KEY ("user_id_1") REFERENCES "user" ("id"),
     CONSTRAINT "contact_user_id_2_fkey" FOREIGN KEY ("user_id_2") REFERENCES "user" ("id")
