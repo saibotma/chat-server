@@ -5,10 +5,13 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
-import persistence.jooq.KotlinDslContext
-import persistence.postgres.queries.*
 import models.ChannelWritePayload
 import models.toChannelRead
+import persistence.jooq.KotlinDslContext
+import persistence.postgres.queries.channel.updateChannel
+import persistence.postgres.queries.deleteChannel
+import persistence.postgres.queries.getChannel
+import util.toOptional
 
 suspend fun PipelineContext<Unit, ApplicationCall>.updateChannel(
     location: ChannelList.ChannelDetails,
@@ -18,7 +21,12 @@ suspend fun PipelineContext<Unit, ApplicationCall>.updateChannel(
     val channelId = location.channelId
 
     val result = database.transaction {
-        updateChannel(id = channelId, name = channel.name, isManaged = channel.isManaged)
+        updateChannel(
+            id = channelId,
+            name = channel.name.toOptional(),
+            description = channel.description.toOptional(),
+            isManaged = channel.isManaged,
+        )
         getChannel(channelId)!!.toChannelRead()
     }
     call.respond(HttpStatusCode.OK, result)

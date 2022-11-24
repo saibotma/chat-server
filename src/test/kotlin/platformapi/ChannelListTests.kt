@@ -2,11 +2,11 @@ package platformapi
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import models.ChannelReadPayload
 import models.ChannelWritePayload
 import models.toChannelRead
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import testutil.mockedChannelWrite
 import testutil.servertest.post.createChannel
 import testutil.servertest.serverTest
@@ -30,5 +30,5 @@ class ChannelListTests {
 }
 
 fun ChannelReadPayload.toWrite(): ChannelWritePayload {
-    return ChannelWritePayload(name = name, isManaged = isManaged)
+    return ChannelWritePayload(name = name, description = description, isManaged = isManaged)
 }

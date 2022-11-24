@@ -8,10 +8,15 @@ import java.util.*
 
 interface ChannelPayload {
     val name: String?
+    val description: String?
     val isManaged: Boolean
 }
 
-data class ChannelWritePayload(override val name: String?, override val isManaged: Boolean) : ChannelPayload
+data class ChannelWritePayload(
+    override val name: String?,
+    override val description: String?,
+    override val isManaged: Boolean
+) : ChannelPayload
 
 interface ChannelReadPayloadInterface : ChannelPayload {
     val id: UUID
@@ -24,6 +29,7 @@ interface ChannelReadPayloadInterface : ChannelPayload {
 data class ChannelReadPayload(
     override val id: UUID,
     override val name: String?,
+    override val description: String?,
     override val isManaged: Boolean,
     override val createdAt: Instant,
     override val updatedAt: Instant?
@@ -32,6 +38,7 @@ data class ChannelReadPayload(
 data class DetailedChannelReadPayload(
     override val id: UUID,
     override val name: String?,
+    override val description: String?,
     override val isManaged: Boolean,
     val members: List<DetailedChannelMemberReadPayload>,
     val messages: List<DetailedMessageReadPayload>,
@@ -45,6 +52,7 @@ data class DetailedChannelReadPayload2(
      * The name of the channel when it is a group channel.
      */
     override val name: String?,
+    override val description: String?,
     override val isManaged: Boolean,
     val members: List<DetailedChannelMemberReadPayload2>,
     /**
@@ -63,6 +71,7 @@ fun Channel.toChannelRead(): ChannelReadPayload {
     return ChannelReadPayload(
         id = id!!,
         name = name,
+        description = description,
         isManaged = isManaged!!,
         createdAt = createdAt!!,
         updatedAt = updatedAt,

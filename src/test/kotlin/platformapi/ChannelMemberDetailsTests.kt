@@ -7,7 +7,7 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import models.toChannelMemberWrite
-import testutil.mockedChannelMember
+import testutil.mockedChannelMemberWrite
 import testutil.servertest.delete.deleteMember
 import testutil.servertest.post.addMember
 import testutil.servertest.post.createChannel
@@ -26,11 +26,11 @@ class ChannelMemberDetailsTests {
                 val (_, user2) = upsertUser()
                 val (memberWrite1, memberRead1) = addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = user1!!.id, role = ChannelMemberRole.admin)
+                    mockedChannelMemberWrite(userId = user1!!.id, role = ChannelMemberRole.admin)
                 )
                 val (memberWrite2, _) = addMember(
                     channelId = channel.id,
-                    mockedChannelMember(userId = user2!!.id, role = ChannelMemberRole.admin)
+                    mockedChannelMemberWrite(userId = user2!!.id, role = ChannelMemberRole.admin)
                 )
                 val (updatedMemberWrite, updatedMemberRead) = updateMember(
                     channelId = channel.id,
@@ -55,11 +55,11 @@ class ChannelMemberDetailsTests {
                 val (_, user2) = upsertUser()
                 val (memberWrite1, _) = addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = user1!!.id)
+                    mockedChannelMemberWrite(userId = user1!!.id)
                 )
                 val (memberWrite2, _) = addMember(
                     channelId = channel.id,
-                    mockedChannelMember(userId = user2!!.id)
+                    mockedChannelMemberWrite(userId = user2!!.id)
                 )
                 deleteMember(channelId = channel.id, userId = memberWrite1.userId)
                 with(getMembers().map { it.toChannelMemberWrite() }) {

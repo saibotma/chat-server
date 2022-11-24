@@ -6,7 +6,7 @@ import models.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import testutil.mockedAuthContext
-import testutil.mockedChannelMember
+import testutil.mockedChannelMemberWrite
 import testutil.mockedMessage
 import testutil.servertest.post.addMember
 import testutil.servertest.post.createChannel
@@ -24,9 +24,9 @@ class ChannelQueryTests {
                 val (_, user1) = upsertUser()
                 val (_, user2) = upsertUser()
 
-                val (_, member1) = addMember(channelId = channel1!!.id, mockedChannelMember(userId = user1!!.id))
-                val (_, member2) = addMember(channelId = channel1.id, mockedChannelMember(userId = user2!!.id))
-                val (_, member3) = addMember(channelId = channel2!!.id, mockedChannelMember(userId = user1.id))
+                val (_, member1) = addMember(channelId = channel1!!.id, mockedChannelMemberWrite(userId = user1!!.id))
+                val (_, member2) = addMember(channelId = channel1.id, mockedChannelMemberWrite(userId = user2!!.id))
+                val (_, member3) = addMember(channelId = channel2!!.id, mockedChannelMemberWrite(userId = user1.id))
 
                 val context = mockedAuthContext(user1.id)
                 val message =
@@ -57,6 +57,7 @@ private fun ChannelReadPayload.toDetailed(
     return DetailedChannelReadPayload(
         id = id,
         name = name,
+        description = description,
         isManaged = isManaged,
         members = members,
         messages = messages,

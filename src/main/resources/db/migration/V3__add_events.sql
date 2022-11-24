@@ -60,14 +60,14 @@ BEGIN
     is_update = tg_op = 'UPDATE';
     is_delete = tg_op = 'DELETE';
     IF (is_update AND OLD."name" IS DISTINCT FROM NEW."name") THEN
-        CALL insert_channel_event(
+        PERFORM insert_channel_event(
                 "channel_id" => NEW."id",
                 "type" => 'set_channel_name',
                 "data" => jsonb_build_object('version', '1.0', 'name', NEW."name")
             );
     END IF;
     IF (is_update AND OLD."description" IS DISTINCT FROM NEW."description") THEN
-        CALL insert_channel_event(
+        PERFORM insert_channel_event(
                 "channel_id" => NEW."id",
                 "type" => 'set_channel_description',
                 "data" => jsonb_build_object('version', '1.0', 'description', NEW."description")
@@ -94,21 +94,21 @@ BEGIN
     reference = jsonb_build_object('user_id', user_id);
 
     IF (is_insert) THEN
-        CALL insert_channel_event(
+        PERFORM insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'add_member',
                 "data" => reference || jsonb_build_object('version', '1.0', 'role', NEW."role")
             );
     END IF;
     IF (is_update AND OLD."role" IS DISTINCT FROM NEW."role") THEN
-        CALL insert_channel_event(
+        PERFORM insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'update_member_role',
                 "data" => reference || jsonb_build_object('version', '1.0', 'role', NEW."role")
             );
     END IF;
     IF (is_delete) THEN
-        CALL insert_channel_event(
+        PERFORM insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'remove_member',
                 "data" => reference || jsonb_build_object('version', '1.0')
@@ -135,7 +135,7 @@ BEGIN
     reference = jsonb_build_object('message_id', message_id);
 
     IF (is_insert) THEN
-        CALL insert_channel_event(
+        PERFORM insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'send_message',
                 "data" => reference || jsonb_build_object(
@@ -147,14 +147,14 @@ BEGIN
             );
     END IF;
     IF (is_update AND OLD."text" IS DISTINCT FROM NEW."text") THEN
-        CALL insert_channel_event(
+        PERFORM insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'update_message_text',
                 "data" => reference || jsonb_build_object('version', '1.0', 'text', NEW."text")
             );
     END IF;
     IF (is_update AND OLD."replied_message_id" != NEW."replied_message_id") THEN
-        CALL insert_channel_event(
+        PERFORM insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'update_message_replied_message_id',
                 "data" => reference || jsonb_build_object(
@@ -170,7 +170,7 @@ BEGIN
         FROM "channel_event"
         where "data" -> 'message_id' = message_id;
 
-        CALL insert_channel_event(
+        PERFORM insert_channel_event(
                 "channel_id" => NEW."channel_id",
                 "type" => 'delete_message',
                 "data" => reference || jsonb_build_object('version', '1.0')

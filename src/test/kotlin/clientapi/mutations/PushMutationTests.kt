@@ -20,7 +20,7 @@ class PushMutationTests {
 
                 getFirebasePushTokens() shouldContainExactlyInAnyOrder listOf(
                     FirebasePushToken(
-                        userId = context.userId,
+                        userId = context.userId.value,
                         deviceId = "DeviceId1",
                         pushToken = "PushToken1"
                     )
@@ -38,7 +38,7 @@ class PushMutationTests {
 
                 getFirebasePushTokens() shouldContainExactlyInAnyOrder listOf(
                     FirebasePushToken(
-                        userId = context.userId,
+                        userId = context.userId.value,
                         deviceId = "DeviceId1",
                         pushToken = "PushToken1"
                     )
@@ -57,7 +57,7 @@ class PushMutationTests {
 
                 getFirebasePushTokens() shouldContainExactlyInAnyOrder listOf(
                     FirebasePushToken(
-                        userId = context2.userId,
+                        userId = context2.userId.value,
                         deviceId = "DeviceId1",
                         pushToken = "DifferentToken"
                     )
@@ -79,7 +79,7 @@ class PushMutationTests {
 
                 getFirebasePushTokens() shouldContainExactlyInAnyOrder listOf(
                     FirebasePushToken(
-                        userId = context.userId,
+                        userId = context.userId.value,
                         deviceId = "OtherDevice",
                         pushToken = "DifferentToken"
                     )

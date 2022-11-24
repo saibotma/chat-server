@@ -1,7 +1,8 @@
 package clientapi.models
 
-import persistence.jooq.tables.pojos.Message
+import clientapi.UserId
 import models.DetailedUserReadPayload
+import persistence.jooq.tables.pojos.Message
 import java.time.Instant
 import java.util.*
 
@@ -20,12 +21,12 @@ data class DetailedMessageReadPayload(
     val createdAt: Instant,
 ) : MessagePayload
 
-fun MessageWritePayload.toMessage(id: UUID, creatorUserId: String, channelId: UUID, createdAt: Instant): Message {
+fun MessageWritePayload.toMessage(id: UUID, creatorUserId: UserId, channelId: UUID, createdAt: Instant): Message {
     return Message(
         id = id,
         text = text,
         repliedMessageId = repliedMessageId,
-        creatorUserId = creatorUserId,
+        creatorUserId = creatorUserId.value,
         channelId = channelId,
         createdAt = createdAt,
     )

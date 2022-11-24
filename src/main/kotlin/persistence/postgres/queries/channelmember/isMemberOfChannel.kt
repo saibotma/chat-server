@@ -1,5 +1,6 @@
 package persistence.postgres.queries.channelmember
 
+import clientapi.UserId
 import org.jooq.Condition
 import org.jooq.Field
 import org.jooq.Record1
@@ -12,13 +13,13 @@ import java.util.*
 
 fun KotlinTransactionContext.isMemberOfChannel(
     channelId: UUID,
-    userId: String,
+    userId: UserId,
 ): Boolean {
     return db.select(
         field(
             isMemberOfChannel(
                 channelId = value(channelId),
-                userId = value(userId),
+                userId = value(userId.value),
             )
         )
     )

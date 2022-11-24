@@ -20,16 +20,15 @@ class MessageMutation(private val database: KotlinDslContext, private val pushSe
         channelId: UUID,
         message: MessageWritePayload,
     ): DetailedMessageReadPayload {
-        val userId = context.userId
         val result = database.transaction {
-            if (!isMemberOfChannel(channelId = channelId, userId = userId)) {
+            if (!isMemberOfChannel(channelId = channelId, userId = context.userId)) {
                 throw ClientApiException.resourceNotFound()
             }
             val id = randomUUID()
             insertMessage(
                 message.toMessage(
                     id = id,
-                    creatorUserId = userId,
+                    creatorUserId = context.userId,
                     channelId = channelId,
                     createdAt = now(),
                 )
@@ -38,7 +37,7 @@ class MessageMutation(private val database: KotlinDslContext, private val pushSe
         }
         if (pushService.isPresent) {
             pushService.get()
-                .sendPushNotificationForNewMessage(channelId = channelId, creatorId = userId, message = message)
+                .sendPushNotificationForNewMessage(channelId = channelId, creatorId = context.userId, message = message)
         }
         return result
     }

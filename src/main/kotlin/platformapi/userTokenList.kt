@@ -1,5 +1,6 @@
 package platformapi
 
+import clientapi.UserId
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import error.PlatformApiException
@@ -19,11 +20,11 @@ suspend fun PipelineContext<Unit, ApplicationCall>.createUserToken(
     database: KotlinDslContext,
     jwtSecret: String,
 ) {
-    val userId = location.userDetails.userId
+    val userId = UserId(location.userDetails.userId)
     val userDoesNotExist = database.transaction { getUser(userId) == null }
     if (userDoesNotExist) throw PlatformApiException.resourceNotFound()
     val jwt = JWT.create()
-        .withSubject(userId)
+        .withSubject(userId.value)
         .withExpiresAt(Date.from(now().plusSeconds(60 * 15)))
         .sign(Algorithm.HMAC256(jwtSecret))
     call.respond(HttpStatusCode.Created, UserToken(jwt = jwt))

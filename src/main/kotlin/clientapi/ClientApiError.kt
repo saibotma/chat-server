@@ -1,3 +1,4 @@
 package clientapi
 
-data class ClientApiError(val errorCode: Int, val message: String? = null)
+enum class ClientApiErrorType { ResourceNotFound, ChannelNameBlank, ChannelDescriptionBlank, ChannelMustHaveOneAdmin }
+data class ClientApiError(val type: ClientApiErrorType, val message: String? = null)

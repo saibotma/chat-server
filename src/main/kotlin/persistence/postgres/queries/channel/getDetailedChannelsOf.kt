@@ -1,5 +1,6 @@
 package persistence.postgres.queries.channel
 
+import clientapi.UserId
 import clientapi.models.toReadPayload
 import com.fasterxml.jackson.databind.ObjectMapper
 import models.DetailedChannelMemberReadPayload2
@@ -22,7 +23,7 @@ import persistence.postgres.queries.channelmember.isMemberOfChannel
 import java.util.*
 
 fun KotlinTransactionContext.getDetailedChannelsOf(
-    userId: String,
+    userId: UserId,
     lastEventType: Set<ChannelEventType>,
     objectMapper: ObjectMapper,
 ): List<DetailedChannelReadPayload2> {
@@ -36,6 +37,7 @@ fun KotlinTransactionContext.getDetailedChannelsOf(
             .asField<Long>(),
         CHANNEL.ID,
         CHANNEL.NAME,
+        CHANNEL.DESCRIPTION,
         CHANNEL.IS_MANAGED,
         multiset(
             select(detailedChannelMemberRead2ToJson(channelMember = CHANNEL_MEMBER))
@@ -53,25 +55,26 @@ fun KotlinTransactionContext.getDetailedChannelsOf(
         CHANNEL.UPDATED_AT,
     )
         .from(CHANNEL)
-        .where(isMemberOfChannel(channelId = CHANNEL.ID, userId = value(userId)))
+        .where(isMemberOfChannel(channelId = CHANNEL.ID, userId = value(userId.value)))
         .orderBy(CHANNEL_EVENT.ID.desc())
         .fetch()
 
     return result.map {
         DetailedChannelReadPayload2(
             id = it.component2()!!,
-            name = it.component3()!!,
-            isManaged = it.component4()!!,
-            members = it.component5()!!,
-            lastEvent = it.component6()!!.toReadPayload(objectMapper = objectMapper),
-            createdAt = it.component7()!!,
-            updatedAt = it.component8()!!,
+            name = it.component3(),
+            description = it.component4(),
+            isManaged = it.component5()!!,
+            members = it.component6()!!,
+            lastEvent = it.component7()?.toReadPayload(objectMapper = objectMapper),
+            createdAt = it.component8()!!,
+            updatedAt = it.component9(),
         )
     }
 }
 
 fun KotlinTransactionContext.getDetailedChannelsOf(
-    userId: String,
+    userId: UserId,
     channelIdFilter: UUID? = null
 ): List<DetailedChannelReadPayload> {
     return selectDetailedChannelsOf(userId = userId, channelIdFilter = channelIdFilter)
@@ -79,11 +82,11 @@ fun KotlinTransactionContext.getDetailedChannelsOf(
 }
 
 private fun KotlinTransactionContext.selectDetailedChannelsOf(
-    userId: String,
+    userId: UserId,
     channelIdFilter: UUID? = null
 ): SelectConditionStep<Record1<JSON>> {
     return db.select(detailedChannelReadToJson(channel = CHANNEL))
         .from(CHANNEL)
-        .where(isMemberOfChannel(channelId = CHANNEL.ID, userId = value(userId)))
+        .where(isMemberOfChannel(channelId = CHANNEL.ID, userId = value(userId.value)))
         .andIf(channelIdFilter != null) { CHANNEL.ID.eq(channelIdFilter) }
 }

@@ -39,10 +39,10 @@ class PushServiceTests {
                     val user3 = addUserWithPushToken(deviceId = "device3", pushToken = "token3")
                     val user4 = addUserWithPushToken(deviceId = "device4", pushToken = "token4")
 
-                    addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user1.id))
-                    addMember(channelId = channel.id, member = mockedChannelMember(userId = user2.id))
-                    addMember(channelId = channel.id, member = mockedChannelMember(userId = user3.id))
-                    addMember(channelId = otherChannel!!.id, member = mockedChannelMember(userId = user4.id))
+                    addMember(channelId = channel!!.id, member = mockedChannelMemberWrite(userId = user1.id))
+                    addMember(channelId = channel.id, member = mockedChannelMemberWrite(userId = user2.id))
+                    addMember(channelId = channel.id, member = mockedChannelMemberWrite(userId = user3.id))
+                    addMember(channelId = otherChannel!!.id, member = mockedChannelMemberWrite(userId = user4.id))
 
                     val context = mockedAuthContext(userId = user1.id)
                     messageMutation.sendMessage(context, channelId = channel.id, message = mockedMessage("Hi"))
@@ -77,8 +77,8 @@ class PushServiceTests {
                     val user1 = addUserWithPushToken(deviceId = "device1", pushToken = "token1")
                     val user2 = addUserWithPushToken(deviceId = "device2", pushToken = "token2")
 
-                    addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user1.id))
-                    addMember(channelId = channel.id, member = mockedChannelMember(userId = user2.id))
+                    addMember(channelId = channel!!.id, member = mockedChannelMemberWrite(userId = user1.id))
+                    addMember(channelId = channel.id, member = mockedChannelMemberWrite(userId = user2.id))
 
                     val context = mockedAuthContext(userId = user1.id)
                     messageMutation.sendMessage(context, channelId = channel.id, message = mockedMessage("Hi"))

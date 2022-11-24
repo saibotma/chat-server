@@ -45,9 +45,8 @@ fun Route.installClientApi() {
 
         webSocket("/events", protocol = "chat-server-authenticated-client") {
             val context = call.principal<AuthContext>()!!
-            val userId = UserId(context.userId)
             val session = SimpleWebSocketSession(this)
-            socketManager.maybeAddSession(userId = userId, session = session)
+            socketManager.maybeAddSession(userId = context.userId, session = session)
 
             try {
                 for (frame in incoming) {

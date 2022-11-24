@@ -1,6 +1,7 @@
 package clientapi.authentication.jwt
 
 import clientapi.AuthContext
+import clientapi.UserId
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.server.auth.*
@@ -21,8 +22,9 @@ fun AuthenticationConfig.installClientApiJwtAuthentication(
                 .build()
         )
         validate { credential ->
-            val user = kotlinDslContext.transaction { getUser(credential.payload.subject) } ?: return@validate null
-            AuthContext(userId = user.id!!)
+            val userId = UserId(credential.payload.subject)
+            val user = kotlinDslContext.transaction { getUser(userId) } ?: return@validate null
+            AuthContext(userId = UserId(user.id!!))
         }
     }
 }

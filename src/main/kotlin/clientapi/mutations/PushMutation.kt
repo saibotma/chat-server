@@ -16,7 +16,7 @@ class PushMutation(private val database: KotlinDslContext) {
         pushToken: String
     ): Boolean {
         database.transaction {
-            upsertPushToken(FirebasePushToken(userId = context.userId, deviceId = deviceId, pushToken = pushToken))
+            upsertPushToken(FirebasePushToken(userId = context.userId.value, deviceId = deviceId, pushToken = pushToken))
         }
 
         return true

@@ -8,7 +8,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import org.junit.jupiter.api.Test
-import testutil.mockedChannelMember
+import testutil.mockedChannelMemberWrite
 import testutil.servertest.post.addMember
 import testutil.servertest.post.createChannel
 import testutil.servertest.post.createUserToken
@@ -23,7 +23,7 @@ class GraphQLInstallationTests {
             val objectMapper = jacksonObjectMapper()
             val (_, user) = upsertUser()
             val (_, channel) = createChannel()
-            addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
+            addMember(channelId = channel!!.id, mockedChannelMemberWrite(userId = user!!.id))
             val response = client.post("/client/graphql") {
                 header("Content-Type", "application/json")
                 header("Authorization", "Bearer ${createUserToken(user.id).second!!.jwt}")

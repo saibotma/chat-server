@@ -5,12 +5,13 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
-import persistence.jooq.KotlinDslContext
-import persistence.postgres.queries.deleteMember
-import persistence.postgres.queries.getMembersOf
-import persistence.postgres.queries.updateMember
 import models.ChannelMemberWritePayload
 import models.toChannelMemberRead
+import persistence.jooq.KotlinDslContext
+import persistence.postgres.queries.channelmember.updateMember
+import persistence.postgres.queries.deleteMember
+import persistence.postgres.queries.getMembersOf
+import util.toOptional
 
 suspend fun PipelineContext<Unit, ApplicationCall>.updateMember(
     location: ChannelList.ChannelDetails.ChannelMemberList.ChannelMemberDetails,
@@ -21,7 +22,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.updateMember(
     val channelId = location.channelMemberList.channelDetails.channelId
     val userId = location.userId
     val result = database.transaction {
-        updateMember(channelId = channelId, userId = userId, role = member.role)
+        updateMember(channelId = channelId, userId = userId, role = member.role.toOptional())
         getMembersOf(channelId = channelId, userIdFilter = userId).first().toChannelMemberRead()
     }
     call.respond(HttpStatusCode.OK, result)

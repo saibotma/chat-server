@@ -1,5 +1,6 @@
 package persistence.postgres.queries
 
+import clientapi.UserId
 import clientapi.models.DetailedMessageReadPayload
 import persistence.jooq.tables.Message.Companion.MESSAGE
 import persistence.jooq.tables.pojos.ChannelMember
@@ -112,11 +113,11 @@ fun KotlinTransactionContext.deleteMessage(id: UUID) {
         .execute()
 }
 
-fun KotlinTransactionContext.isCreatorOfMessage(messageId: UUID, userId: String): Boolean {
+fun KotlinTransactionContext.isCreatorOfMessage(messageId: UUID, userId: UserId): Boolean {
     return db.fetchExists(
         select()
             .from(MESSAGE)
-            .where(MESSAGE.CREATOR_USER_ID.eq(userId))
+            .where(MESSAGE.CREATOR_USER_ID.eq(userId.value))
             .and(MESSAGE.ID.eq(messageId))
     )
 }

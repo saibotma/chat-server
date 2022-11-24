@@ -14,7 +14,7 @@ import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import testutil.mockedAuthContext
-import testutil.mockedChannelMember
+import testutil.mockedChannelMemberWrite
 import testutil.mockedMessage
 import testutil.servertest.post.addMember
 import testutil.servertest.post.createChannel
@@ -29,7 +29,7 @@ class MessageMutationTests {
             serverTest {
                 val (_, channel) = createChannel()
                 val (_, user) = upsertUser()
-                addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user!!.id))
+                addMember(channelId = channel!!.id, member = mockedChannelMemberWrite(userId = user!!.id))
 
                 val context = mockedAuthContext(userId = user.id)
                 val otherMessageWrite = mockedMessage()
@@ -76,7 +76,7 @@ class MessageMutationTests {
             serverTest {
                 val (_, channel) = createChannel()
                 val (_, user) = upsertUser()
-                addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user!!.id))
+                addMember(channelId = channel!!.id, member = mockedChannelMemberWrite(userId = user!!.id))
 
                 val context = mockedAuthContext(userId = user.id)
                 val otherMessageWrite = mockedMessage(text = "Message 1")
@@ -115,9 +115,9 @@ class MessageMutationTests {
                 // Give him admin permissions to make sure that also not admins can edit messages of others.
                 addMember(
                     channelId = channel!!.id,
-                    member = mockedChannelMember(userId = user1!!.id, role = ChannelMemberRole.admin)
+                    member = mockedChannelMemberWrite(userId = user1!!.id, role = ChannelMemberRole.admin)
                 )
-                addMember(channelId = channel.id, member = mockedChannelMember(userId = user2!!.id))
+                addMember(channelId = channel.id, member = mockedChannelMemberWrite(userId = user2!!.id))
 
                 val context1 = mockedAuthContext(userId = user1.id)
                 messageMutation.sendMessage(
@@ -149,7 +149,7 @@ class MessageMutationTests {
             serverTest {
                 val (_, channel) = createChannel()
                 val (_, user) = upsertUser()
-                addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user!!.id))
+                addMember(channelId = channel!!.id, member = mockedChannelMemberWrite(userId = user!!.id))
 
                 val context = mockedAuthContext(userId = user.id)
                 val otherMessage = messageMutation.sendMessage(
@@ -181,9 +181,9 @@ class MessageMutationTests {
                 // Give him admin permissions to make sure that also not admins can edit messages of others.
                 addMember(
                     channelId = channel!!.id,
-                    member = mockedChannelMember(userId = user1!!.id, role = ChannelMemberRole.admin)
+                    member = mockedChannelMemberWrite(userId = user1!!.id, role = ChannelMemberRole.admin)
                 )
-                addMember(channelId = channel.id, member = mockedChannelMember(userId = user2!!.id))
+                addMember(channelId = channel.id, member = mockedChannelMemberWrite(userId = user2!!.id))
 
                 val context1 = mockedAuthContext(userId = user1.id)
                 val context2 = mockedAuthContext(userId = user2.id)

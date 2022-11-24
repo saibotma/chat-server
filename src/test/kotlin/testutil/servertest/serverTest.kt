@@ -44,7 +44,6 @@ fun serverTest(
         }
 
         environment { this.config = config }
-
         application { chatServer(di = di) }
 
         val client = createClient {

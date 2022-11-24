@@ -4,7 +4,9 @@ import clientapi.AuthContext
 import clientapi.mutations.ChannelMutation
 import clientapi.mutations.MessageMutation
 import clientapi.mutations.PushMutation
-import clientapi.queries.*
+import clientapi.queries.ChannelEventQuery
+import clientapi.queries.ChannelQuery
+import clientapi.queries.MessageQuery
 import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.execution.SimpleKotlinDataFetcherFactoryProvider
@@ -35,8 +37,10 @@ val graphQlDi = DI.Module("graphql") {
     bind<GraphQLSchema>() with singleton {
         val config = SchemaGeneratorConfig(
             supportedPackages = listOf(
+                // TODO(saibotma): Also remove this, but think about enums.
                 "persistence.jooq.tables.pojos",
                 "clientapi.models",
+                // TODO(saibotma): Remove models, because should not share models to better be able to avoid breaking changes.
                 "models",
             ),
             hooks = ChatServerSchemaGeneratorHooks(),

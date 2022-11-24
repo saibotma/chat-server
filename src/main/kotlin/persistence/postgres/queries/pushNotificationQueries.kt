@@ -1,5 +1,6 @@
 package persistence.postgres.queries
 
+import clientapi.UserId
 import org.jooq.impl.DSL.exists
 import org.jooq.impl.DSL.select
 import persistence.jooq.KotlinTransactionContext
@@ -50,11 +51,11 @@ fun KotlinTransactionContext.upsertPushToken(firebasePushToken: FirebasePushToke
         .execute()
 }
 
-fun KotlinTransactionContext.deviceIdBelongsToUser(deviceId: String, userId: String): Boolean {
+fun KotlinTransactionContext.deviceIdBelongsToUser(deviceId: String, userId: UserId): Boolean {
     return db.fetchExists(
         select()
             .from(FIREBASE_PUSH_TOKEN)
             .where(FIREBASE_PUSH_TOKEN.DEVICE_ID.eq(deviceId))
-            .and(FIREBASE_PUSH_TOKEN.USER_ID.eq(userId))
+            .and(FIREBASE_PUSH_TOKEN.USER_ID.eq(userId.value))
     )
 }

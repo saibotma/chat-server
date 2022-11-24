@@ -1,77 +1,217 @@
 package clientapi.mutations
 
-import clientapi.ClientApiException
-import clientapi.resourceNotFound
-import persistence.jooq.enums.ChannelMemberRole
+import clientapi.*
+import clientapi.models.*
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import models.toChannelRead
+import models.toChannelMemberRead
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import models.toChannelMemberRead
-import models.toChannelMemberWrite
-import testutil.mockedAuthContext
-import testutil.mockedChannelMember
-import testutil.mockedChannelWrite
+import persistence.jooq.enums.ChannelMemberRole
+import persistence.jooq.tables.pojos.Channel
+import persistence.jooq.tables.pojos.ChannelMember
+import testutil.*
 import testutil.servertest.post.addMember
 import testutil.servertest.post.createChannel
+import testutil.servertest.put.upsertContact
 import testutil.servertest.put.upsertUser
 import testutil.servertest.serverTest
+import util.fallbackTo
 
 class ChannelMutationTests {
     @Nested
-    inner class AddChannelTests {
+    inner class CreateChannelTests {
         @Test
-        fun `creates a channel and returns it`() {
+        fun `creates a channel`() {
             serverTest {
                 val (_, user1) = upsertUser()
                 val (_, user2) = upsertUser()
 
                 val context = mockedAuthContext(userId = user1!!.id)
-                val members = listOf(mockedChannelMember(user1.id), mockedChannelMember(user2!!.id))
-                val detailedChannel = channelMutation.createChannel(
+                // Don't add user1 as member, because that should happen automatically.
+                val members = listOf(mockedCreateChannelInputMember(user2!!.id))
+
+                upsertContact(userId1 = user1.id, userId2 = user2.id)
+
+                channelMutation.createChannel(
                     context = context,
-                    name = "Channel",
-                    members = members,
+                    input = CreateChannelInput(
+                        name = "Name",
+                        description = "Description",
+                        members = members,
+                    )
                 )
 
-                with(getChannels()) {
-                    shouldHaveSize(1)
-                    first().name shouldBe "Channel"
-                    detailedChannel.id shouldBe first().id
+                val actualChannels = getChannels()
+                val expectedChannels = listOf(
+                    Channel(
+                        name = "Name",
+                        isManaged = false,
+                        description = "Description",
+                        creatorUserId = context.userId.value
+                    )
+                ).ignoreUnknown()
+                actualChannels.ignoreUnknown() shouldContainExactlyInAnyOrder expectedChannels
+
+                val channelId = actualChannels.first().id!!
+                val actualMembers = getMembers().ignoreUnknown()
+                val expectedMembers = (members.map { it.toChannelMember(channelId = channelId) } +
+                        listOf(ChannelMember(channelId = channelId, userId = user1.id, role = ChannelMemberRole.admin)))
+                    .ignoreUnknown()
+                actualMembers shouldContainExactlyInAnyOrder expectedMembers
+            }
+        }
+
+        @Test
+        fun `returns an error when name is blank`() {
+            serverTest {
+                val (_, user1) = upsertUser()
+
+                val context = mockedAuthContext(userId = user1!!.id)
+                val error = shouldThrow<ClientApiException> {
+                    channelMutation.createChannel(
+                        context = context,
+                        input = CreateChannelInput(name = " ", description = null, members = emptyList())
+                    )
                 }
 
-                with(getMembers().map { it.toChannelMemberWrite() }) {
-                    shouldHaveSize(2)
-                    shouldContainExactlyInAnyOrder(members)
+                error shouldBe ClientApiException.channelNameBlank()
+                getChannels() shouldHaveSize 0
+            }
+        }
+
+        @Test
+        fun `returns an error when description is blank`() {
+            serverTest {
+                val (_, user1) = upsertUser()
+
+                val context = mockedAuthContext(userId = user1!!.id)
+                val error = shouldThrow<ClientApiException> {
+                    channelMutation.createChannel(
+                        context = context,
+                        input = CreateChannelInput(name = null, description = " ", members = emptyList())
+                    )
                 }
+
+                error shouldBe ClientApiException.channelDescriptionBlank()
+                getChannels() shouldHaveSize 0
+            }
+        }
+
+        @Test
+        fun `returns an error when any member is not a contact`() {
+            serverTest {
+                val (_, user1) = upsertUser()
+                val (_, user2) = upsertUser()
+
+                val context = mockedAuthContext(userId = user1!!.id)
+                val members = listOf(mockedCreateChannelInputMember(user2!!.id))
+                val error = shouldThrow<ClientApiException> {
+                    channelMutation.createChannel(
+                        context = context,
+                        input = CreateChannelInput(
+                            name = "Name",
+                            description = "Description",
+                            members = members,
+                        )
+                    )
+                }
+                error shouldBe ClientApiException.resourceNotFound()
+
+                getChannels() shouldHaveSize 0
+                getMembers() shouldHaveSize 0
             }
         }
     }
 
     @Nested
     inner class UpdateChannelTests {
-        @Test
-        fun `updates a channel when the user is an admin of the channel and returns it`() {
+        fun test(updateInput: UpdateChannelInput) {
             serverTest {
-                val (_, channel) = createChannel(mockedChannelWrite(name = "Channel"))
+                val (_, channel) = createChannel(mockedChannelWrite(name = "Name", description = "Description"))
                 // Add another channel to check that only the specified one gets updated
-                val (_, otherChannel) = createChannel(mockedChannelWrite(name = "Channel"))
+                val (_, otherChannel) = createChannel(mockedChannelWrite(name = "Channel", description = "Description"))
                 val (_, admin) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
+                    mockedChannelMemberWrite(userId = admin!!.id, role = ChannelMemberRole.admin)
+                )
+
+                val previousChannel = getChannels().first { it.id == channel.id }
+                val context = mockedAuthContext(userId = admin.id)
+                channelMutation.updateChannel(context = context, id = channel.id, input = updateInput)
+
+                // Also test that the other channel does not get updated.
+                val actualChannels = getChannels().map(Channel::ignoreUnknown)
+                val expectedChannels = listOf(
+                    otherChannel!!.toChannel(), previousChannel.copy(
+                        name = updateInput.name.fallbackTo(previousChannel.name),
+                        description = updateInput.description.fallbackTo(previousChannel.description)
+                    )
+                ).map(Channel::ignoreUnknown)
+                actualChannels shouldContainExactlyInAnyOrder expectedChannels
+            }
+        }
+
+        @Test
+        fun `updates the name when the user is an admin of the channel`() {
+            test(updateInput = UpdateChannelInput(name = OptionalNullableString("Updated name")))
+        }
+
+        @Test
+        fun `returns an error when the name is blank`() {
+            serverTest {
+                val (_, channel) = createChannel(mockedChannelWrite(name = "Name"))
+                val (_, admin) = upsertUser()
+                addMember(
+                    channelId = channel!!.id,
+                    mockedChannelMemberWrite(userId = admin!!.id, role = ChannelMemberRole.admin)
                 )
 
                 val context = mockedAuthContext(userId = admin.id)
-                val detailedChannel =
-                    channelMutation.updateChannel(context = context, id = channel.id, name = "Updated channel")
+                val error = shouldThrow<ClientApiException> {
+                    channelMutation.updateChannel(
+                        context = context,
+                        id = channel.id,
+                        input = UpdateChannelInput(name = OptionalNullableString("  "))
+                    )
+                }
+                error shouldBe ClientApiException.channelNameBlank()
 
-                detailedChannel.id shouldBe channel.id
-                getChannels().map { it.toChannelRead() }
-                    .shouldContainExactlyInAnyOrder(listOf(channel.copy(name = "Updated channel"), otherChannel))
+                val actualChannels = getChannels()
+                actualChannels.first().name shouldBe channel.name
+            }
+        }
+
+        @Test
+        fun `updates the description when the user is an admin of the channel`() {
+            test(updateInput = UpdateChannelInput(description = OptionalNullableString("Updated description")))
+        }
+
+        @Test
+        fun `returns an error when the description is blank`() {
+            serverTest {
+                val (_, channel) = createChannel(mockedChannelWrite(description = "Description"))
+                val (_, admin) = upsertUser()
+                addMember(
+                    channelId = channel!!.id,
+                    mockedChannelMemberWrite(userId = admin!!.id, role = ChannelMemberRole.admin)
+                )
+
+                val context = mockedAuthContext(userId = admin.id)
+                val error = shouldThrow<ClientApiException> {
+                    channelMutation.updateChannel(
+                        context = context,
+                        id = channel.id,
+                        input = UpdateChannelInput(description = OptionalNullableString("  "))
+                    )
+                }
+                error shouldBe ClientApiException.channelDescriptionBlank()
+
+                val actualChannels = getChannels()
+                actualChannels.first().description shouldBe channel.description
             }
         }
 
@@ -82,12 +222,12 @@ class ChannelMutationTests {
                 val (_, user) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.user)
+                    mockedChannelMemberWrite(userId = user!!.id, role = ChannelMemberRole.user)
                 )
 
                 val context = mockedAuthContext(userId = user.id)
                 val error = shouldThrow<ClientApiException> {
-                    channelMutation.updateChannel(context = context, id = channel.id, name = "Updated channel")
+                    channelMutation.updateChannel(context = context, id = channel.id, input = UpdateChannelInput())
                 }
 
                 error shouldBe ClientApiException.resourceNotFound()
@@ -106,7 +246,7 @@ class ChannelMutationTests {
                 val (_, admin) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
+                    mockedChannelMemberWrite(userId = admin!!.id, role = ChannelMemberRole.admin)
                 )
 
                 val context = mockedAuthContext(userId = admin.id)
@@ -126,7 +266,7 @@ class ChannelMutationTests {
                 val (_, user) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.user)
+                    mockedChannelMemberWrite(userId = user!!.id, role = ChannelMemberRole.user)
                 )
 
                 val context = mockedAuthContext(userId = user.id)
@@ -141,55 +281,34 @@ class ChannelMutationTests {
     }
 
     @Nested
-    inner class UpsertMemberTest {
+    inner class AddMemberTest {
         @Test
-        fun `adds a member and returns it when the user is an admin`() {
+        fun `adds a member when the user is an admin and contact`() {
             serverTest {
                 val (_, channel) = createChannel()
                 val (_, admin) = upsertUser()
-                val (_, user) = upsertUser()
                 val (adminMember, _) = addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
+                    mockedChannelMemberWrite(userId = admin!!.id, role = ChannelMemberRole.admin)
                 )
+
+                val (_, user) = upsertUser()
+                upsertContact(userId1 = admin.id, userId2 = user!!.id)
 
                 val context = mockedAuthContext(userId = admin.id)
-                val otherMember = mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.admin)
-                val detailedChannelMember = channelMutation.upsertMember(
+                channelMutation.addMember(
                     context = context,
                     channelId = channel.id,
-                    member = otherMember,
+                    userId = user.id,
+                    input = AddMemberInput(role = ChannelMemberRole.admin),
                 )
 
-                detailedChannelMember.userId shouldBe user.id
-                getMembers().map { it.toChannelMemberWrite() }
-                    .shouldContainExactlyInAnyOrder(listOf(adminMember, otherMember))
-            }
-        }
-
-        @Test
-        fun `updates a member and returns it when the user is an admin and the member already exists`() {
-            serverTest {
-                val (_, channel) = createChannel()
-                val (_, admin) = upsertUser()
-                val (member, _) = addMember(
-                    channelId = channel!!.id,
-                    mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
-                )
-
-                val context = mockedAuthContext(userId = admin.id)
-                val updatedMember = member.copy(role = ChannelMemberRole.user)
-                val detailedChannelMember = channelMutation.upsertMember(
-                    context = context,
-                    channelId = channel.id,
-                    member = updatedMember,
-                )
-
-                detailedChannelMember.userId shouldBe admin.id
-                with(getMembers().map { it.toChannelMemberWrite() }) {
-                    shouldHaveSize(1)
-                    first() shouldBe updatedMember
-                }
+                val actualMembers = getMembers().ignoreUnknown()
+                val expectedMembers = listOf(
+                    mockedChannelMember(channelId = channel.id, userId = user.id, role = ChannelMemberRole.admin),
+                    adminMember.toChannelMember(channel.id)
+                ).ignoreUnknown()
+                actualMembers shouldContainExactlyInAnyOrder expectedMembers
             }
         }
 
@@ -197,24 +316,173 @@ class ChannelMutationTests {
         fun `returns an error when the user is not an admin of the channel`() {
             serverTest {
                 val (_, channel) = createChannel()
-                val (_, user) = upsertUser()
-                val (member, _) = addMember(
+                val (_, notAdmin) = upsertUser()
+                addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.user)
+                    mockedChannelMemberWrite(userId = notAdmin!!.id, role = ChannelMemberRole.user)
                 )
+                val (_, user) = upsertUser()
+                upsertContact(userId1 = notAdmin.id, userId2 = user!!.id)
 
-                val context = mockedAuthContext(userId = user.id)
-                val updatedMember = member.copy(role = ChannelMemberRole.admin)
+                val context = mockedAuthContext(userId = notAdmin.id)
                 val error = shouldThrow<ClientApiException> {
-                    channelMutation.upsertMember(
+                    channelMutation.addMember(
                         context = context,
                         channelId = channel.id,
-                        member = updatedMember,
+                        userId = user.id,
+                        input = AddMemberInput(role = ChannelMemberRole.user),
                     )
                 }
 
                 error shouldBe ClientApiException.resourceNotFound()
-                getMembers().first().toChannelMemberWrite() shouldBe member
+                getMembers().first().userId shouldBe notAdmin.id
+            }
+        }
+
+        @Test
+        fun `returns an error when the user is not a contact of the new member`() {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, admin) = upsertUser()
+                addMember(
+                    channelId = channel!!.id,
+                    mockedChannelMemberWrite(userId = admin!!.id, role = ChannelMemberRole.admin)
+                )
+                val (_, user) = upsertUser()
+
+                val context = mockedAuthContext(userId = admin.id)
+                val error = shouldThrow<ClientApiException> {
+                    channelMutation.addMember(
+                        context = context,
+                        channelId = channel.id,
+                        userId = user!!.id,
+                        input = AddMemberInput(role = ChannelMemberRole.user),
+                    )
+                }
+
+                error shouldBe ClientApiException.resourceNotFound()
+                getMembers().first().userId shouldBe admin.id
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateMemberTests {
+        fun test(updateInput: UpdateMemberInput) {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, admin) = upsertUser()
+                val (adminMember, _) = addMember(
+                    channelId = channel!!.id,
+                    mockedChannelMemberWrite(userId = admin!!.id, role = ChannelMemberRole.admin)
+                )
+                val (_, user) = upsertUser()
+                addMember(
+                    channelId = channel.id,
+                    mockedChannelMemberWrite(userId = user!!.id, role = ChannelMemberRole.user)
+                )
+
+                val previousMember = getMembers().first { it.userId == user.id }
+                val context = mockedAuthContext(userId = admin.id)
+                channelMutation.updateMember(
+                    context = context,
+                    channelId = channel.id,
+                    userId = user.id,
+                    input = UpdateMemberInput(role = OptionalChannelMemberRole(ChannelMemberRole.admin)),
+                )
+
+                // Also test that the other members does not get updated.
+                val actualMembers = getMembers().map(ChannelMember::ignoreUnknown)
+                val expectedMembers = listOf(
+                    adminMember.toChannelMember(channelId = channel.id),
+                    previousMember.copy(role = updateInput.role.fallbackTo(previousMember.role!!))
+                ).map(ChannelMember::ignoreUnknown)
+                actualMembers.shouldContainExactlyInAnyOrder(expectedMembers)
+            }
+        }
+
+        @Test
+        fun `updates the role when the executing user is an admin`() {
+            test(updateInput = UpdateMemberInput(role = OptionalChannelMemberRole(ChannelMemberRole.admin)))
+        }
+
+        @Test
+        fun `returns an error when the user is not an admin of the channel`() {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, notAnAdmin) = upsertUser()
+                val (notAnAdminMember, _) = addMember(
+                    channelId = channel!!.id,
+                    mockedChannelMemberWrite(userId = notAnAdmin!!.id, role = ChannelMemberRole.user)
+                )
+
+                val context = mockedAuthContext(userId = notAnAdmin.id)
+                val error = shouldThrow<ClientApiException> {
+                    channelMutation.updateMember(
+                        context = context,
+                        channelId = channel.id,
+                        userId = notAnAdmin.id,
+                        input = UpdateMemberInput(role = OptionalChannelMemberRole(ChannelMemberRole.admin)),
+                    )
+                }
+
+                error shouldBe ClientApiException.resourceNotFound()
+                getMembers().first().role shouldBe notAnAdminMember.role
+            }
+        }
+
+        @Test
+        fun `allows an admin to degrade himself, when another admin exists`() {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, admin1) = upsertUser()
+                addMember(
+                    channelId = channel!!.id,
+                    mockedChannelMemberWrite(userId = admin1!!.id, role = ChannelMemberRole.admin)
+                )
+
+                val (_, admin2) = upsertUser()
+                addMember(
+                    channelId = channel.id,
+                    mockedChannelMemberWrite(userId = admin2!!.id, role = ChannelMemberRole.admin)
+                )
+
+                val context = mockedAuthContext(userId = admin1.id)
+                channelMutation.updateMember(
+                    context = context,
+                    channelId = channel.id,
+                    userId = admin1.id,
+                    input = UpdateMemberInput(role = OptionalChannelMemberRole(ChannelMemberRole.user)),
+                )
+
+                val actualRoles = getMembers().map { it.userId to it.role }
+                val expectedRoles = listOf(admin1.id to ChannelMemberRole.user, admin2.id to ChannelMemberRole.admin)
+                actualRoles shouldContainExactlyInAnyOrder expectedRoles
+            }
+        }
+
+        @Test
+        fun `returns an error when an admin degrades his role but no other admin exists`() {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, admin) = upsertUser()
+                val (adminMember, _) = addMember(
+                    channelId = channel!!.id,
+                    mockedChannelMemberWrite(userId = admin!!.id, role = ChannelMemberRole.admin)
+                )
+
+                val context = mockedAuthContext(userId = admin.id)
+                val error = shouldThrow<ClientApiException> {
+                    channelMutation.updateMember(
+                        context = context,
+                        channelId = channel.id,
+                        userId = admin.id,
+                        input = UpdateMemberInput(role = OptionalChannelMemberRole(ChannelMemberRole.user)),
+                    )
+                }
+
+                error shouldBe ClientApiException.channelMustHaveOneAdmin()
+                getMembers().first().role shouldBe adminMember.role
             }
         }
     }
@@ -222,7 +490,7 @@ class ChannelMutationTests {
     @Nested
     inner class RemoveMemberTests {
         @Test
-        fun `removes a member when the user is an admin of the channel`() {
+        fun `removes a member when the executing user is an admin of the channel`() {
             serverTest {
                 val (_, channel) = createChannel()
                 val (_, otherChannel) = createChannel()
@@ -230,16 +498,16 @@ class ChannelMutationTests {
                 val (_, otherAdmin) = upsertUser()
                 val (_, member1) = addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
+                    mockedChannelMemberWrite(userId = admin!!.id, role = ChannelMemberRole.admin)
                 )
                 addMember(
                     channelId = channel.id,
-                    mockedChannelMember(userId = otherAdmin!!.id, role = ChannelMemberRole.admin)
+                    mockedChannelMemberWrite(userId = otherAdmin!!.id, role = ChannelMemberRole.admin)
                 )
                 // Have the same member as a member of another channel to see that only the specified one gets removed.
                 val (_, member2) = addMember(
                     channelId = otherChannel!!.id,
-                    mockedChannelMember(userId = otherAdmin.id, role = ChannelMemberRole.admin)
+                    mockedChannelMemberWrite(userId = otherAdmin.id, role = ChannelMemberRole.admin)
                 )
 
                 val context = mockedAuthContext(userId = admin.id)
@@ -254,23 +522,59 @@ class ChannelMutationTests {
         }
 
         @Test
-        fun `removes a member when the user is the same as the removed member`() {
+        fun `removes a member when the executing user is the same as the removed member and another admin exists`() {
+            serverTest {
+                val (_, channel) = createChannel()
+                val (_, admin1) = upsertUser()
+                addMember(
+                    channelId = channel!!.id,
+                    mockedChannelMemberWrite(userId = admin1!!.id, role = ChannelMemberRole.admin)
+                )
+
+                val (_, admin2) = upsertUser()
+                addMember(
+                    channelId = channel.id,
+                    mockedChannelMemberWrite(userId = admin2!!.id, role = ChannelMemberRole.admin)
+                )
+
+                val context = mockedAuthContext(userId = admin1.id)
+                channelMutation.removeMember(
+                    context = context,
+                    channelId = channel.id,
+                    userId = admin1.id
+                )
+
+                getMembers().map { it.userId } shouldContainExactlyInAnyOrder listOf(admin2.id)
+            }
+        }
+
+        @Test
+        fun `returns an error when an admin removes himself and no other admin exists`() {
             serverTest {
                 val (_, channel) = createChannel()
                 val (_, admin) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = admin!!.id, role = ChannelMemberRole.admin)
+                    mockedChannelMemberWrite(userId = admin!!.id, role = ChannelMemberRole.admin)
+                )
+
+                val (_, user) = upsertUser()
+                addMember(
+                    channelId = channel.id,
+                    mockedChannelMemberWrite(userId = user!!.id, role = ChannelMemberRole.user)
                 )
 
                 val context = mockedAuthContext(userId = admin.id)
-                channelMutation.removeMember(
-                    context = context,
-                    channelId = channel.id,
-                    userId = admin.id
-                )
+                val error = shouldThrow<ClientApiException> {
+                    channelMutation.removeMember(
+                        context = context,
+                        channelId = channel.id,
+                        userId = admin.id
+                    )
+                }
 
-                getMembers() shouldHaveSize 0
+                error shouldBe ClientApiException.channelMustHaveOneAdmin()
+                getMembers() shouldHaveSize 2
             }
         }
 
@@ -282,11 +586,11 @@ class ChannelMutationTests {
                 val (_, user2) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
-                    mockedChannelMember(userId = user1!!.id, role = ChannelMemberRole.user)
+                    mockedChannelMemberWrite(userId = user1!!.id, role = ChannelMemberRole.user)
                 )
                 addMember(
                     channelId = channel.id,
-                    mockedChannelMember(userId = user2!!.id, role = ChannelMemberRole.user)
+                    mockedChannelMemberWrite(userId = user2!!.id, role = ChannelMemberRole.user)
                 )
 
                 val context = mockedAuthContext(userId = user1.id)
@@ -308,7 +612,7 @@ class ChannelMutationTests {
             serverTest {
                 val (_, channel) = createChannel(mockedChannelWrite(isManaged = true))
                 val (_, user) = upsertUser()
-                addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
+                addMember(channelId = channel!!.id, mockedChannelMemberWrite(userId = user!!.id))
 
                 val context = mockedAuthContext(userId = user.id)
                 val error = shouldThrow<ClientApiException> {

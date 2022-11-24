@@ -1,6 +1,8 @@
 package persistence.jooq
 
-import error.*
+import error.PlatformApiException
+import error.dependencyNotFound
+import error.duplicate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -11,7 +13,6 @@ import org.postgresql.util.PSQLException
 import persistence.postgres.*
 import util.snakeToCamelCase
 import java.sql.BatchUpdateException
-import java.sql.SQLException
 
 class KotlinDslContext(private val dslContext: DSLContext) {
     // Uses for overriding the dsl context during tests.
@@ -28,7 +29,7 @@ class KotlinDslContext(private val dslContext: DSLContext) {
         try {
             (if (overrideDSLContext != null) overrideDSLContext!! else dslContext).transactionResult { config ->
                 val transactionDslContext = DSL.using(config)
-                if (isolationLevel != null) {
+                if (overrideDSLContext == null && isolationLevel != null) {
                     transactionDslContext.connection { it.transactionIsolation = isolationLevel }
                 }
                 runBlocking { KotlinTransactionContext(transactionDslContext).block() }

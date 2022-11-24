@@ -5,10 +5,11 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
-import persistence.jooq.KotlinDslContext
-import persistence.postgres.queries.*
 import models.ChannelWritePayload
 import models.toChannel
+import persistence.jooq.KotlinDslContext
+import persistence.postgres.queries.channel.insertChannel
+import persistence.postgres.queries.getChannel
 import java.time.Instant
 import java.util.UUID.randomUUID
 

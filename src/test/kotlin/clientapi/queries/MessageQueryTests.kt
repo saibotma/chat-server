@@ -14,7 +14,7 @@ import models.toDetailed
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import testutil.mockedAuthContext
-import testutil.mockedChannelMember
+import testutil.mockedChannelMemberWrite
 import testutil.mockedMessage
 import testutil.servertest.post.addMember
 import testutil.servertest.post.createChannel
@@ -53,8 +53,8 @@ class MessageQueryTests {
                 val (_, channel) = createChannel()
                 val (_, otherChannel) = createChannel()
                 val (_, user) = upsertUser()
-                addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
-                addMember(channelId = otherChannel!!.id, mockedChannelMember(userId = user.id))
+                addMember(channelId = channel!!.id, mockedChannelMemberWrite(userId = user!!.id))
+                addMember(channelId = otherChannel!!.id, mockedChannelMemberWrite(userId = user.id))
 
                 val context = mockedAuthContext(userId = user.id)
                 suspend fun sendMessage(text: String, channelId: UUID): DetailedMessageReadPayload {
@@ -88,8 +88,8 @@ class MessageQueryTests {
                 val (_, channel) = createChannel()
                 val (_, user1) = upsertUser()
                 val (_, user2) = upsertUser()
-                addMember(channelId = channel!!.id, mockedChannelMember(userId = user1!!.id))
-                addMember(channelId = channel.id, mockedChannelMember(userId = user2!!.id))
+                addMember(channelId = channel!!.id, mockedChannelMemberWrite(userId = user1!!.id))
+                addMember(channelId = channel.id, mockedChannelMemberWrite(userId = user2!!.id))
 
                 val context1 = mockedAuthContext(userId = user1.id)
                 val context2 = mockedAuthContext(userId = user2.id)
@@ -150,7 +150,7 @@ class MessageQueryTests {
         serverTest {
             val (_, channel) = createChannel()
             val (_, user) = upsertUser()
-            addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
+            addMember(channelId = channel!!.id, mockedChannelMemberWrite(userId = user!!.id))
 
             val context = mockedAuthContext(userId = user.id)
             suspend fun sendMessage(text: String): DetailedMessageReadPayload {
@@ -185,7 +185,7 @@ class MessageQueryTests {
         serverTest {
             val (_, channel) = createChannel()
             val (_, user) = upsertUser()
-            addMember(channelId = channel!!.id, mockedChannelMember(userId = user!!.id))
+            addMember(channelId = channel!!.id, mockedChannelMemberWrite(userId = user!!.id))
 
             val context = mockedAuthContext(userId = user.id)
             suspend fun sendMessage(text: String): DetailedMessageReadPayload {

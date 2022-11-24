@@ -21,8 +21,8 @@ class MessageQuery(private val database: KotlinDslContext) {
         nextLimit: Int = 15,
     ): List<DetailedMessageReadPayload> {
         // TODO(saibotma): https://github.com/saibotma/chat-server/issues/5
-        val userId = context.userId
-        val isMemberOfChannel = database.transaction { isMemberOfChannel(channelId = channelId, userId = userId) }
+        val isMemberOfChannel =
+            database.transaction { isMemberOfChannel(channelId = channelId, userId = context.userId) }
         if (!isMemberOfChannel) throw ClientApiException.resourceNotFound()
 
         return database.transaction {

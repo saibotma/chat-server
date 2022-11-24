@@ -1,6 +1,5 @@
 package platformapi
 
-import persistence.jooq.enums.ChannelMemberRole
 import error.PlatformApiException
 import error.managedChannelHasAdmin
 import error.resourceNotFound
@@ -9,11 +8,17 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
-import persistence.jooq.KotlinDslContext
-import persistence.postgres.queries.*
 import models.ChannelMemberWritePayload
 import models.toChannelMember
 import models.toChannelMemberWrite
+import persistence.jooq.KotlinDslContext
+import persistence.jooq.enums.ChannelMemberRole
+import persistence.postgres.queries.channelmember.insertMember
+import persistence.postgres.queries.channelmember.insertMembers
+import persistence.postgres.queries.channelmember.updateMembers
+import persistence.postgres.queries.deleteMembersOf
+import persistence.postgres.queries.getChannel
+import persistence.postgres.queries.getMembersOf
 import java.time.Instant.now
 
 suspend fun PipelineContext<Unit, ApplicationCall>.addMember(
@@ -48,7 +53,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.updateMembers(
 
         val currentMembers = getMembersOf(channelId).map { it.toChannelMemberWrite() }
 
-        val union = members.map { it.userId }.intersect(currentMembers.map { it.userId }).toList()
+        val union = members.map { it.userId }.intersect(currentMembers.map { it.userId }.toSet()).toList()
         val deleted = currentMembers.filter { !union.contains(it.userId) }.map { it.userId }
         val inserted = members.filter { member -> !currentMembers.map { it.userId }.contains(member.userId) }
             .map { it.toChannelMember(channelId, addedAt = now()) }

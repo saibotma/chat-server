@@ -1,5 +1,6 @@
 package push
 
+import clientapi.UserId
 import clientapi.models.MessageWritePayload
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +18,7 @@ class PushService(
 ) {
     private val logger = logger()
 
-    suspend fun sendPushNotificationForNewMessage(channelId: UUID, creatorId: String, message: MessageWritePayload) {
+    suspend fun sendPushNotificationForNewMessage(channelId: UUID, creatorId: UserId, message: MessageWritePayload) {
         val affectedUserIds = dslContext.transaction { getUserIdsOfChannel(channelId = channelId) }
         val creator = dslContext.transaction { getUser(creatorId)!! }
         val channel = dslContext.transaction { getChannel(channelId)!! }
@@ -30,7 +31,7 @@ class PushService(
                 text = message.text ?: "",
                 channelId = channelId
             ),
-            ownUserId = creatorId,
+            ownUserId = creatorId.value,
         )
     }
 

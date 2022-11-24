@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import models.ChannelMemberReadPayload
 import models.ChannelMemberWritePayload
 import models.toChannelMemberRead
-import testutil.mockedChannelMember
+import testutil.mockedChannelMemberWrite
 import testutil.mockedChannelWrite
 import testutil.servertest.asApiError
 import testutil.servertest.ensureBadRequestWithDuplicate
@@ -32,7 +32,7 @@ class ChannelMemberListTests {
                 val (_, user) = upsertUser()
                 val (write, read) = addMember(
                     channelId = channel!!.id,
-                    member = mockedChannelMember(userId = user!!.id)
+                    member = mockedChannelMemberWrite(userId = user!!.id)
                 )
 
                 read!!.toWrite() shouldBe write
@@ -51,7 +51,7 @@ class ChannelMemberListTests {
                 val (_, user) = upsertUser()
                 addMember(
                     channelId = channel!!.id,
-                    member = mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.admin)
+                    member = mockedChannelMemberWrite(userId = user!!.id, role = ChannelMemberRole.admin)
                 ) { _, _ ->
                     status shouldBe HttpStatusCode.BadRequest
                     asApiError() shouldBe PlatformApiException.managedChannelHasAdmin().error
@@ -66,7 +66,7 @@ class ChannelMemberListTests {
                 val (_, user) = upsertUser()
                 val (write, _) = addMember(
                     channelId = channel!!.id,
-                    member = mockedChannelMember(userId = user!!.id)
+                    member = mockedChannelMemberWrite(userId = user!!.id)
                 )
                 addMember(
                     channelId = channel.id,
@@ -90,17 +90,17 @@ class ChannelMemberListTests {
                 val (_, user1) = upsertUser()
                 val (_, user2) = upsertUser()
                 val (_, user3) = upsertUser()
-                addMember(channelId = channel!!.id, member = mockedChannelMember(userId = user1!!.id))
+                addMember(channelId = channel!!.id, member = mockedChannelMemberWrite(userId = user1!!.id))
                 addMember(
                     channelId = channel.id,
-                    member = mockedChannelMember(userId = user2!!.id, role = ChannelMemberRole.user)
+                    member = mockedChannelMemberWrite(userId = user2!!.id, role = ChannelMemberRole.user)
                 )
                 // Delete 1, edit 2 and add 3
                 val (write, read) = setMembers(
                     channelId = channel.id,
                     members = listOf(
-                        mockedChannelMember(userId = user2.id, role = ChannelMemberRole.admin),
-                        mockedChannelMember(userId = user3!!.id),
+                        mockedChannelMemberWrite(userId = user2.id, role = ChannelMemberRole.admin),
+                        mockedChannelMemberWrite(userId = user3!!.id),
                     )
                 )
 
@@ -116,7 +116,7 @@ class ChannelMemberListTests {
                 val (_, user) = upsertUser()
                 setMembers(
                     channelId = channel!!.id,
-                    members = listOf(mockedChannelMember(userId = user!!.id, role = ChannelMemberRole.admin))
+                    members = listOf(mockedChannelMemberWrite(userId = user!!.id, role = ChannelMemberRole.admin))
                 ) { _, _ ->
                     status shouldBe HttpStatusCode.BadRequest
                     asApiError() shouldBe PlatformApiException.managedChannelHasAdmin().error
