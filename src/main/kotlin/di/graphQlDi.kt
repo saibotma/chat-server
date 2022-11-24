@@ -2,6 +2,7 @@ package di
 
 import clientapi.AuthContext
 import clientapi.mutations.ChannelMutation
+import clientapi.mutations.ContactMutation
 import clientapi.mutations.MessageMutation
 import clientapi.mutations.PushMutation
 import clientapi.queries.ChannelEventQuery
@@ -33,6 +34,7 @@ val graphQlDi = DI.Module("graphql") {
     bind<ChannelMutation>() with singleton { ChannelMutation(instance()) }
     bind<MessageMutation>() with singleton { MessageMutation(instance(), instance()) }
     bind<PushMutation>() with singleton { PushMutation(instance()) }
+    bind<ContactMutation>() with singleton { ContactMutation(instance()) }
 
     bind<GraphQLSchema>() with singleton {
         val config = SchemaGeneratorConfig(
@@ -57,6 +59,7 @@ val graphQlDi = DI.Module("graphql") {
             instance<ChannelMutation>(),
             instance<MessageMutation>(),
             instance<PushMutation>(),
+            instance<ContactMutation>(),
         ).map { TopLevelObject(it) }
 
         toSchema(config = config, queries = queries, mutations = mutations)

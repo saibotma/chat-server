@@ -6,6 +6,7 @@ import org.jooq.Field
 import org.jooq.impl.DSL.*
 import persistence.jooq.KotlinTransactionContext
 import persistence.jooq.tables.references.CONTACT
+import persistence.jooq.tables.Contact as ContactTable
 
 fun KotlinTransactionContext.areContacts(userId1: UserId, userId2: UserId): Boolean {
     return db.select(areContacts(userId1 = value(userId1.value), userId2 = value(userId2.value)))
@@ -15,7 +16,11 @@ fun KotlinTransactionContext.areContacts(userId1: UserId, userId2: UserId): Bool
 fun areContacts(userId1: Field<String?>, userId2: Field<String?>): Condition {
     return exists(
         selectFrom(CONTACT)
-            .where(CONTACT.USER_ID_1.eq(userId1).and(CONTACT.USER_ID_2.eq(userId2)))
-            .or(CONTACT.USER_ID_1.eq(userId2).and(CONTACT.USER_ID_2.eq(userId1)))
+            .where(areContacts(contact = CONTACT, userId1 = userId1, userId2 = userId2))
     )
+}
+
+fun areContacts(contact: ContactTable, userId1: Field<String?>, userId2: Field<String?>): Condition {
+    return (contact.USER_ID_1.eq(userId1).and(contact.USER_ID_2.eq(userId2)))
+        .or(contact.USER_ID_1.eq(userId2).and(contact.USER_ID_2.eq(userId1)))
 }

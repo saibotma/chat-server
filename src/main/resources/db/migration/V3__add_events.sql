@@ -1,14 +1,61 @@
+CREATE FUNCTION "update_updated_at"() RETURNS TRIGGER AS
+$$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+ALTER TABLE "message"
+    ALTER COLUMN "created_at" SET DEFAULT now();
+
+ALTER TABLE "message"
+    ADD COLUMN "updated_at" timestamptz NULL;
+
+CREATE TRIGGER "message_update_updated_at"
+    BEFORE UPDATE
+    ON "message"
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
+
+ALTER TABLE "user"
+    ALTER COLUMN "created_at" SET DEFAULT now();
+
 ALTER TABLE "user"
     ADD COLUMN "updated_at" timestamptz NULL;
 
+CREATE TRIGGER "user_update_updated_at"
+    BEFORE UPDATE
+    ON "user"
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
+
+ALTER TABLE "channel_member"
+    ALTER COLUMN "added_at" SET DEFAULT now();
+
 ALTER TABLE "channel_member"
     ADD COLUMN "updated_at" timestamptz NULL;
+
+CREATE TRIGGER "channel_member_update_updated_at"
+    BEFORE UPDATE
+    ON "channel_member"
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
 
 ALTER TABLE "channel"
     ADD COLUMN "description" text NULL;
 
 ALTER TABLE "channel"
+    ALTER COLUMN "created_at" SET DEFAULT now();
+
+ALTER TABLE "channel"
     ADD COLUMN "updated_at" timestamptz NULL;
+
+CREATE TRIGGER "channel_update_updated_at"
+    BEFORE UPDATE
+    ON "channel"
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
 
 ALTER TABLE "channel"
     ADD COLUMN "creator_user_id" varchar NULL;
@@ -34,7 +81,7 @@ CREATE TABLE "channel_event"
     channel_id uuid,
     type       "channel_event_type" NOT NULL,
     data       jsonb                NOT NULL,
-    created_at timestamptz          NOT NULL,
+    created_at timestamptz          NOT NULL DEFAULT now(),
     CONSTRAINT "channel_event_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "channel_event_channel_id_fkey"
         FOREIGN KEY ("channel_id") REFERENCES "channel" ("id") ON DELETE CASCADE
@@ -238,9 +285,18 @@ EXECUTE PROCEDURE notify_channel_event();
 
 CREATE TABLE "contact"
 (
-    user_id_1 varchar NOT NULL,
-    user_id_2 varchar NOT NULL,
+    user_id_1   varchar     NOT NULL,
+    user_id_2   varchar     NOT NULL,
+    is_approved bool        NOT NULL,
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    updated_at  timestamptz NULL,
     CONSTRAINT "contact_pkey" PRIMARY KEY ("user_id_1", "user_id_2"),
     CONSTRAINT "contact_user_id_1_fkey" FOREIGN KEY ("user_id_1") REFERENCES "user" ("id"),
     CONSTRAINT "contact_user_id_2_fkey" FOREIGN KEY ("user_id_2") REFERENCES "user" ("id")
 );
+
+CREATE TRIGGER "contact_update_updated_at"
+    BEFORE UPDATE
+    ON "contact"
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();

@@ -1,7 +1,9 @@
 package testutil.servertest
 
 import chatServer
+import clientapi.AuthContext
 import clientapi.mutations.ChannelMutation
+import clientapi.mutations.ContactMutation
 import clientapi.mutations.MessageMutation
 import clientapi.mutations.PushMutation
 import clientapi.queries.ChannelQuery
@@ -20,10 +22,7 @@ import models.*
 import org.flywaydb.core.Flyway
 import org.kodein.di.*
 import platformapi.PlatformApiConfig
-import testutil.DatabaseTestEnvironment
-import testutil.handleCleanUp
-import testutil.restoreDatabase
-import testutil.setupTestDependencies
+import testutil.*
 import java.util.*
 
 typealias ServerTestResponse = HttpResponse
@@ -80,6 +79,11 @@ class ServerTestEnvironment(val client: HttpClient, di: DI) :
     val channelMutation: ChannelMutation by di.instance()
     val messageMutation: MessageMutation by di.instance()
     val pushMutation: PushMutation by di.instance()
+    val contactMutation: ContactMutation by di.instance()
+
+    fun UserReadPayload.toAuthContext(): AuthContext {
+        return mockedAuthContext(userId = id)
+    }
 
     fun HttpRequestBuilder.addApiKeyAuthentication() {
         header("X-Chat-Server-Platform-Api-Access-Token", platformApiConfig.accessToken)
