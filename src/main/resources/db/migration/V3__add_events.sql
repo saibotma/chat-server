@@ -285,11 +285,10 @@ EXECUTE PROCEDURE notify_channel_event();
 
 CREATE TABLE "contact"
 (
-    user_id_1   varchar     NOT NULL,
-    user_id_2   varchar     NOT NULL,
-    is_approved bool        NOT NULL,
-    created_at  timestamptz NOT NULL DEFAULT now(),
-    updated_at  timestamptz NULL,
+    user_id_1  varchar     NOT NULL,
+    user_id_2  varchar     NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NULL,
     CONSTRAINT "contact_pkey" PRIMARY KEY ("user_id_1", "user_id_2"),
     CONSTRAINT "contact_user_id_1_fkey" FOREIGN KEY ("user_id_1") REFERENCES "user" ("id"),
     CONSTRAINT "contact_user_id_2_fkey" FOREIGN KEY ("user_id_2") REFERENCES "user" ("id")

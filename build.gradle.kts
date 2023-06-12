@@ -153,6 +153,7 @@ jooq {
                         isDeprecated = false
                         isImmutablePojos = true
                         // Needed because else Arrays don't equal by content
+                        // https://github.com/jOOQ/jOOQ/issues/10805
                         isPojosEqualsAndHashCode = true
                     }
                     target.apply {

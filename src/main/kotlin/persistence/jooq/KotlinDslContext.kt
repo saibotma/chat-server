@@ -57,6 +57,7 @@ class KotlinDslContext(private val dslContext: DSLContext) {
 /**
  * Handles generic Postgres error that were not catched in the query function.
  */
+// TODO(saibotma): Why does this throw PlatformApiExceptions here?
 private fun handleGenericPostgresError(e: PSQLException): Nothing {
     with(e) {
         when {
