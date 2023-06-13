@@ -2,11 +2,7 @@ package clientapi
 
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import com.fasterxml.jackson.databind.ObjectMapper
-import graphql.ExecutionInput
-import graphql.GraphQL
-import graphql.KtorGraphQLServer
 import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.request.*
@@ -20,7 +16,8 @@ fun Route.installClientApi() {
     val objectMapper: ObjectMapper by closestDI().instance()
 
     // To get the GraphQL schema comment this back in and
-    // remove the authentication block.
+    // remove the "appWriteAuthenticate" block
+    // then open http://localhost:8080/client/graphql/ in the browser.
     // installGraphQlPlayground()
 
     clientApiJwtAuthenticate {
@@ -39,12 +36,12 @@ fun Route.installClientApi() {
     }
 }
 
+
 private fun Route.installGraphQlPlayground() {
-    get("playground") {
-        this.call.respondText(buildPlaygroundHtml("/client/graphql", "subscriptions"), ContentType.Text.Html)
+    static("/graphql") {
+        resource("/", "graphql-playground.html")
     }
 }
-
 private fun buildPlaygroundHtml(graphQLEndpoint: String, subscriptionsEndpoint: String) =
     Application::class.java.classLoader.getResource("graphql-playground.html")?.readText()
         ?.replace("\${graphQLEndpoint}", graphQLEndpoint)
