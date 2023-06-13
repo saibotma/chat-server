@@ -19,7 +19,7 @@ services:
       - FLYWAY_SHOULD_BASELINE
     restart: "unless-stopped"
     ports:
-      - "127.0.0.1:${KTOR_DEPLOYMENT_PORT}:${KTOR_DEPLOYMENT_PORT}"
+      - "127.0.0.1:${SERVER_PORT}:${SERVER_PORT}"
     logging:
       driver: "json-file"
       options:
