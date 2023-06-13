@@ -39,7 +39,7 @@ plugins {
 }
 
 application {
-    mainClassName = "io.ktor.server.netty.EngineMain"
+    mainClassName = "ApplicationKt"
 }
 
 group = "dev.saibotma"
@@ -194,8 +194,6 @@ tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
     allInputsDeclared.set(true)
     outputs.cacheIf { true }
 }
-
-
 
 abstract class PrintVersionTask : DefaultTask() {
     @TaskAction

@@ -1,5 +1,6 @@
 package testutil
 
+import chatServer
 import clientapi.mutations.ChannelMutation
 import clientapi.mutations.MessageMutation
 import clientapi.mutations.PushMutation
@@ -19,11 +20,11 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import models.*
-import module
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
-import org.kodein.di.*
+import org.kodein.di.DI
+import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import persistence.jooq.KotlinDslContext
 import platformapi.PlatformApiConfig
@@ -37,11 +38,11 @@ fun serverTest(
     test: suspend ServerTestEnvironment.() -> Unit
 ) {
     withTestApplication({
-        module {
+        chatServer(DI {
             setupDi()
             setupTestDependencies()
             bindDependencies()
-        }
+        })
     }) {
         val di = application.closestDI()
         val database: DSLContext by di.instance()

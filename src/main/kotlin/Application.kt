@@ -3,24 +3,28 @@ import clientapi.installClientApi
 import clientapi.installClientApiJwtAuthentication
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.typesafe.config.ConfigFactory
 import di.setupDi
 import error.PlatformApiException
 import flyway.FlywayConfig
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.config.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.locations.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import logging.Logging
 import org.flywaydb.core.Flyway
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.ktor.DIFeature
 import org.kodein.di.ktor.closestDI
+import org.kodein.di.ktor.di
 import persistence.jooq.KotlinDslContext
 import platformapi.PlatformApiConfig
 import platformapi.installPlatformApi
@@ -33,8 +37,29 @@ import java.util.*
 import kotlin.reflect.typeOf
 
 
-fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupDi() }) {
-    installFeatures(bindDependencies)
+fun main() {
+    // Execute using embedded server because wih automatic module loading
+    // a second config file without module loading setting would be required
+    // for tests. This would be a lot of duplicate config properties.
+    embeddedServer(
+        Netty,
+        environment = applicationEngineEnvironment {
+            config = HoconApplicationConfig(ConfigFactory.load())
+            connector {
+                port = config.property("server.port").getString().toInt()
+                // Needs to be "0.0.0.0" otherwise it does not work
+                // with docker and the current port forwarding configuration
+                // in the docker compose files.
+                host = "0.0.0.0"
+            }
+            module { chatServer() }
+        },
+    ).start(wait = true)
+}
+
+
+fun Application.chatServer(di: DI? = null) {
+    installFeatures(di ?: DI { setupDi() })
     val flywayConfig: FlywayConfig by closestDI().instance()
     val flyway: Flyway by closestDI().instance()
     // Need to support this in for databases that are not empty,
@@ -58,8 +83,8 @@ fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupDi()
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-private fun Application.installFeatures(bindDependencies: DI.MainBuilder.() -> Unit) {
-    install(DIFeature) { bindDependencies() }
+private fun Application.installFeatures(di: DI) {
+    di { extend(di) }
     install(CORS) {
         method(HttpMethod.Get)
         method(HttpMethod.Post)
