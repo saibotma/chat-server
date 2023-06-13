@@ -57,6 +57,7 @@ fun Application.module(bindDependencies: DI.MainBuilder.() -> Unit = { setupDi()
     }
 }
 
+@OptIn(ExperimentalStdlibApi::class)
 private fun Application.installFeatures(bindDependencies: DI.MainBuilder.() -> Unit) {
     install(DIFeature) { bindDependencies() }
     install(CORS) {
@@ -125,12 +126,14 @@ private fun Application.installFeatures(bindDependencies: DI.MainBuilder.() -> U
                     """.trimIndent()
                     )
                 }
+
                 is ParameterConversionException -> {
                     call.respond(
                         HttpStatusCode.BadRequest,
                         "Parameter \"${t.parameterName}\" could not be parsed.\nPlease check that the type fulfils the specification."
                     )
                 }
+
                 is JsonMappingException -> {
                     val locationMessage = t.location?.let {
                         "Error at line ${it.lineNr} and column ${it.columnNr}"
@@ -144,12 +147,15 @@ private fun Application.installFeatures(bindDependencies: DI.MainBuilder.() -> U
                         """.trimIndent()
                     )
                 }
+
                 is com.fasterxml.jackson.core.JsonParseException -> {
                     call.respond(HttpStatusCode.BadRequest, "Json body could not be parsed.\n${t.originalMessage}")
                 }
+
                 is PlatformApiException -> {
                     call.respond(t.statusCode, t.error)
                 }
+
                 else -> {
                     call.respond(HttpStatusCode.InternalServerError)
                     throw t

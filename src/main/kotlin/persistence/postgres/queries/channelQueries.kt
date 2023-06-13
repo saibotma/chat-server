@@ -1,23 +1,22 @@
 package persistence.postgres.queries
 
+import models.ChannelMemberWritePayload
+import models.DetailedChannelMemberReadPayload
+import models.DetailedChannelReadPayload
+import org.jooq.*
+import org.jooq.impl.DSL.*
+import persistence.jooq.KotlinTransactionContext
+import persistence.jooq.andIf
 import persistence.jooq.enums.ChannelMemberRole
+import persistence.jooq.funAlias
 import persistence.jooq.tables.Channel.Companion.CHANNEL
 import persistence.jooq.tables.ChannelMember.Companion.CHANNEL_MEMBER
 import persistence.jooq.tables.pojos.Channel
 import persistence.jooq.tables.pojos.ChannelMember
 import persistence.jooq.tables.records.ChannelMemberRecord
 import persistence.jooq.tables.records.ChannelRecord
-import models.DetailedChannelReadPayload
-import org.jooq.*
-import org.jooq.impl.DSL
-import persistence.jooq.KotlinTransactionContext
-import persistence.jooq.andIf
-import persistence.jooq.funAlias
 import persistence.postgres.mappings.detailedChannelMemberReadToJson
 import persistence.postgres.mappings.detailedChannelReadToJson
-import models.ChannelMemberWritePayload
-import models.DetailedChannelMemberReadPayload
-import org.jooq.impl.DSL.*
 import java.time.Instant.now
 import java.util.*
 
@@ -151,13 +150,12 @@ private fun KotlinTransactionContext.selectChannelsOf(
 }
 
 fun isMemberOfChannel(channelId: Field<UUID?>, userId: String): Condition {
-    return value(userId).`in`(selectUserIdsOfChannel(channelId = channelId))
-}
-
-private fun selectUserIdsOfChannel(channelId: Field<UUID?>): SelectConditionStep<Record1<String?>> {
-    val funName = ::selectUserIdsOfChannel.name
+    val funName = ::isMemberOfChannel.name
     val channelMemberAlias = CHANNEL_MEMBER.funAlias(funName)
-    return select(channelMemberAlias.USER_ID)
-        .from(channelMemberAlias)
-        .where(channelMemberAlias.CHANNEL_ID.eq(channelId))
+    return exists(
+        select(channelMemberAlias.USER_ID)
+            .from(channelMemberAlias)
+            .where(channelMemberAlias.CHANNEL_ID.eq(channelId))
+            .and(channelMemberAlias.USER_ID.eq(userId))
+    )
 }
