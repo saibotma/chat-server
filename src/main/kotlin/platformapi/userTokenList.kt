@@ -1,10 +1,10 @@
 package platformapi
 
-import clientapi.UserId
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import error.PlatformApiException
 import error.resourceNotFound
+import graphqlclientapi.UserId
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*

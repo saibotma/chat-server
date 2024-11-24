@@ -1,0 +1,70 @@
+package graphqlclientapi.mutations
+
+import graphqlclientapi.AuthContext
+import graphqlclientapi.ClientApiException
+import graphqlclientapi.models.DetailedMessageReadPayload
+import graphqlclientapi.models.MessageWritePayload
+import graphqlclientapi.models.toMessage
+import graphqlclientapi.resourceNotFound
+import persistence.jooq.KotlinDslContext
+import persistence.postgres.queries.*
+import persistence.postgres.queries.channelmember.isMemberOfChannel
+import push.PushService
+import java.time.Instant.now
+import java.util.*
+import java.util.UUID.randomUUID
+
+class MessageMutation(private val database: KotlinDslContext, private val pushService: Optional<PushService>) {
+    suspend fun sendMessage(
+        context: AuthContext,
+        channelId: UUID,
+        message: MessageWritePayload,
+    ): DetailedMessageReadPayload {
+        val result = database.transaction {
+            if (!isMemberOfChannel(channelId = channelId, userId = context.userId)) {
+                throw ClientApiException.resourceNotFound()
+            }
+            val id = randomUUID()
+            insertMessage(
+                message.toMessage(
+                    id = id,
+                    creatorUserId = context.userId,
+                    channelId = channelId,
+                    createdAt = now(),
+                )
+            )
+            getMessage(id)!!
+        }
+        if (pushService.isPresent) {
+            pushService.get()
+                .sendPushNotificationForNewMessage(channelId = channelId, creatorId = context.userId, message = message)
+        }
+        return result
+    }
+
+    suspend fun editMessage(
+        context: AuthContext,
+        id: UUID,
+        text: String?,
+    ): DetailedMessageReadPayload {
+        val userId = context.userId
+        return database.transaction {
+            if (!isCreatorOfMessage(messageId = id, userId = userId)) {
+                throw ClientApiException.resourceNotFound()
+            }
+            updateMessage(messageId = id, text = text)
+            getMessage(id)!!
+        }
+    }
+
+    suspend fun deleteMessage(context: AuthContext, id: UUID): Boolean {
+        val userId = context.userId
+        database.transaction {
+            if (!isCreatorOfMessage(messageId = id, userId = userId)) {
+                throw ClientApiException.resourceNotFound()
+            }
+            deleteMessage(id = id)
+        }
+        return true
+    }
+}

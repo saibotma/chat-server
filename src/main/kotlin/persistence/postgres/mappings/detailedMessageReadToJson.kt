@@ -1,6 +1,6 @@
 package persistence.postgres.mappings
 
-import clientapi.models.DetailedMessageReadPayload
+import graphqlclientapi.models.DetailedMessageReadPayload
 import persistence.jooq.tables.User.Companion.USER
 import org.jooq.JSON
 import org.jooq.JSONObjectNullStep

@@ -1,7 +1,7 @@
 package graphql
 
-import clientapi.AuthContext
 import com.expediagroup.graphql.server.execution.GraphQLContextFactory
+import graphqlclientapi.AuthContext
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 

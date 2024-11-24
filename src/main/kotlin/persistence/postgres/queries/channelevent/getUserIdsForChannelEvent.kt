@@ -1,6 +1,6 @@
 package persistence.postgres.queries.channelevent
 
-import clientapi.UserId
+import graphqlclientapi.UserId
 import persistence.jooq.KotlinTransactionContext
 import persistence.jooq.tables.references.CHANNEL_MEMBER
 import java.util.*

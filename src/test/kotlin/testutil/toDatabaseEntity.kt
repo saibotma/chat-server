@@ -1,6 +1,6 @@
 package testutil
 
-import clientapi.models.CreateChannelInputMember
+import graphqlclientapi.models.CreateChannelInputMember
 import models.ChannelMemberWritePayload
 import models.ChannelReadPayload
 import persistence.jooq.tables.pojos.Channel

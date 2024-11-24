@@ -1,6 +1,6 @@
 package persistence.postgres.queries
 
-import clientapi.UserId
+import graphqlclientapi.UserId
 import org.jooq.impl.DSL.exists
 import org.jooq.impl.DSL.select
 import persistence.jooq.KotlinTransactionContext

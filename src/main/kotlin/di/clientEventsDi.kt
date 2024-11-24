@@ -1,7 +1,7 @@
 package di
 
-import clientapi.TargetedMessageSessionManager
 import com.fasterxml.jackson.databind.ObjectMapper
+import graphqlclientapi.TargetedMessageSessionManager
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance

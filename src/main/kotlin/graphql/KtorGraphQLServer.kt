@@ -1,10 +1,10 @@
 package graphql
 
-import clientapi.AuthContext
 import com.expediagroup.graphql.server.execution.GraphQLContextFactory
 import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
 import com.expediagroup.graphql.server.execution.GraphQLRequestParser
 import com.expediagroup.graphql.server.execution.GraphQLServer
+import graphqlclientapi.AuthContext
 import io.ktor.server.request.*
 
 class KtorGraphQLServer(

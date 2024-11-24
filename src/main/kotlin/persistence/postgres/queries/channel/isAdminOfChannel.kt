@@ -1,6 +1,6 @@
 package persistence.postgres.queries.channel
 
-import clientapi.UserId
+import graphqlclientapi.UserId
 import org.jooq.impl.DSL
 import persistence.jooq.KotlinTransactionContext
 import persistence.jooq.enums.ChannelMemberRole

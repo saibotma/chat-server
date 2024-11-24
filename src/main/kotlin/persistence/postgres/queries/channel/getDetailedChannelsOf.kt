@@ -1,7 +1,7 @@
 package persistence.postgres.queries.channel
 
-import clientapi.UserId
-import clientapi.models.toReadPayload
+import graphqlclientapi.UserId
+import graphqlclientapi.models.toReadPayload
 import com.fasterxml.jackson.databind.ObjectMapper
 import models.DetailedChannelMemberReadPayload2
 import models.DetailedChannelReadPayload

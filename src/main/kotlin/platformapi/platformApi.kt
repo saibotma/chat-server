@@ -1,6 +1,6 @@
 package platformapi
 
-import clientapi.ClientApiConfig
+import graphqlclientapi.ClientApiConfig
 import io.ktor.server.auth.*
 import io.ktor.server.locations.*
 import io.ktor.server.locations.post

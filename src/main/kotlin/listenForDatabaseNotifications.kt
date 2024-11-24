@@ -1,6 +1,7 @@
-import clientapi.TargetedMessageSessionManager
-import clientapi.models.toReadPayload
+
 import com.fasterxml.jackson.databind.ObjectMapper
+import graphqlclientapi.TargetedMessageSessionManager
+import graphqlclientapi.models.toReadPayload
 import io.ktor.server.application.*
 import io.ktor.websocket.*
 import io.r2dbc.postgresql.PostgresqlConnectionConfiguration

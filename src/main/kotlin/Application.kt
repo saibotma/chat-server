@@ -1,6 +1,6 @@
-import clientapi.ClientApiConfig
-import clientapi.authentication.jwt.installClientApiJwtAuthentication
-import clientapi.installClientApi
+import graphqlclientapi.ClientApiConfig
+import apis.authentication.installClientApiJwtAuthentication
+import graphqlclientapi.installClientApi
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.typesafe.config.ConfigFactory

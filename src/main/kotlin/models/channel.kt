@@ -1,7 +1,7 @@
 package models
 
-import clientapi.models.ChannelEventReadPayload
-import clientapi.models.DetailedMessageReadPayload
+import graphqlclientapi.models.ChannelEventReadPayload
+import graphqlclientapi.models.DetailedMessageReadPayload
 import persistence.jooq.tables.pojos.Channel
 import java.time.Instant
 import java.util.*

@@ -1,6 +1,6 @@
 package platformapi
 
-import clientapi.UserId
+import graphqlclientapi.UserId
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*

@@ -1,7 +1,7 @@
 package push
 
-import clientapi.UserId
-import clientapi.models.MessageWritePayload
+import graphqlclientapi.UserId
+import graphqlclientapi.models.MessageWritePayload
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

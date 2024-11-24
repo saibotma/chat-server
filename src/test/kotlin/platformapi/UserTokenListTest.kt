@@ -1,6 +1,6 @@
 package platformapi
 
-import clientapi.ClientApiConfig
+import graphqlclientapi.ClientApiConfig
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException

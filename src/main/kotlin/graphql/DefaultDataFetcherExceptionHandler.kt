@@ -1,11 +1,11 @@
 package graphql
 
-import clientapi.ClientApiException
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.DataFetcherExceptionHandlerParameters
 import graphql.execution.DataFetcherExceptionHandlerResult
 import graphql.language.SourceLocation
+import graphqlclientapi.ClientApiException
 
 class DefaultDataFetcherExceptionHandler(private val objectMapper: ObjectMapper) : DataFetcherExceptionHandler {
     override fun onException(parameters: DataFetcherExceptionHandlerParameters?): DataFetcherExceptionHandlerResult {

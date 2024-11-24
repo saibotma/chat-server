@@ -1,13 +1,13 @@
 package di
 
-import clientapi.AuthContext
-import clientapi.mutations.ChannelMutation
-import clientapi.mutations.ContactMutation
-import clientapi.mutations.MessageMutation
-import clientapi.mutations.PushMutation
-import clientapi.queries.ChannelEventQuery
-import clientapi.queries.ChannelQuery
-import clientapi.queries.MessageQuery
+import graphqlclientapi.AuthContext
+import graphqlclientapi.mutations.ChannelMutation
+import graphqlclientapi.mutations.ContactMutation
+import graphqlclientapi.mutations.MessageMutation
+import graphqlclientapi.mutations.PushMutation
+import graphqlclientapi.queries.ChannelEventQuery
+import graphqlclientapi.queries.ChannelQuery
+import graphqlclientapi.queries.MessageQuery
 import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.execution.SimpleKotlinDataFetcherFactoryProvider

@@ -1,6 +1,6 @@
 package models
 
-import clientapi.UserId
+import graphqlclientapi.UserId
 import persistence.jooq.tables.pojos.User
 import java.time.Instant
 

@@ -1,6 +1,6 @@
 package persistence.postgres.queries.channelmember
 
-import clientapi.UserId
+import graphqlclientapi.UserId
 import org.jooq.Condition
 import org.jooq.Field
 import org.jooq.Record1

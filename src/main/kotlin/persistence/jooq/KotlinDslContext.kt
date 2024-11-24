@@ -21,7 +21,7 @@ class KotlinDslContext(private val dslContext: DSLContext) {
     /**
      * Starts a transaction that gets executed using the IO dispatcher.
      */
-    suspend fun <T> transaction(
+    suspend fun <T>     transaction(
         isolationLevel: Int? = null,
         onRollback: suspend (DataAccessException) -> Unit = {},
         block: suspend (KotlinTransactionContext).() -> T

@@ -1,7 +1,7 @@
 package persistence.postgres.queries
 
-import clientapi.UserId
-import clientapi.models.DetailedMessageReadPayload
+import graphqlclientapi.UserId
+import graphqlclientapi.models.DetailedMessageReadPayload
 import persistence.jooq.tables.Message.Companion.MESSAGE
 import persistence.jooq.tables.pojos.ChannelMember
 import persistence.jooq.tables.pojos.Message
@@ -122,7 +122,7 @@ fun KotlinTransactionContext.isCreatorOfMessage(messageId: UUID, userId: UserId)
     )
 }
 
-fun KotlinTransactionContext.insertChatRoomMembers(members: List<ChannelMember>) {
+fun KotlinTransactionContext.insertChannelMembers(members: List<ChannelMember>) {
     db.batchInsert(members.map { ChannelMemberRecord().apply { from(it) } }).execute()
 }
 

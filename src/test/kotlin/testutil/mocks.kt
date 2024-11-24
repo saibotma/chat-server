@@ -1,9 +1,9 @@
 package testutil
 
-import clientapi.AuthContext
-import clientapi.UserId
-import clientapi.models.CreateChannelInputMember
-import clientapi.models.MessageWritePayload
+import graphqlclientapi.AuthContext
+import graphqlclientapi.UserId
+import graphqlclientapi.models.CreateChannelInputMember
+import graphqlclientapi.models.MessageWritePayload
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

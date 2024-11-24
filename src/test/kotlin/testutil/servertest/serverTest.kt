@@ -1,13 +1,13 @@
 package testutil.servertest
 
 import chatServer
-import clientapi.AuthContext
-import clientapi.mutations.ChannelMutation
-import clientapi.mutations.ContactMutation
-import clientapi.mutations.MessageMutation
-import clientapi.mutations.PushMutation
-import clientapi.queries.ChannelQuery
-import clientapi.queries.MessageQuery
+import graphqlclientapi.AuthContext
+import graphqlclientapi.mutations.ChannelMutation
+import graphqlclientapi.mutations.ContactMutation
+import graphqlclientapi.mutations.MessageMutation
+import graphqlclientapi.mutations.PushMutation
+import graphqlclientapi.queries.ChannelQuery
+import graphqlclientapi.queries.MessageQuery
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*

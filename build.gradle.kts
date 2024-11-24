@@ -1,3 +1,5 @@
+import org.jooq.meta.jaxb.ForcedType
+
 val postgresUser = System.getenv("POSTGRES_USER") ?: "postgres"
 val postgresPassword = System.getenv("POSTGRES_PASSWORD") ?: "postgres"
 val postgresServerName = System.getenv("POSTGRES_SERVERNAME") ?: "localhost"
@@ -6,6 +8,7 @@ val postgresDb = System.getenv("POSTGRES_DB") ?: "chat-server"
 val postgresUrl = "jdbc:postgresql://$postgresServerName:$postgresPort/$postgresDb"
 
 val kotlinVersion = "1.7.21"
+val kotlinXSerialization = "1.6.0"
 val ktorVersion = "2.1.3"
 val log4jVersion = "2.19.0"
 val log4jApiKotlinVersion = "1.2.0"
@@ -50,6 +53,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinXSerialization")
 
     implementation("io.ktor", "ktor-server-netty", ktorVersion)
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
@@ -68,8 +72,10 @@ dependencies {
     // https://youtrack.jetbrains.com/issue/KTOR-4236/CORS-Plugin-should-log-reason-for-returning-403-Forbidden-errors
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
+
     implementation("io.ktor", "ktor-client-core", ktorVersion)
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+
     implementation("io.ktor:ktor-server-websockets-jvm:2.1.3")
     testImplementation("io.ktor", "ktor-server-tests", ktorVersion)
 
@@ -142,9 +148,13 @@ jooq {
                             arrayOf(
                                 org.jooq.meta.jaxb.ForcedType()
                                     .withUserType("java.time.Instant")
-                                    .withConverter("persistence.jooq.InstantConverter")
+                                    .withConverter("persistence.jooq.converters.InstantConverter")
                                     // "\\s*" stands for multiple spaces
-                                    .withIncludeTypes("timestamp\\s*with\\s*time\\s*zone")
+                                    .withIncludeTypes("timestamp\\s*with\\s*time\\s*zone"),
+                                ForcedType()
+                                    .withUserType("kotlin.collections.Map<String, Any?>")
+                                    .withConverter("persistence.jooq.converters.JsonbConverter")
+                                    .withIncludeTypes("jsonb"),
                             )
                         )
                     }
